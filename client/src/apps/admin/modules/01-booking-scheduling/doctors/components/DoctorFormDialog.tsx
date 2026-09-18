@@ -1,0 +1,403 @@
+/**
+ * DoctorFormDialog - حوار إضافة/تعديل الطبيب
+ */
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Edit, Plus } from 'lucide-react';
+import ImageUpload from '@/components/form/ImageUpload';
+import { trpc } from '@/lib/api/trpc';
+import type { DoctorFormData } from '../types/doctor.types';
+
+interface DoctorFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  mode: 'create' | 'edit';
+  formData: DoctorFormData;
+  onFormDataChange: (data: DoctorFormData) => void;
+  onSubmit: () => void;
+  isPending: boolean;
+  onNameChange?: (value: string) => void;
+  doctorType?: 'regular' | 'visiting' | 'all';
+}
+
+export function DoctorFormDialog({
+  open,
+  onOpenChange,
+  mode,
+  formData,
+  onFormDataChange,
+  onSubmit,
+  isPending,
+  onNameChange,
+  doctorType,
+}: DoctorFormDialogProps) {
+  const { data: departments } = trpc.departments.list.useQuery(undefined, {
+    enabled: open,
+  });
+
+  const isVisitingDoctor = doctorType === 'visiting' || formData.isVisiting === 'yes';
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div
+              className={`h-8 w-8 rounded-lg flex items-center justify-center ${
+                mode === 'edit'
+                  ? 'bg-blue-50 dark:bg-blue-900/30'
+                  : isVisitingDoctor
+                    ? 'bg-purple-50 dark:bg-purple-900/30'
+                    : 'bg-emerald-50 dark:bg-emerald-900/30'
+              }`}
+            >
+              {mode === 'edit' ? (
+                <Edit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <Plus
+                  className={`h-4 w-4 ${
+                    isVisitingDoctor
+                      ? 'text-purple-600 dark:text-purple-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
+                  }`}
+                />
+              )}
+            </div>
+            {mode === 'edit'
+              ? isVisitingDoctor
+                ? 'تعديل بيانات الطبيب الزائر'
+                : 'تعديل بيانات الطبيب'
+              : isVisitingDoctor
+                ? 'إضافة طبيب زائر جديد'
+                : 'إضافة طبيب جديد'}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === 'edit'
+              ? isVisitingDoctor
+                ? 'قم بتعديل بيانات الطبيب الزائر وتواريخ الزيارة في النموذج أدناه'
+                : 'قم بتعديل بيانات الطبيب في النموذج أدناه'
+              : isVisitingDoctor
+                ? 'أدخل بيانات الطبيب الزائر وفترة وتفاصيل الزيارة في النموذج أدناه'
+                : 'أدخل بيانات الطبيب الجديد في النموذج أدناه'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-5 py-4">
+          {/* القسم الأول: المعلومات الأساسية */}
+          <div className="space-y-1 mb-4">
+            <h4 className="text-sm font-semibold text-foreground">المعلومات الأساسية</h4>
+            <div className="h-px bg-muted" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="name"
+              >
+                الاسم *
+              </Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => {
+                  onFormDataChange({ ...formData, name: e.target.value });
+                  onNameChange?.(e.target.value);
+                }}
+                placeholder="د. أحمد محمد"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="slug"
+              >
+                الرابط (Slug) *
+              </Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => onFormDataChange({ ...formData, slug: e.target.value })}
+                placeholder="dr-ahmed-mohamed"
+                dir="ltr"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="department"
+              >
+                القسم الطبي
+              </Label>
+              <Select
+                value={formData.departmentId ? String(formData.departmentId) : 'none'}
+                onValueChange={(val) =>
+                  onFormDataChange({
+                    ...formData,
+                    departmentId: val === 'none' ? null : Number(val),
+                  })
+                }
+              >
+                <SelectTrigger id="department">
+                  <SelectValue placeholder="اختر القسم الطبي" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">بدون قسم محدد</SelectItem>
+                  {departments?.map((dept) => (
+                    <SelectItem key={dept.id} value={String(dept.id)}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="specialty"
+              >
+                التخصص *
+              </Label>
+              <Input
+                id="specialty"
+                value={formData.specialty}
+                onChange={(e) => onFormDataChange({ ...formData, specialty: e.target.value })}
+                placeholder="أخصائي القلب والأوعية الدموية"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="experience"
+              >
+                سنوات الخبرة
+              </Label>
+              <Input
+                id="experience"
+                value={formData.experience}
+                onChange={(e) => onFormDataChange({ ...formData, experience: e.target.value })}
+                placeholder="15 سنة"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-right block text-xs font-medium text-muted-foreground">
+              صورة الطبيب
+            </Label>
+            <ImageUpload
+              value={formData.image}
+              onChange={(url) => onFormDataChange({ ...formData, image: url })}
+              folder="doctors"
+              placeholder="اسحب صورة الطبيب هنا أو اضغط للاختيار"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label
+              className="text-right block text-xs font-medium text-muted-foreground"
+              htmlFor="bio"
+            >
+              نبذة عن الطبيب
+            </Label>
+            <Textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => onFormDataChange({ ...formData, bio: e.target.value })}
+              placeholder="نبذة مختصرة عن الطبيب وخبراته..."
+              rows={3}
+            />
+          </div>
+
+          {/* القسم الثاني: التفاصيل */}
+          <div className="space-y-1 mb-4 mt-6">
+            <h4 className="text-sm font-semibold text-foreground">التفاصيل والإعدادات</h4>
+            <div className="h-px bg-muted" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="languages"
+              >
+                اللغات
+              </Label>
+              <Input
+                id="languages"
+                value={formData.languages}
+                onChange={(e) => onFormDataChange({ ...formData, languages: e.target.value })}
+                placeholder="العربية، الإنجليزية"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="consultationFee"
+              >
+                رسوم الاستشارة
+              </Label>
+              <Input
+                id="consultationFee"
+                value={formData.consultationFee}
+                onChange={(e) => onFormDataChange({ ...formData, consultationFee: e.target.value })}
+                placeholder="200 ريال"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label
+              className="text-right block text-xs font-medium text-muted-foreground"
+              htmlFor="procedures"
+            >
+              الإجراءات المتاحة (فصل بفاصلة)
+            </Label>
+            <Textarea
+              id="procedures"
+              value={formData.procedures}
+              onChange={(e) => onFormDataChange({ ...formData, procedures: e.target.value })}
+              placeholder="مثال: كشف عام, تخطيط قلب, إيكو على القلب"
+              rows={2}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              سيتم عرضها في نموذج الحجز كخيارات للمريض
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="isVisiting"
+              >
+                طبيب زائر
+              </Label>
+              <Select
+                value={formData.isVisiting}
+                onValueChange={(value: 'yes' | 'no') =>
+                  onFormDataChange({ ...formData, isVisiting: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="no">لا - مقيم</SelectItem>
+                  <SelectItem value="yes">نعم - زائر</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                className="text-right block text-xs font-medium text-muted-foreground"
+                htmlFor="available"
+              >
+                الحالة
+              </Label>
+              <Select
+                value={formData.available}
+                onValueChange={(value: 'yes' | 'no') =>
+                  onFormDataChange({ ...formData, available: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="yes">متاح للحجز</SelectItem>
+                  <SelectItem value="no">غير متاح</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {formData.isVisiting === 'yes' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <div className="space-y-1.5">
+                <Label
+                  className="text-right block text-xs font-medium text-amber-800 dark:text-amber-300"
+                  htmlFor="visitingStartDate"
+                >
+                  تاريخ بداية الزيارة
+                </Label>
+                <Input
+                  id="visitingStartDate"
+                  type="date"
+                  value={formData.visitingStartDate || ''}
+                  onChange={(e) =>
+                    onFormDataChange({
+                      ...formData,
+                      visitingStartDate: e.target.value || null,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label
+                  className="text-right block text-xs font-medium text-amber-800 dark:text-amber-300"
+                  htmlFor="visitingEndDate"
+                >
+                  تاريخ نهاية الزيارة
+                </Label>
+                <Input
+                  id="visitingEndDate"
+                  type="date"
+                  value={formData.visitingEndDate || ''}
+                  onChange={(e) =>
+                    onFormDataChange({
+                      ...formData,
+                      visitingEndDate: e.target.value || null,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            إلغاء
+          </Button>
+          <Button onClick={onSubmit} disabled={isPending}>
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                جاري الحفظ...
+              </>
+            ) : mode === 'edit' ? (
+              'حفظ التعديلات'
+            ) : (
+              'إضافة الطبيب'
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

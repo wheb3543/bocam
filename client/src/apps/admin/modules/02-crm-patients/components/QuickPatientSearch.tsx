@@ -1,0 +1,637 @@
+import { useFormatDate } from '@/hooks/export/useFormatDate';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { trpc } from '@/lib/api/trpc';
+
+interface Patient {
+  id?: number;
+  type?: 'lead' | 'appointment' | 'offerLead' | 'campRegistration';
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  status?: string;
+  age?: number | null;
+  doctorName?: string;
+  offerTitle?: string;
+  campName?: string;
+  appointmentDate?: string | Date | null;
+  preferredDate?: string | Date | null;
+  createdAt?: string | Date | null;
+  source?: string;
+  notes?: string | null;
+  address?: string;
+  [key: string]: unknown;
+}
+
+type PatientStatus =
+  'pending' | 'contacted' | 'no_answer' | 'confirmed' | 'attended' | 'completed' | 'cancelled';
+type LeadStatus = 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer';
+
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Search,
+  Phone,
+  MessageCircle,
+  Edit,
+  X,
+  Calendar,
+  Mail,
+  User,
+  MapPin,
+  Printer,
+  AlertCircle,
+  Loader2,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { printReceipt } from '@/components/booking/PrintReceipt';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
+
+interface PatientCardProps {
+  patient: Patient;
+  onClose: () => void;
+  onUpdateStatus: (id: number, status: string) => void;
+}
+
+function PatientCard({ patient, onClose, onUpdateStatus }: PatientCardProps) {
+  const { formatDate } = useFormatDate();
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const [selectedStatus, setSelectedStatus] = useState(patient.status);
+  const { user } = useAuth();
+  const [_isPrinting, _setIsPrinting] = useState(false); // Reserved for future print functionality
+
+  const generateAppointmentReceipt = trpc.appointments.generateReceiptNumber.useMutation();
+  const generateOfferReceipt = trpc.offerLeads.generateReceiptNumber.useMutation();
+  const generateCampReceipt = trpc.campRegistrations.generateReceiptNumber.useMutation();
+
+  const handleCall = () => {
+    if (patient.phone) {
+      window.location.href = `tel:${formatPhoneDisplay(patient.phone)}`;
+    } else {
+      toast.error('رقم الهاتف غير متوفر');
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (patient.phone) {
+      const cleanPhone = patient.phone.replace(/\D/g, '');
+      window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    } else {
+      toast.error('رقم الهاتف غير متوفر');
+    }
+  };
+
+  const handlePrint = async () => {
+    let type: 'appointment' | 'camp' | 'offer' = 'appointment';
+    let typeName = 'غير محدد';
+
+    if (patient.type === 'appointment') {
+      type = 'appointment';
+      typeName = patient.doctorName ?? 'غير محدد';
+    } else if (patient.type === 'offerLead') {
+      type = 'offer';
+      typeName = patient.offerTitle ?? 'غير محدد';
+    } else if (patient.type === 'campRegistration') {
+      type = 'camp';
+      typeName = patient.campName ?? 'غير محدد';
+    }
+
+    try {
+      _setIsPrinting(true);
+
+      // Generate or retrieve receipt number
+      let receiptNumber = 'غير متاح';
+
+      if (type === 'appointment' && patient.id) {
+        const result = await generateAppointmentReceipt.mutateAsync({ id: patient.id });
+        receiptNumber = result.receiptNumber;
+      } else if (type === 'offer' && patient.id) {
+        const result = await generateOfferReceipt.mutateAsync({ id: patient.id });
+        receiptNumber = result.receiptNumber;
+      } else if (type === 'camp' && patient.id) {
+        const result = await generateCampReceipt.mutateAsync({ id: patient.id });
+        receiptNumber = result.receiptNumber;
+      }
+
+      // Print with receipt number
+      printReceipt(
+        {
+          fullName: patient.fullName ?? 'غير معروف',
+          age: patient.age ?? 0,
+          phone: patient.phone ?? '',
+          registrationDate: patient.createdAt ? new Date(patient.createdAt) : new Date(),
+          type,
+          typeName,
+          receiptNumber,
+        },
+        user?.name || 'غير معروف'
+      );
+    } catch {
+      toast.error('فشل توليد رقم السند');
+    } finally {
+      _setIsPrinting(false);
+    }
+  };
+
+  const handleUpdateStatus = () => {
+    if (selectedStatus !== patient.status && patient.id && selectedStatus) {
+      onUpdateStatus(patient.id, selectedStatus);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const statusMap: Record<
+      string,
+      { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+    > = {
+      new: { label: 'جديد', variant: 'default' },
+      pending: { label: 'قيد الانتظار', variant: 'default' },
+      contacted: { label: 'تم التواصل', variant: 'secondary' },
+      confirmed: { label: 'مؤكد', variant: 'secondary' },
+      booked: { label: 'تم الحجز', variant: 'secondary' },
+      cancelled: { label: 'ملغي', variant: 'destructive' },
+      completed: { label: 'مكتمل', variant: 'outline' },
+      attended: { label: 'حضر', variant: 'outline' },
+      not_interested: { label: 'غير مهتم', variant: 'destructive' },
+      no_answer: { label: 'لم يرد', variant: 'outline' },
+    };
+    const status_info = statusMap[status] || { label: status, variant: 'outline' as const };
+    return <Badge variant={status_info.variant}>{status_info.label}</Badge>;
+  };
+
+  // الحالات الموحدة السبع لجميع أنواع التسجيلات
+  const UNIFIED_STATUS_OPTIONS = [
+    { value: 'pending', label: 'قيد الانتظار' },
+    { value: 'contacted', label: 'تم التواصل' },
+    { value: 'no_answer', label: 'لم يرد' },
+    { value: 'confirmed', label: 'مؤكد' },
+    { value: 'attended', label: 'حضر' },
+    { value: 'completed', label: 'مكتمل' },
+    { value: 'cancelled', label: 'ملغي' },
+  ];
+  // Get status options based on type - unified 7 statuses for all types
+  const getStatusOptions = () => UNIFIED_STATUS_OPTIONS;
+
+  const getTypeLabel = () => {
+    if (patient.type === 'lead') {
+      return 'عميل';
+    }
+    if (patient.type === 'appointment') {
+      return 'موعد طبيب';
+    }
+    if (patient.type === 'offerLead') {
+      return 'حجز عرض';
+    }
+    if (patient.type === 'campRegistration') {
+      return 'تسجيل مخيم';
+    }
+    return 'غير محدد';
+  };
+
+  return (
+    <Card className="border-2 border-primary shadow-lg">
+      <CardContent className="p-4 md:p-6">
+        {/* Close Button */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-lg md:text-xl font-bold mb-1">{patient.fullName}</h3>
+            <p className="text-xs md:text-sm text-muted-foreground">{getTypeLabel()}</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Patient Info */}
+        <div className="space-y-3 mb-4">
+          {/* Phone */}
+          <div className="flex items-start gap-2">
+            <Phone className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">رقم الهاتف</p>
+              <p className="font-medium text-sm break-all" dir="ltr">
+                {patient.phone ?? 'غير متوفر'}
+              </p>
+            </div>
+          </div>
+
+          {/* Email */}
+          {patient.email && (
+            <div className="flex items-start gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">البريد الإلكتروني</p>
+                <p className="font-medium text-sm break-all">{patient.email ?? ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Age */}
+          {patient.age && (
+            <div className="flex items-start gap-2">
+              <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">العمر</p>
+                <p className="font-medium text-sm">{patient.age} سنة</p>
+              </div>
+            </div>
+          )}
+
+          {/* Address */}
+          {patient.address && (
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">العنوان</p>
+                <p className="font-medium text-sm">{patient.address ?? ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Doctor Name (for appointments) */}
+          {patient.type === 'appointment' && patient.doctorName && (
+            <div className="flex items-start gap-2">
+              <User className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">الطبيب</p>
+                <p className="font-medium text-sm">{patient.doctorName ?? ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Appointment Date (for appointments) */}
+          {patient.type === 'appointment' && patient.appointmentDate && (
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">تاريخ الموعد</p>
+                <p className="font-medium text-sm">{formatDate(patient.appointmentDate ?? null)}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Offer Title (for offer leads) */}
+          {patient.type === 'offerLead' && patient.offerTitle && (
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">العرض</p>
+                <p className="font-medium text-sm">{patient.offerTitle ?? ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Camp Name (for camp registrations) */}
+          {patient.type === 'campRegistration' && patient.campName && (
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">المخيم</p>
+                <p className="font-medium text-sm">{patient.campName ?? ''}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Status */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-1">الحالة</p>
+            <div>{getStatusBadge(patient.status ?? '')}</div>
+          </div>
+
+          {/* Created At */}
+          {patient.createdAt && (
+            <div className="flex items-start gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">تاريخ التسجيل</p>
+                <p className="font-medium text-sm">{formatDate(patient.createdAt ?? null)}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Status Update */}
+        <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+          <p className="text-sm font-medium mb-2">تحديث الحالة</p>
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="w-full p-2 border rounded-md text-sm"
+          >
+            {getStatusOptions().map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {selectedStatus !== patient.status && (
+            <Button onClick={handleUpdateStatus} size="sm" className="w-full mt-2">
+              <Edit className="h-4 w-4 mr-2" />
+              حفظ التحديث
+            </Button>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+          <Button
+            variant="outline"
+            onClick={handleCall}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
+            <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 md:mr-2" />
+            اتصال
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleWhatsApp}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
+            <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1 md:mr-2" />
+            واتساب
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handlePrint}
+            className="w-full text-[10px] sm:text-xs md:text-sm h-8 sm:h-9 px-1 sm:px-3"
+          >
+            <Printer className="h-4 w-4 mr-1 md:mr-2" />
+            طباعة
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function QuickPatientSearch() {
+  const { formatPhoneDisplay } = usePhoneFormat();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Patient[]>([]);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const {
+    data: leads,
+    isLoading: leadsLoading,
+    error: leadsError,
+  } = trpc.leads.unifiedList.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const {
+    data: appointments,
+    isLoading: appointmentsLoading,
+    error: appointmentsError,
+  } = trpc.appointments.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const {
+    data: offerLeads,
+    isLoading: offerLeadsLoading,
+    error: offerLeadsError,
+  } = trpc.offerLeads.list.useQuery(
+    undefined,
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const {
+    data: campRegsPaged,
+    isLoading: campLoading,
+    error: campError,
+  } = trpc.campRegistrations.listPaginated.useQuery(
+    { page: 1, limit: 200 },
+    { refetchInterval: 60000 } // Auto-refresh every 60 seconds
+  );
+  const campRegistrations = useMemo(() => campRegsPaged?.data ?? [], [campRegsPaged?.data]);
+
+  const isLoading = leadsLoading || appointmentsLoading || offerLeadsLoading || campLoading;
+  const hasError = leadsError || appointmentsError || offerLeadsError || campError;
+
+  const updateLeadMutation = trpc.leads.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateAppointmentMutation = trpc.appointments.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateOfferLeadMutation = trpc.offerLeads.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+  const updateCampMutation = trpc.campRegistrations.updateStatus.useMutation({
+    onSuccess: () => {
+      // Invalidate cache to refresh data across components
+      trpc.useContext().leads.unifiedList.invalidate();
+      trpc.useContext().appointments.list.invalidate();
+      trpc.useContext().offerLeads.list.invalidate();
+      trpc.useContext().campRegistrations.listPaginated.invalidate();
+    },
+  });
+
+  // Search when query length >= 3 - show ALL matching results
+  useEffect(() => {
+    if (searchQuery.length >= 3) {
+      const allPatients: Patient[] = [
+        ...(appointments || []).map((a) => ({ ...a, type: 'appointment' as const }) as Patient),
+        ...(offerLeads || []).map((o) => ({ ...o, type: 'offerLead' as const }) as Patient),
+        ...(campRegistrations || []).map(
+          (c) => ({ ...c, type: 'campRegistration' as const }) as Patient
+        ),
+      ];
+
+      const results = allPatients.filter(
+        (p) =>
+          (p.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+          (p.phone?.includes(searchQuery) ?? false)
+      );
+
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+      setSelectedPatient(null);
+    }
+  }, [searchQuery, leads, appointments, offerLeads, campRegistrations]);
+
+  // Close on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSelectedPatient(null);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleUpdateStatus = async (id: number, status: string) => {
+    try {
+      if (selectedPatient?.type === 'lead') {
+        await updateLeadMutation.mutateAsync({ id, status: status as LeadStatus });
+      } else if (selectedPatient?.type === 'appointment') {
+        await updateAppointmentMutation.mutateAsync({ id, status: status as PatientStatus });
+      } else if (selectedPatient?.type === 'offerLead') {
+        await updateOfferLeadMutation.mutateAsync({ id, status: status as PatientStatus });
+      } else if (selectedPatient?.type === 'campRegistration') {
+        await updateCampMutation.mutateAsync({ id, status: status as PatientStatus });
+      }
+      toast.success('تم تحديث الحالة بنجاح');
+      if (selectedPatient) {
+        setSelectedPatient({ ...selectedPatient, status });
+      }
+    } catch {
+      toast.error('فشل تحديث الحالة');
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    if (type === 'lead') {
+      return 'عميل';
+    }
+    if (type === 'appointment') {
+      return 'موعد';
+    }
+    if (type === 'offerLead') {
+      return 'عرض';
+    }
+    if (type === 'campRegistration') {
+      return 'مخيم';
+    }
+    return type;
+  };
+
+  return (
+    <div ref={searchRef} className="relative w-full">
+      {/* Search Input */}
+      <div className="relative">
+        <Search
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <Input
+          type="text"
+          placeholder="ابحث بالاسم أو رقم الهاتف (3 أحرف على الأقل)..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-10 h-12 text-base md:text-lg"
+          disabled={isLoading}
+          aria-label="بحث عن مريض"
+          aria-describedby="search-hint"
+        />
+        <span id="search-hint" className="sr-only">
+          أدخل 3 أحرف على الأقل للبحث عن مريض بالاسم أو رقم الهاتف
+        </span>
+        {isLoading && (
+          <Loader2
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground"
+            aria-hidden="true"
+          />
+        )}
+      </div>
+
+      {/* Error state */}
+      {hasError && (
+        <div className="absolute top-full mt-2 w-full z-50">
+          <Card className="border-destructive bg-destructive/10">
+            <CardContent className="p-4 text-center">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2 text-destructive" />
+              <p className="text-sm font-semibold text-destructive mb-1">فشل تحميل البيانات</p>
+              <p className="text-xs text-muted-foreground mb-3">
+                حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm"
+              >
+                إعادة المحاولة
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Search Results List */}
+      {searchQuery.length >= 3 && searchResults.length > 0 && !selectedPatient && (
+        <div className="absolute top-full mt-2 w-full z-50 max-h-[60vh] overflow-y-auto">
+          <Card>
+            <CardContent className="p-2">
+              <p className="text-xs text-muted-foreground p-2">
+                تم العثور على {searchResults.length} نتيجة
+              </p>
+              <div className="space-y-1">
+                {searchResults.map((result) => (
+                  <button
+                    key={`${result.type}-${result.id}`}
+                    onClick={() => setSelectedPatient(result)}
+                    className="w-full p-3 text-right hover:bg-slate-50 rounded-md transition-colors flex items-center justify-between group"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">
+                        {result.fullName}
+                      </p>
+                      <p className="text-xs text-muted-foreground" dir="ltr">
+                        {formatPhoneDisplay(result.phone)}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 ml-2 text-xs">
+                      {getTypeLabel(result.type ?? '')}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Selected Patient Card */}
+      {selectedPatient && (
+        <div className="absolute top-full mt-2 w-full z-50">
+          <PatientCard
+            patient={selectedPatient}
+            onClose={() => {
+              setSelectedPatient(null);
+              setSearchQuery('');
+              setSearchResults([]);
+            }}
+            onUpdateStatus={handleUpdateStatus}
+          />
+        </div>
+      )}
+
+      {/* No Results */}
+      {searchQuery.length >= 3 && searchResults.length === 0 && !hasError && (
+        <div className="absolute top-full mt-2 w-full z-50">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-30" />
+              <p className="text-sm font-semibold text-muted-foreground mb-1">لا توجد نتائج</p>
+              <p className="text-xs text-muted-foreground">لم يتم العثور على أي مريض يطابق البحث</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}

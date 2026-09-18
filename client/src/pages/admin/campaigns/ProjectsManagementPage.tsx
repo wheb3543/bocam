@@ -1,2 +1,5 @@
-// Projects Management uses the Campaigns page
-export { default } from './CampaignsPage';
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/06-tasks-projects/pages/ProjectsTrackerPage".
+ */
+export * from '@apps/admin/modules/06-tasks-projects/pages/ProjectsTrackerPage';

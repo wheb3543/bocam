@@ -1,25 +1,6 @@
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
-import { Users } from 'lucide-react';
-
-export default function DigitalMarketingTeamPage() {
-  return (
-    <DashboardLayout pageTitle="فريق التسويق الرقمي" pageDescription="إدارة فريق التسويق الرقمي">
-      <UnderDevelopmentPage
-        title="فريق التسويق الرقمي"
-        description="إدارة فريق التسويق الرقمي"
-        icon={Users}
-        currentPath="/admin/teams/digital-marketing"
-        compactWorkspace
-        features={[
-          'إدارة مهام التسويق الرقمي',
-          'تتبع الحملات الإعلانية',
-          'إدارة حسابات التواصل الاجتماعي',
-          'تحليلات الأداء',
-          'جدولة المحتوى',
-          'إدارة الميزانيات',
-        ]}
-      />
-    </DashboardLayout>
-  );
-}
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/06-tasks-projects/teams/DigitalMarketingTeamPage".
+ */
+export * from '@apps/admin/modules/06-tasks-projects/teams/DigitalMarketingTeamPage';
+export { default } from '@apps/admin/modules/06-tasks-projects/teams/DigitalMarketingTeamPage';

@@ -1,8 +1,5 @@
-export { default as LeadCard } from './LeadCard';
-export { default as LeadStatsCards } from './LeadStatsCards';
-export { default as LeadsTab } from './LeadsTab';
-export { default as LeadFilters } from './LeadFilters';
-export { default as LeadMobileCards } from './LeadMobileCards';
-export { default as LeadTableDesktop } from './LeadTableDesktop';
-export { default as LeadStatusDialog } from './LeadStatusDialog';
-export { default as ConvertLeadToAppointmentDialog } from './ConvertLeadToAppointmentDialog';
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/04-marketing-publishing/leads/components/index".
+ */
+export * from '@apps/admin/modules/04-marketing-publishing/leads/components/index';

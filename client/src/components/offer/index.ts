@@ -1,7 +1,5 @@
-export { default as OffersManagement } from './OffersManagement';
-export { default as OfferLeadsManagement } from './OfferLeadsManagement';
-export { default as OfferStatsCards } from './OfferStatsCards';
-export { default as OfferLeadCard } from './OfferLeadCard';
-export { default as OfferLeadsFilters } from './OfferLeadsFilters';
-export { default as OfferLeadsTable } from './OfferLeadsTable';
-export { default as OfferLeadsCards } from './OfferLeadsCards';
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/04-marketing-publishing/leads/offers/index".
+ */
+export * from '@apps/admin/modules/04-marketing-publishing/leads/offers/index';

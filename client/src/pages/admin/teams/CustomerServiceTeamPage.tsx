@@ -1,21 +1,6 @@
-import UnderDevelopmentPage from '@/components/UnderDevelopmentPage';
-import { Headphones } from 'lucide-react';
-
-export default function CustomerServiceTeamPage() {
-  return (
-    <UnderDevelopmentPage
-      title="فريق خدمة العملاء"
-      description="إدارة فريق خدمة العملاء"
-      icon={Headphones}
-      currentPath="/admin/teams/customer-service"
-      features={[
-        'إدارة طلبات العملاء',
-        'تتبع التذاكر والدعم',
-        'إدارة قاعدة المعرفة',
-        'تحليلات رضا العملاء',
-        'إدارة الردود التلقائية',
-        'تقارير الأداء',
-      ]}
-    />
-  );
-}
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/06-tasks-projects/teams/CustomerServiceTeamPage".
+ */
+export * from '@apps/admin/modules/06-tasks-projects/teams/CustomerServiceTeamPage';
+export { default } from '@apps/admin/modules/06-tasks-projects/teams/CustomerServiceTeamPage';

@@ -1,8 +1,5 @@
-export function completeMediaSelection(
-  url: string,
-  onSelect: (url: string) => void,
-  onOpenChange: (open: boolean) => void
-) {
-  onSelect(url);
-  onOpenChange(false);
-}
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/05-cms-portal/media/mediaSelection".
+ */
+export * from '@apps/admin/modules/05-cms-portal/media/mediaSelection';

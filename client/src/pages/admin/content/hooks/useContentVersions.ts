@@ -1,26 +1,5 @@
 /**
- * Content Versions Hook
- * Hook لإدارة النسخ المحفوظة للمحتوى
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/05-cms-portal/hooks/useContentVersions".
  */
-
-import { trpc } from '@/lib/api/trpc';
-
-export function useContentVersions() {
-  const createVersion = trpc.content.contentVersions.create.useMutation();
-  const getVersions = trpc.content.contentVersions.list.useQuery;
-  const getVersion = trpc.content.contentVersions.get.useQuery;
-  const getLatestVersion = trpc.content.contentVersions.getLatest.useQuery;
-  const restoreVersion = trpc.content.contentVersions.restore.useMutation();
-  const deleteVersion = trpc.content.contentVersions.delete.useMutation();
-  const deleteAllVersions = trpc.content.contentVersions.deleteAll.useMutation();
-
-  return {
-    createVersion,
-    getVersions,
-    getVersion,
-    getLatestVersion,
-    restoreVersion,
-    deleteVersion,
-    deleteAllVersions,
-  };
-}
+export * from '@apps/admin/modules/05-cms-portal/hooks/useContentVersions';

@@ -1,0 +1,183 @@
+import { useState } from 'react';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { useConfirmDialog } from '@/hooks/ui/useConfirmDialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search, Plus } from 'lucide-react';
+import { ColumnVisibility } from '@/components/table/ColumnVisibility';
+import { useTableFeatures } from '@/hooks/table/useTableFeatures';
+import { useDoctorManagement } from './hooks/useDoctorManagement';
+import { DoctorStatsCards } from './components/DoctorStatsCards';
+import { DoctorFormDialog } from './components/DoctorFormDialog';
+import { DoctorScheduleDialog } from './components/DoctorScheduleDialog';
+import { DoctorTable, doctorColumns, visitingDoctorColumns } from './components/DoctorTable';
+import type { Doctor } from './types/doctor.types';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { PermissionHint } from '@/components/PermissionHint';
+
+export interface DoctorsManagementProps {
+  doctorType?: 'regular' | 'visiting' | 'all';
+}
+
+export default function DoctorsManagement({ doctorType = 'all' }: DoctorsManagementProps = {}) {
+  const [scheduleDoctor, setScheduleDoctor] = useState<Doctor | null>(null);
+  const deleteConfirm = useConfirmDialog<Doctor>();
+  const doctorManagement = useDoctorManagement({ doctorType });
+  const { can } = useRolePermissions();
+  const canCreate = can('catalog.create');
+  const canUpdate = can('catalog.update');
+  const canPublish = can('catalog.publish');
+  const canArchive = can('catalog.archive');
+  const canDelete = can('catalog.delete');
+
+  const isVisiting = doctorType === 'visiting';
+  const activeColumns = isVisiting ? visitingDoctorColumns : doctorColumns;
+  const tableKey = isVisiting ? 'visiting_doctors' : 'doctors';
+
+  // === useTableFeatures hook ===
+  const doctorTable = useTableFeatures({
+    tableKey,
+    columns: activeColumns,
+    defaultFrozenColumns: ['name'],
+  });
+
+  if (doctorManagement.isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Stats Skeleton */}
+        <div className="grid gap-2 sm:gap-3 md:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-card dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 sm:p-4"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+                <div className="h-8 w-8 bg-muted rounded-lg animate-pulse" />
+              </div>
+              <div className="h-7 w-12 bg-muted rounded animate-pulse mb-1" />
+              <div className="h-2.5 w-20 bg-muted rounded animate-pulse" />
+            </div>
+          ))}
+        </div>
+        {/* Table Skeleton */}
+        <div className="bg-white dark:bg-card rounded-xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="h-5 w-32 bg-muted rounded animate-pulse" />
+            <div className="h-9 w-36 bg-muted rounded animate-pulse" />
+          </div>
+          <div className="h-10 w-full bg-muted rounded animate-pulse mb-4" />
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-14 w-full bg-muted/50 rounded animate-pulse mb-2" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      {/* Stats Cards */}
+      <div className="shrink-0">
+        <DoctorStatsCards stats={doctorManagement.doctorStats} doctorType={doctorType} />
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex shrink-0 flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center flex-1 w-full">
+          <div className="relative flex-1 w-full max-w-md">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={
+                isVisiting
+                  ? 'البحث في الأطباء الزائرين بالاسم، التخصص...'
+                  : 'البحث بالاسم، التخصص، أو اللغات...'
+              }
+              value={doctorManagement.searchTerm}
+              onChange={(e) => doctorManagement.setSearchTerm(e.target.value)}
+              className="pr-10"
+            />
+          </div>
+          <ColumnVisibility {...doctorTable.columnVisibilityProps} />
+        </div>
+        {canCreate ? (
+          <Button onClick={() => doctorManagement.handleOpenDialog()} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 ml-2" />
+            {isVisiting ? 'إضافة طبيب زائر جديد' : 'إضافة طبيب جديد'}
+          </Button>
+        ) : (
+          <PermissionHint
+            message={
+              isVisiting
+                ? 'تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب زائر أو نسخ بياناته.'
+                : 'تحتاج إلى صلاحية إنشاء الكتالوج لإضافة طبيب أو نسخ بياناته.'
+            }
+          />
+        )}
+      </div>
+
+      {/* Table */}
+      <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-gray-100 bg-white dark:bg-card">
+        <DoctorTable
+          doctors={doctorManagement.doctors}
+          searchTerm={doctorManagement.searchTerm}
+          doctorTable={doctorTable}
+          onToggleAvailability={doctorManagement.handleToggleAvailability}
+          onEdit={doctorManagement.handleOpenDialog}
+          onDuplicate={doctorManagement.handleDuplicate}
+          onDelete={(doctor: Doctor) => deleteConfirm.openConfirm(doctor)}
+          onAdd={() => doctorManagement.handleOpenDialog()}
+          onConfigureSchedule={(doctor: Doctor) => setScheduleDoctor(doctor)}
+          canCreate={canCreate}
+          canUpdate={canUpdate}
+          canPublish={canPublish}
+          canArchive={canArchive}
+          canDelete={canDelete}
+        />
+      </div>
+
+      {/* Doctor Schedule & Capacity Dialog */}
+      {canUpdate ? (
+        <DoctorScheduleDialog
+          open={!!scheduleDoctor}
+          onOpenChange={(open: boolean) => !open && setScheduleDoctor(null)}
+          doctor={scheduleDoctor}
+        />
+      ) : null}
+
+      {/* Add/Edit Dialog */}
+      {canCreate || canUpdate ? (
+        <DoctorFormDialog
+          open={doctorManagement.dialogOpen}
+          onOpenChange={doctorManagement.setDialogOpen}
+          mode={doctorManagement.editingDoctor ? 'edit' : 'create'}
+          formData={doctorManagement.formData}
+          onFormDataChange={doctorManagement.setFormData}
+          onSubmit={doctorManagement.handleSubmit}
+          isPending={
+            doctorManagement.createMutation.isPending || doctorManagement.updateMutation.isPending
+          }
+          onNameChange={doctorManagement.autoGenerateSlug}
+          doctorType={doctorType}
+        />
+      ) : null}
+
+      {/* Delete Confirmation Dialog */}
+      {canDelete ? (
+        <ConfirmDeleteDialog
+          open={deleteConfirm.isOpen}
+          onOpenChange={() => deleteConfirm.closeConfirm()}
+          itemName={deleteConfirm.item?.name || undefined}
+          itemType={isVisiting ? 'الطبيب الزائر' : 'الطبيب'}
+          onConfirm={() => {
+            if (deleteConfirm.item && deleteConfirm.item.id) {
+              doctorManagement.deleteMutation.mutate({ id: deleteConfirm.item.id });
+            }
+          }}
+          isLoading={doctorManagement.deleteMutation.isPending}
+          confirmText={isVisiting ? 'حذف الطبيب الزائر' : 'حذف الطبيب'}
+        />
+      ) : null}
+    </div>
+  );
+}

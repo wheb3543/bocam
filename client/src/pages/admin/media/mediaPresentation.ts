@@ -1,16 +1,5 @@
-export type MediaPresentation = 'image' | 'video' | 'audio' | 'document';
-
-export function getMediaPresentation(
-  type: 'image' | 'video' | 'audio' | 'document' | 'other'
-): MediaPresentation {
-  if (type === 'image') {
-    return 'image';
-  }
-  if (type === 'video') {
-    return 'video';
-  }
-  if (type === 'audio') {
-    return 'audio';
-  }
-  return 'document';
-}
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/05-cms-portal/media/mediaPresentation".
+ */
+export * from '@apps/admin/modules/05-cms-portal/media/mediaPresentation';

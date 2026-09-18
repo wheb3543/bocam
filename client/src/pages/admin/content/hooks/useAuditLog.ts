@@ -1,18 +1,5 @@
 /**
- * Audit Log Hook
- * Hook لإدارة سجل التغييرات
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/05-cms-portal/hooks/useAuditLog".
  */
-
-import { trpc } from '@/lib/api/trpc';
-
-export function useAuditLog() {
-  const getAuditLog = trpc.content.auditLog.list.useQuery;
-  const getAuditLogCount = trpc.content.auditLog.count.useQuery;
-  const exportAuditLog = trpc.content.auditLog.export.useQuery;
-
-  return {
-    getAuditLog,
-    getAuditLogCount,
-    exportAuditLog,
-  };
-}
+export * from '@apps/admin/modules/05-cms-portal/hooks/useAuditLog';

@@ -1,15 +1,6 @@
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import CustomerProfilesTab from '@/components/CustomerProfilesTab';
-
-export default function CustomersPage() {
-  return (
-    <DashboardLayout
-      pageTitle="ملفات العملاء"
-      pageDescription="عرض ملفات العملاء الموحدة وتاريخ تفاعلاتهم"
-    >
-      <div className="container mx-auto py-6 space-y-6" dir="rtl">
-        <CustomerProfilesTab />
-      </div>
-    </DashboardLayout>
-  );
-}
+/**
+ * @deprecated Re-export bridge for backward compatibility.
+ * Prefer importing from "@apps/admin/modules/02-crm-patients/pages/PatientsDirectoryPage".
+ */
+export * from '@apps/admin/modules/02-crm-patients/pages/PatientsDirectoryPage';
+export { default } from '@apps/admin/modules/02-crm-patients/pages/PatientsDirectoryPage';

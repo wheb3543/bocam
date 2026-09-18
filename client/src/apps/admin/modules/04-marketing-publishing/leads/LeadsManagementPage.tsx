@@ -1,0 +1,408 @@
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import {
+  LeadStatsCards,
+  LeadFilters,
+  LeadTableDesktop,
+  LeadStatusDialog,
+  LeadMobileCards,
+} from '@/components/lead';
+import Pagination from '@/components/table/Pagination';
+import { toast } from 'sonner';
+import { emitToastHash } from '@/lib/toastHashRouter';
+import { exportToExcel, formatLeadsForExport } from '@/lib/export/exportToExcel';
+import { useFilterUtils, type DateFilterPreset } from '@/hooks/table/useFilterUtils';
+import { useAuth } from '@/_core/hooks/useAuth';
+import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
+import { usePagination } from '@/hooks/table/usePagination';
+import FilterPresets from '@/components/FilterPresets';
+import type { UnifiedLead } from '@shared/types';
+
+const sanitizeLead = (lead: UnifiedLead) => {
+  if (!lead) {
+    return null;
+  }
+  const sanitized = { ...lead };
+  (Object.keys(sanitized) as Array<keyof UnifiedLead>).forEach((key) => {
+    const value = sanitized[key];
+    if (value === undefined || value === null || (typeof value === 'number' && isNaN(value))) {
+      delete sanitized[key];
+    }
+  });
+  return sanitized;
+};
+
+export default function LeadsManagementPage() {
+  const { user } = useAuth();
+  const { can } = useRolePermissions();
+  const canUpdateLeads = can('leads.update');
+  const canAssignLeads = can('leads.assign');
+  const canReplyToLeads = can('communications.reply');
+  const [selectedLead, setSelectedLead] = useState<UnifiedLead | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+
+  const leadsFilter = useFilterUtils<UnifiedLead>({
+    data: undefined,
+    searchFields: [],
+  });
+
+  const searchTerm = leadsFilter.filters.searchTerm;
+  const setSearchTerm = leadsFilter.filters.setSearchTerm;
+  const leadsDateFilter = leadsFilter.filters.dateFilter;
+  const setLeadsDateFilter = leadsFilter.filters.setDateFilter;
+  const leadsStatusFilter = leadsFilter.filters.statusFilter;
+  const setLeadsStatusFilter = leadsFilter.filters.setStatusFilter;
+  const leadsSourceFilter = leadsFilter.filters.sourceFilter;
+  const setLeadsSourceFilter = leadsFilter.filters.setSourceFilter;
+
+  // Quick presets for FilterPresets component
+  const quickPresets = [
+    {
+      id: 'today-new',
+      name: 'عملاء اليوم - جدد',
+      filters: { dateFilter: 'today' as DateFilterPreset, status: 'new' },
+    },
+    {
+      id: 'week-contacted',
+      name: 'عملاء الأسبوع - تم الاتصال',
+      filters: { dateFilter: 'week' as DateFilterPreset, status: 'contacted' },
+    },
+    {
+      id: 'month-converted',
+      name: 'عملاء الشهر - محولين',
+      filters: { dateFilter: 'month' as DateFilterPreset, status: 'converted' },
+    },
+    {
+      id: 'all-qualified',
+      name: 'جميع العملاء - مؤهلين',
+      filters: { dateFilter: 'all' as DateFilterPreset, status: 'qualified' },
+    },
+  ];
+
+  const handleApplyPreset = (filters: Record<string, unknown>) => {
+    if (filters.dateFilter) {
+      setLeadsDateFilter(filters.dateFilter as DateFilterPreset);
+    }
+    if (filters.status) {
+      setLeadsStatusFilter(filters.status as string[]);
+    }
+    if (filters.source) {
+      setLeadsSourceFilter(filters.source as string[]);
+    }
+    if (filters.searchTerm !== undefined) {
+      setSearchTerm(filters.searchTerm as string);
+    }
+  };
+
+  const currentFilters = {
+    dateFilter: leadsDateFilter,
+    status: leadsStatusFilter,
+    source: leadsSourceFilter,
+    searchTerm,
+  };
+
+  const {
+    data: leadsData,
+    isLoading: leadsLoading,
+    refetch: refetchLeads,
+  } = trpc.leads.list.useQuery();
+  const assignableUsers = (
+    (trpc.leads.assignableUsers.useQuery(undefined, {
+      enabled: canAssignLeads,
+    }).data ?? []) as Array<{ id: number; name?: string | null; username?: string | null }>
+  ).map((user) => ({
+    id: user.id,
+    name: user.name ?? null,
+    username: user.username ?? null,
+  }));
+  const { data: stats } = trpc.leads.stats.useQuery();
+
+  const updateStatusMutation = trpc.leads.updateStatus.useMutation({
+    onSuccess: () => {
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث حالة العميل بنجاح',
+        description: 'تم حفظ حالة العميل الأخيرة بنجاح.',
+        redirect: '/admin/bookings/leads',
+      });
+      refetchLeads();
+      setStatusDialogOpen(false);
+      setSelectedLead(null);
+    },
+    onError: () => {
+      toast.error('حدث خطأ أثناء تحديث الحالة');
+    },
+  });
+  const assignLeadMutation = trpc.leads.assign.useMutation({
+    onSuccess: () => {
+      emitToastHash({
+        kind: 'success',
+        message: 'تم تحديث مسؤول المتابعة',
+        description: 'تم إسناد العميل إلى المسؤول المختار.',
+        redirect: '/admin/bookings/leads',
+      });
+      refetchLeads();
+    },
+    onError: (error) => toast.error(`تعذر إسناد العميل: ${error.message}`),
+  });
+
+  const unifiedLeads = useMemo<UnifiedLead[]>(
+    () =>
+      (leadsData ?? []).map((lead) => ({
+        ...lead,
+        type: 'lead' as const,
+        typeLabel: 'عميل محتمل',
+        relatedId: lead.campaignId,
+        utmSource: lead.utmSource ?? null,
+        utmMedium: lead.utmMedium ?? null,
+        utmCampaign: lead.utmCampaign ?? null,
+      })),
+    [leadsData]
+  );
+
+  const filteredLeads = useMemo(() => {
+    if (!unifiedLeads) {
+      return [];
+    }
+    let filtered = unifiedLeads;
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (lead) =>
+          lead.fullName.toLowerCase().includes(term) ||
+          lead.phone.includes(term) ||
+          (lead.email && lead.email.toLowerCase().includes(term))
+      );
+    }
+
+    if (leadsDateFilter && leadsDateFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      filtered = filtered.filter((lead) => {
+        const leadDate = new Date(lead.createdAt);
+        if (leadsDateFilter === 'today') {
+          return leadDate >= today;
+        }
+        if (leadsDateFilter === 'week') {
+          const weekAgo = new Date(today);
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return leadDate >= weekAgo;
+        }
+        if (leadsDateFilter === 'month') {
+          const monthAgo = new Date(today);
+          monthAgo.setMonth(monthAgo.getMonth() - 1);
+          return leadDate >= monthAgo;
+        }
+        return true;
+      });
+    }
+
+    if (leadsStatusFilter && leadsStatusFilter.length > 0) {
+      filtered = filtered.filter((lead) => leadsStatusFilter.includes(lead.status));
+    }
+
+    if (leadsSourceFilter && leadsSourceFilter.length > 0) {
+      filtered = filtered.filter((lead) => {
+        const source = (lead as UnifiedLead).source || '';
+        return leadsSourceFilter.includes(source);
+      });
+    }
+
+    return filtered;
+  }, [unifiedLeads, searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter]);
+
+  // استخدام usePagination المشترك
+  const pagination = usePagination(filteredLeads);
+
+  // إعادة تعيين الصفحة عند تغيير الفلاتر
+  useEffect(() => {
+    pagination.resetPage();
+  }, [searchTerm, leadsDateFilter, leadsStatusFilter, leadsSourceFilter, pagination]);
+
+  const hasActiveFilters = !!(
+    searchTerm ||
+    (leadsDateFilter && leadsDateFilter !== 'all') ||
+    leadsStatusFilter.length > 0 ||
+    leadsSourceFilter.length > 0
+  );
+
+  const clearAllFilters = useCallback(() => {
+    setSearchTerm('');
+    setLeadsDateFilter('all');
+    setLeadsStatusFilter([]);
+    setLeadsSourceFilter([]);
+  }, [setSearchTerm, setLeadsDateFilter, setLeadsStatusFilter, setLeadsSourceFilter]);
+
+  const handleStatusUpdate = useCallback(
+    (status: string, notes: string) => {
+      if (!selectedLead || !status) {
+        return;
+      }
+      updateStatusMutation.mutate({
+        id: selectedLead.id,
+        status: status as 'new' | 'contacted' | 'booked' | 'not_interested' | 'no_answer',
+        notes,
+      });
+    },
+    [selectedLead, updateStatusMutation]
+  );
+
+  const handleExport = useCallback(() => {
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error('لا توجد بيانات للتصدير');
+      return;
+    }
+    const formattedData = formatLeadsForExport(
+      filteredLeads as unknown as Record<string, unknown>[]
+    );
+    exportToExcel(formattedData, 'تسجيلات_العملاء');
+    toast.success('تم تصدير البيانات بنجاح');
+  }, [filteredLeads]);
+
+  const handlePrint = useCallback(() => {
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error('لا توجد بيانات للطباعة');
+      return;
+    }
+    window.print();
+  }, [filteredLeads]);
+
+  const handleUpdateStatusClick = useCallback((lead: UnifiedLead) => {
+    setSelectedLead(sanitizeLead(lead));
+    setStatusDialogOpen(true);
+  }, []);
+
+  const handleWhatsApp = useCallback((lead: UnifiedLead) => {
+    window.open(`https://wa.me/${lead.phone.replace(/\D/g, '')}`, '_blank');
+  }, []);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchTerm(value);
+    },
+    [setSearchTerm]
+  );
+
+  const handleDateFilterChange = useCallback(
+    (value: DateFilterPreset) => {
+      setLeadsDateFilter(value);
+    },
+    [setLeadsDateFilter]
+  );
+
+  const handleStatusFilterChange = useCallback(
+    (value: string[]) => {
+      setLeadsStatusFilter(value);
+    },
+    [setLeadsStatusFilter]
+  );
+
+  const handleSourceFilterChange = useCallback(
+    (value: string[]) => {
+      setLeadsSourceFilter(value);
+    },
+    [setLeadsSourceFilter]
+  );
+
+  const pendingCount = Array.isArray(unifiedLeads)
+    ? unifiedLeads.filter(
+        (l) => l.type !== 'appointment' && l.status === ('new' as UnifiedLead['status'])
+      ).length
+    : 0;
+
+  return (
+    <DashboardLayout pageTitle="تسجيلات العملاء" pageDescription="إدارة ومتابعة تسجيلات العملاء">
+      <div
+        className="flex h-[calc(100dvh-4.25rem)] min-h-0 flex-col gap-3 overflow-hidden px-3 py-3 sm:px-4 sm:py-4"
+        dir="rtl"
+      >
+        {/* Stats Cards */}
+        <div className="shrink-0">
+          <LeadStatsCards stats={stats} />
+        </div>
+
+        {/* Filter Presets */}
+        <div className="shrink-0">
+          <FilterPresets
+            pageKey="leads"
+            currentFilters={currentFilters}
+            onApplyFilters={handleApplyPreset}
+            quickPresets={quickPresets}
+            isAdmin={user?.role === 'admin'}
+          />
+        </div>
+
+        {/* Filters Section */}
+        <div className="shrink-0">
+          <LeadFilters
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            dateFilter={leadsDateFilter}
+            onDateFilterChange={handleDateFilterChange}
+            statusFilter={leadsStatusFilter}
+            onStatusFilterChange={handleStatusFilterChange}
+            sourceFilter={leadsSourceFilter}
+            onSourceFilterChange={handleSourceFilterChange}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearAllFilters}
+            filteredCount={filteredLeads.length}
+            totalCount={unifiedLeads?.length || 0}
+            pendingCount={pendingCount}
+            onExport={handleExport}
+            onPrint={handlePrint}
+          />
+        </div>
+
+        {/* Mobile Cards View */}
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1 md:hidden">
+          <LeadMobileCards
+            leads={pagination.paginatedData as unknown as UnifiedLead[]}
+            isLoading={leadsLoading}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearAllFilters}
+            onUpdateStatus={canUpdateLeads || canAssignLeads ? handleUpdateStatusClick : undefined}
+            onWhatsApp={canReplyToLeads ? handleWhatsApp : undefined}
+          />
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden min-h-0 flex-1 overflow-auto md:block">
+          <LeadTableDesktop
+            leads={pagination.paginatedData}
+            isLoading={leadsLoading}
+            hasActiveFilters={hasActiveFilters}
+            onClearFilters={clearAllFilters}
+            onUpdateStatus={canUpdateLeads || canAssignLeads ? handleUpdateStatusClick : undefined}
+          />
+        </div>
+
+        {/* Pagination (Desktop + Mobile) */}
+        <div className="shrink-0">
+          {filteredLeads.length > 0 && <Pagination {...pagination.paginationProps} />}
+        </div>
+
+        {/* Update Lead Status Dialog */}
+        {(canUpdateLeads || canAssignLeads) && (
+          <LeadStatusDialog
+            open={statusDialogOpen}
+            onOpenChange={setStatusDialogOpen}
+            lead={selectedLead}
+            onSubmit={handleStatusUpdate}
+            isPending={updateStatusMutation.isPending}
+            canUpdateStatus={canUpdateLeads}
+            canAssign={canAssignLeads}
+            assignableUsers={assignableUsers}
+            onAssign={(assignedToUserId) => {
+              if (selectedLead) {
+                assignLeadMutation.mutate({ id: selectedLead.id, assignedToUserId });
+              }
+            }}
+            isAssigning={assignLeadMutation.isPending}
+          />
+        )}
+      </div>
+    </DashboardLayout>
+  );
+}
