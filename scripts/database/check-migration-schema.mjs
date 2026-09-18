@@ -40,10 +40,26 @@ function columnName(initializer) {
 }
 
 function schemaTables() {
-  const source = ts.createSourceFile(schemaPath, fs.readFileSync(schemaPath, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const schemaDir = path.join(root, 'drizzle/schema');
+  const schemaFiles = [schemaPath];
+  if (fs.existsSync(schemaDir)) {
+    schemaFiles.push(
+      ...fs
+        .readdirSync(schemaDir)
+        .filter((f) => f.endsWith('.ts'))
+        .map((f) => path.join(schemaDir, f))
+    );
+  }
   const tables = new Map();
   function visit(node) {
-    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'mysqlTable' && node.arguments.length >= 2 && ts.isStringLiteral(node.arguments[0]) && ts.isObjectLiteralExpression(node.arguments[1])) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'mysqlTable' &&
+      node.arguments.length >= 2 &&
+      ts.isStringLiteral(node.arguments[0]) &&
+      ts.isObjectLiteralExpression(node.arguments[1])
+    ) {
       const columns = new Set();
       for (const property of node.arguments[1].properties) {
         const name = propertyName(property);
@@ -56,7 +72,16 @@ function schemaTables() {
     }
     ts.forEachChild(node, visit);
   }
-  visit(source);
+  for (const file of schemaFiles) {
+    const source = ts.createSourceFile(
+      file,
+      fs.readFileSync(file, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS
+    );
+    visit(source);
+  }
   return tables;
 }
 
