@@ -1,5 +1,7 @@
 {
   "recommendations": [
-    "stylelint.vscode-stylelint"
+    "stylelint.vscode-stylelint",
+    "google.geminicodeassist",
+    "googlecloudtools.cloudcode"
   ]
 }

@@ -105,157 +105,159 @@ export default function SghHeroSlider() {
   const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
-    <div
-      className="relative w-full h-[440px] sm:h-[500px] md:h-[560px] lg:h-[600px] overflow-hidden bg-black select-none"
-      dir="rtl"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
-      {/* Slides Container */}
-      {slides.map((slide, index) => {
-        const isActive = index === currentSlide;
-        return (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            }`}
-          >
-            {/* Slide Background Image */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `url(${slide.image})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            >
-              {/* Subtle natural darkening for text readability on non-graphic slides */}
-              {!slide.isGraphicBanner && (
-                <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/25 to-transparent pointer-events-none" />
-              )}
-            </div>
-
-            {/* Clickable Area for Graphic Banners */}
-            {slide.isGraphicBanner && slide.slideLink && (
-              <a
-                href={slide.slideLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 z-10 cursor-pointer"
-                aria-label="رابط الشريحة"
-              />
-            )}
-
-            {/* Slide Content */}
-            {!slide.isGraphicBanner && (
-              <div className="relative h-full container mx-auto px-6 sm:px-12 lg:px-20 max-w-6xl flex items-center">
-                <div className="max-w-2xl text-white space-y-5 text-right z-10">
-                  {slide.title && (
-                    <h1 className="text-2xl sm:text-3xl md:text-[40px] font-medium leading-tight text-white drop-shadow-md whitespace-pre-line">
-                      {slide.title}
-                    </h1>
-                  )}
-
-                  {slide.button && (
-                    <div className="pt-2">
-                      <a
-                        href={slide.button.href}
-                        className="inline-flex items-center justify-center bg-[#1ca8e5] hover:bg-[#1594ce] text-white text-[16px] font-normal px-[22.4px] py-[6px] h-[38px] rounded-full border border-[#1ca8e5] shadow-none transition-colors cursor-pointer"
-                      >
-                        {slide.button.label}
-                      </a>
-                    </div>
+    <section className="w-full bg-black py-0" dir="rtl">
+      {/* 3. عرض السليدر: محدد ضمن Container العرض القياسي المعتمد (1350px) بالموقع المرجعي */}
+      <div className="container mx-auto px-4 max-w-[1380px]">
+        <div
+          className="relative w-full h-[440px] sm:h-[500px] md:h-[560px] lg:h-[600px] overflow-hidden bg-black select-none"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {/* Slides Container */}
+          {slides.map((slide, index) => {
+            const isActive = index === currentSlide;
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                }`}
+              >
+                {/* Slide Background Image */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `url(${slide.image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                >
+                  {/* Subtle darkening for text readability on non-graphic slides */}
+                  {!slide.isGraphicBanner && (
+                    <div className="absolute inset-0 bg-black/40 pointer-events-none" />
                   )}
                 </div>
+
+                {/* Clickable Area for Graphic Banners */}
+                {slide.isGraphicBanner && slide.slideLink && (
+                  <a
+                    href={slide.slideLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 z-10 cursor-pointer"
+                    aria-label="رابط الشريحة"
+                  />
+                )}
+
+                {/* 1 & 2: أماكن النصوص والزر - توسيط أفقي ورأسي في منتصف الشريحة تماماً كالمرجع */}
+                {!slide.isGraphicBanner && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 sm:px-12 z-10 pointer-events-none -translate-y-4 sm:-translate-y-6">
+                    {slide.title && (
+                      <h1 className="text-2xl sm:text-3xl md:text-[40px] font-medium leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] whitespace-pre-line text-center max-w-3xl mb-4 sm:mb-6">
+                        {slide.title}
+                      </h1>
+                    )}
+
+                    {slide.button && (
+                      <div className="pointer-events-auto">
+                        <a
+                          href={slide.button.href}
+                          className="inline-flex items-center justify-center bg-[#1ca8e5] hover:bg-[#1594ce] text-white text-[16px] font-normal px-[22.4px] py-[6px] h-[38px] rounded-full border border-[#1ca8e5] shadow-md transition-colors cursor-pointer"
+                        >
+                          {slide.button.label}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
 
-      {/* Transparent Navigation Arrows on Sides */}
-      <button
-        onClick={prevSlide}
-        aria-label="الشريحة السابقة"
-        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
-      >
-        <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:-translate-x-1 drop-shadow-md" />
-      </button>
+          {/* Transparent Navigation Arrows on Sides */}
+          <button
+            onClick={prevSlide}
+            aria-label="الشريحة السابقة"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
+          >
+            <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:-translate-x-1 drop-shadow-md" />
+          </button>
 
-      <button
-        onClick={nextSlide}
-        aria-label="الشريحة التالية"
-        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
-      >
-        <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:translate-x-1 drop-shadow-md" />
-      </button>
+          <button
+            onClick={nextSlide}
+            aria-label="الشريحة التالية"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
+          >
+            <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:translate-x-1 drop-shadow-md" />
+          </button>
 
-      {/* Authentic SGH Thumbnail Bar with Connecting Line & SVG Circular Progress Ring */}
-      <div
-        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-8 flex items-center justify-between"
-        dir="ltr"
-      >
-        {/* Horizontal background line connecting thumbnails */}
-        <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-[1.5px] bg-white/50 pointer-events-none z-0" />
+          {/* 4. مكان المؤشرات الدائرية: ملاصقة للحافة السفلية وممتدة على كامل عرض السلايدر */}
+          <div
+            className="absolute bottom-2 sm:bottom-3 left-4 right-4 sm:left-10 sm:right-10 z-20 flex items-center justify-between"
+            dir="ltr"
+          >
+            {/* Horizontal background line connecting thumbnails */}
+            <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-[1px] bg-white/40 pointer-events-none z-0" />
 
-        {slides.map((slide, idx) => {
-          const isActive = idx === currentSlide;
-          return (
-            <button
-              key={slide.id}
-              onClick={() => goToSlide(idx)}
-              aria-label={`انتقال للشريحة ${idx + 1}`}
-              className="relative z-10 w-[54px] h-[54px] flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none group"
-            >
-              {/* Circular SVG Countdown Progress Ring for Active Slide */}
-              {isActive ? (
-                <svg
-                  width="54px"
-                  height="54px"
-                  viewBox="0 0 70 70"
-                  className="absolute inset-0 m-auto pointer-events-none -rotate-90"
+            {slides.map((slide, idx) => {
+              const isActive = idx === currentSlide;
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => goToSlide(idx)}
+                  aria-label={`انتقال للشريحة ${idx + 1}`}
+                  className="relative z-10 w-[54px] h-[54px] flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none group"
                 >
-                  <circle
-                    cx="35"
-                    cy="35"
-                    r={RADIUS}
-                    fill="none"
-                    stroke="rgba(255, 255, 255, 0.35)"
-                    strokeWidth="2.5"
-                  />
-                  <circle
-                    cx="35"
-                    cy="35"
-                    r={RADIUS}
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="3.5"
-                    strokeDasharray={CIRCUMFERENCE}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                  />
-                </svg>
-              ) : null}
+                  {/* Circular SVG Countdown Progress Ring for Active Slide */}
+                  {isActive ? (
+                    <svg
+                      width="54px"
+                      height="54px"
+                      viewBox="0 0 70 70"
+                      className="absolute inset-0 m-auto pointer-events-none -rotate-90"
+                    >
+                      <circle
+                        cx="35"
+                        cy="35"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="rgba(255, 255, 255, 0.35)"
+                        strokeWidth="2.5"
+                      />
+                      <circle
+                        cx="35"
+                        cy="35"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="#FFFFFF"
+                        strokeWidth="3.5"
+                        strokeDasharray={CIRCUMFERENCE}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  ) : null}
 
-              {/* Inner Circle Thumbnail Image */}
-              <div
-                className={`w-[34px] h-[34px] rounded-full overflow-hidden shadow-[0_0_6px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
-                  isActive
-                    ? 'scale-105 ring-2 ring-white'
-                    : 'opacity-80 group-hover:opacity-100 group-hover:scale-110'
-                }`}
-                style={{
-                  backgroundImage: `url(${slide.image})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                }}
-              />
-            </button>
-          );
-        })}
+                  {/* Inner Circle Thumbnail Image */}
+                  <div
+                    className={`w-[34px] h-[34px] rounded-full overflow-hidden shadow-[0_0_6px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
+                      isActive
+                        ? 'scale-105 ring-2 ring-white'
+                        : 'opacity-80 group-hover:opacity-100 group-hover:scale-110'
+                    }`}
+                    style={{
+                      backgroundImage: `url(${slide.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
