@@ -1,30 +1,28 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ChevronRight, ChevronLeft, Calendar, ArrowLeft } from 'lucide-react';
-import { useBookingModal } from '@/hooks/booking/useBookingModal';
-import { Link } from 'wouter';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface SlideItem {
   id: number;
-  title?: string;
-  subtitle?: string;
-  badge?: string;
   image: string;
   isGraphicBanner?: boolean;
-  primaryAction?: {
-    label: string;
-    type: 'booking' | 'link';
-    href?: string;
-  };
-  secondaryAction?: {
+  slideLink?: string;
+  title?: string;
+  button?: {
     label: string;
     href: string;
   };
 }
 
+const SLIDE_DURATION = 6500; // 6.5 seconds per slide
+const RADIUS = 34;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ~213.6
+
 export default function SghHeroSlider() {
-  const { openBookingModal } = useBookingModal();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const progressStartTimeRef = useRef<number>(Date.now());
+  const elapsedBeforePauseRef = useRef<number>(0);
 
   const slides: SlideItem[] = [
     {
@@ -34,94 +32,81 @@ export default function SghHeroSlider() {
     },
     {
       id: 2,
-      title: 'تطبيق السعودي الألماني الصحية - رعايتك في متناول يدك',
-      subtitle:
-        'إدارة مواعيدك، نتائج الفحوصات المخبرية، تقارير الأشعة، واستشارات الأطباء في أي وقت ومن أي مكان.',
-      badge: 'التطبيق الذكي الموحد',
       image: '/sgh/slide2.jpg',
-      primaryAction: {
-        label: 'تحميل التطبيق الآن',
-        type: 'link',
-        href: 'https://saudigermanhealth.com/en/mobile-application-0',
-      },
-      secondaryAction: {
-        label: 'احجز موعد',
-        href: '#booking',
-      },
+      isGraphicBanner: true,
+      slideLink: 'https://saudigermanhealth.com/en/mobile-application-0',
     },
     {
       id: 3,
-      title: 'أكبر مجموعة مستشفيات خاصة في الشرق الأوسط',
-      subtitle:
-        'رعايتنا تصنع الفرق في منطقة حائل والمملكة العربية السعودية، بتقديم أحدث الخدمات الطبية المتكاملة بمعايير عالمية.',
-      badge: 'السعودي الألماني الصحية · حائل',
       image: '/sgh/slide3.jpg',
-      primaryAction: {
-        label: 'احجز موعدك الآن',
-        type: 'booking',
-      },
-      secondaryAction: {
-        label: 'عرض المزيد عن المستشفى',
-        href: '#about',
+      title: 'أكبر مجموعة مستشفيات خاصة في الشرق الأوسط',
+      button: {
+        label: 'عرض المزيد',
+        href: '/#about',
       },
     },
     {
       id: 4,
-      title: 'توفير رعاية مبتكرة وشاملة تركز على حاجات المرضى',
-      subtitle:
-        'نخبة من كبار الأطباء والاستشاريين وحملة البورد الدولي في أكثر من 40 تخصصاً دقيقاً لضمان أفضل مسار علاجي.',
-      badge: 'نخبة الاستشاريين والأطباء',
       image: '/sgh/slide4.jpg',
-      primaryAction: {
-        label: 'تصفح جميع الأطباء',
-        type: 'link',
+      title: 'توفير رعاية مبتكرة وشاملة\nتركز على حاجات المرضى',
+      button: {
+        label: 'جميع الأطباء',
         href: '/doctors',
-      },
-      secondaryAction: {
-        label: 'حجز موعد مباشر',
-        href: '#booking',
       },
     },
     {
       id: 5,
-      title: 'الرعاية الصحية العالمية أقرب إليك في حائل',
-      subtitle:
-        'تجهيزات فائقة التطور، أجنحة عناية حثيثة متقدمة، وطوارئ تعمل 24 ساعة بأعلى درجات الجاهزية والسرعة.',
-      badge: 'تجهيزات طبية ومختبرات متطورة',
       image: '/sgh/slide5.jpg',
-      primaryAction: {
+      title: 'الرعاية الصحية العالمية أقرب إليك',
+      button: {
         label: 'جميع التخصصات الطبية',
-        type: 'link',
         href: '/departments',
-      },
-      secondaryAction: {
-        label: 'العروض الطبية',
-        href: '/offers',
       },
     },
   ];
 
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+    setProgress(0);
+    elapsedBeforePauseRef.current = 0;
+    progressStartTimeRef.current = Date.now();
+  }, []);
+
   const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
+    goToSlide((currentSlide + 1) % slides.length);
+  }, [currentSlide, goToSlide, slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+    goToSlide((currentSlide - 1 + slides.length) % slides.length);
+  }, [currentSlide, goToSlide, slides.length]);
 
+  // Smooth animation of the circular SVG countdown progress ring
   useEffect(() => {
     if (isPaused) {
+      elapsedBeforePauseRef.current += Date.now() - progressStartTimeRef.current;
       return;
     }
+
+    progressStartTimeRef.current = Date.now();
+
     const interval = setInterval(() => {
-      nextSlide();
-    }, 6500);
+      const elapsed = elapsedBeforePauseRef.current + (Date.now() - progressStartTimeRef.current);
+      const currentProgress = Math.min(100, (elapsed / SLIDE_DURATION) * 100);
+      setProgress(currentProgress);
+
+      if (elapsed >= SLIDE_DURATION) {
+        nextSlide();
+      }
+    }, 50);
+
     return () => clearInterval(interval);
-  }, [nextSlide, isPaused]);
+  }, [isPaused, nextSlide]);
+
+  const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
     <div
-      className="relative w-full h-[440px] sm:h-[500px] md:h-[550px] lg:h-[580px] overflow-hidden bg-slate-900 select-none"
+      className="relative w-full h-[440px] sm:h-[500px] md:h-[560px] lg:h-[600px] overflow-hidden bg-black select-none"
       dir="rtl"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -132,13 +117,13 @@ export default function SghHeroSlider() {
         return (
           <div
             key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
               isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
-            {/* Background Image */}
+            {/* Slide Background Image */}
             <div
-              className="absolute inset-0 transition-transform duration-7000 ease-out"
+              className="absolute inset-0"
               style={{
                 backgroundImage: `url(${slide.image})`,
                 backgroundSize: 'cover',
@@ -146,67 +131,43 @@ export default function SghHeroSlider() {
                 backgroundRepeat: 'no-repeat',
               }}
             >
-              {slide.isGraphicBanner ? (
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
-              ) : (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#101738]/90 via-[#1E2B6D]/70 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                </>
+              {/* Subtle natural darkening for text readability on non-graphic slides */}
+              {!slide.isGraphicBanner && (
+                <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/25 to-transparent pointer-events-none" />
               )}
             </div>
 
-            {/* Slide Content if not pure graphic banner */}
-            {!slide.isGraphicBanner && (
-              <div className="relative h-full container mx-auto px-6 sm:px-12 lg:px-20 flex items-center">
-                <div className="max-w-2xl text-white space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-right-8 duration-700">
-                  {slide.badge && (
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/20 text-white text-xs font-semibold backdrop-blur-md">
-                      <span>{slide.badge}</span>
-                    </div>
-                  )}
+            {/* Clickable Area for Graphic Banners */}
+            {slide.isGraphicBanner && slide.slideLink && (
+              <a
+                href={slide.slideLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 z-10 cursor-pointer"
+                aria-label="رابط الشريحة"
+              />
+            )}
 
+            {/* Slide Content */}
+            {!slide.isGraphicBanner && (
+              <div className="relative h-full container mx-auto px-6 sm:px-12 lg:px-20 max-w-6xl flex items-center">
+                <div className="max-w-2xl text-white space-y-5 text-right z-10">
                   {slide.title && (
-                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight tracking-tight text-white drop-shadow-md">
+                    <h1 className="text-2xl sm:text-3xl md:text-[40px] font-medium leading-tight text-white drop-shadow-md whitespace-pre-line">
                       {slide.title}
                     </h1>
                   )}
 
-                  {slide.subtitle && (
-                    <p className="text-sm sm:text-base md:text-lg text-slate-200 leading-relaxed max-w-xl line-clamp-3">
-                      {slide.subtitle}
-                    </p>
+                  {slide.button && (
+                    <div className="pt-2">
+                      <a
+                        href={slide.button.href}
+                        className="inline-flex items-center justify-center bg-[#1ca8e5] hover:bg-[#1594ce] text-white text-[16px] font-normal px-[22.4px] py-[6px] h-[38px] rounded-full border border-[#1ca8e5] shadow-none transition-colors cursor-pointer"
+                      >
+                        {slide.button.label}
+                      </a>
+                    </div>
                   )}
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap items-center gap-3.5 pt-2">
-                    {slide.primaryAction?.type === 'booking' ? (
-                      <button
-                        onClick={() => openBookingModal()}
-                        className="px-6 py-3 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white font-bold text-sm sm:text-base shadow-lg transition-all flex items-center gap-2 cursor-pointer"
-                      >
-                        <Calendar className="w-4 h-4 text-white" />
-                        <span>{slide.primaryAction.label}</span>
-                      </button>
-                    ) : slide.primaryAction ? (
-                      <a
-                        href={slide.primaryAction.href}
-                        className="px-6 py-3 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white font-bold text-sm sm:text-base shadow-lg transition-all flex items-center gap-2"
-                      >
-                        <span>{slide.primaryAction.label}</span>
-                        <ArrowLeft className="w-4 h-4" />
-                      </a>
-                    ) : null}
-
-                    {slide.secondaryAction && (
-                      <a
-                        href={slide.secondaryAction.href}
-                        className="px-5 py-3 rounded-full bg-white/15 hover:bg-white/25 text-white font-medium text-sm sm:text-base border border-white/30 backdrop-blur-md transition-all"
-                      >
-                        {slide.secondaryAction.label}
-                      </a>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
@@ -214,44 +175,82 @@ export default function SghHeroSlider() {
         );
       })}
 
-      {/* Navigation Arrows */}
+      {/* Transparent Navigation Arrows on Sides */}
       <button
         onClick={prevSlide}
         aria-label="الشريحة السابقة"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer"
+        className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:-translate-x-1 drop-shadow-md" />
       </button>
+
       <button
         onClick={nextSlide}
         aria-label="الشريحة التالية"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all cursor-pointer"
+        className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-20 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer group focus:outline-none"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:translate-x-1 drop-shadow-md" />
       </button>
 
-      {/* Authentic SGH Thumbnail Line Indicators exactly like ref_slider_loaded.png */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl px-6 flex items-center justify-between">
+      {/* Authentic SGH Thumbnail Bar with Connecting Line & SVG Circular Progress Ring */}
+      <div
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-20 w-full max-w-4xl px-8 flex items-center justify-between"
+        dir="ltr"
+      >
         {/* Horizontal background line connecting thumbnails */}
-        <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-[1.5px] bg-white/40 pointer-events-none z-0" />
+        <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-[1.5px] bg-white/50 pointer-events-none z-0" />
 
         {slides.map((slide, idx) => {
           const isActive = idx === currentSlide;
           return (
             <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
+              key={slide.id}
+              onClick={() => goToSlide(idx)}
               aria-label={`انتقال للشريحة ${idx + 1}`}
-              className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 transition-all duration-300 cursor-pointer shadow-lg ${
-                isActive
-                  ? 'border-white scale-125 ring-4 ring-white/40'
-                  : 'border-white/60 opacity-80 hover:opacity-100 hover:scale-105'
-              }`}
+              className="relative z-10 w-[54px] h-[54px] flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none group"
             >
-              <img
-                src={slide.image}
-                alt={`مصغرة الشريحة ${idx + 1}`}
-                className="w-full h-full object-cover object-center"
+              {/* Circular SVG Countdown Progress Ring for Active Slide */}
+              {isActive ? (
+                <svg
+                  width="54px"
+                  height="54px"
+                  viewBox="0 0 70 70"
+                  className="absolute inset-0 m-auto pointer-events-none -rotate-90"
+                >
+                  <circle
+                    cx="35"
+                    cy="35"
+                    r={RADIUS}
+                    fill="none"
+                    stroke="rgba(255, 255, 255, 0.35)"
+                    strokeWidth="2.5"
+                  />
+                  <circle
+                    cx="35"
+                    cy="35"
+                    r={RADIUS}
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth="3.5"
+                    strokeDasharray={CIRCUMFERENCE}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : null}
+
+              {/* Inner Circle Thumbnail Image */}
+              <div
+                className={`w-[34px] h-[34px] rounded-full overflow-hidden shadow-[0_0_6px_rgba(0,0,0,0.5)] transition-transform duration-300 ${
+                  isActive
+                    ? 'scale-105 ring-2 ring-white'
+                    : 'opacity-80 group-hover:opacity-100 group-hover:scale-110'
+                }`}
+                style={{
+                  backgroundImage: `url(${slide.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
               />
             </button>
           );
