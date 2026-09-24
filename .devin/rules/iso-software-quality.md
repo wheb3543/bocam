@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 description: Enforce ISO/IEC 25010 software quality characteristics tailored for the BOCAM healthcare platform
 ---
 # ISO/IEC 25010 Software Quality Standards

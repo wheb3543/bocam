@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 description: Maintain high-standard documentation and enforce governance via the Documentation Registry
 ---
 # Continuous & High-Standard Documentation

@@ -7,7 +7,16 @@
         "/node_modules": true
     },
     "css.validate": false,
-    "stylelint.validate": ["css", "scss"],
+    "stylelint.validate": [
+        "css",
+        "scss"
+    ],
     "stylelint.enable": true,
-    "window.autoDetectColorScheme": false
+    "window.autoDetectColorScheme": false,
+    "screencastMode.keyboardOptions": {
+        "showCommandGroups": true
+    },
+    "task.problemMatchers.neverPrompt": false,
+    "task.quickOpen.showAll": false,
+    "task.verboseLogging": true
 }

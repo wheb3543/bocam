@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 description: Enforce strict ESLint configuration, architectural design patterns, and code quality standards for BOCAM
 ---
 # Global Quality & Engineering Standards

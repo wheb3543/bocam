@@ -1,5 +1,5 @@
 ---
-trigger: always_on
+trigger: manual
 description: Enforce healthcare data privacy, OWASP standards, strict schema validation, and runtime reliability
 ---
 # Healthcare Data Privacy & Security (PHI & OWASP Top 10)
