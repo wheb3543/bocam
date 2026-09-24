@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="2637px" height="1162px" viewBox="0 0 2637 1162" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="31.5975588%" y1="73.8533546%" x2="65.957763%" y2="46.590327%" id="linearGradient-1">
+            <stop stop-color="#007242" offset="0%"></stop>
+            <stop stop-color="#2AB24B" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="SGH-web-09062020-copy-05" transform="translate(0.000000, 14.000000)" fill="url(#linearGradient-1)" fill-rule="nonzero">
+            <g id="Group">
+                <path d="M1388.1,0.2 C1381.6,0.1 1375,0 1368.4,0 C1308.1,0 1247.1,4.3 1185.6,13.2 C915.3,52.2 624.30558,211.502501 455.691887,389.671379 C259.134683,597.367303 107.237387,849.976844 0,1147.5 L98.0390834,973.750969 C101.539083,968.850969 240.379853,689.217145 532.339083,451.050969 C744.024868,278.367976 1041.43908,187.250969 1325.43908,187.250969 C1472.33908,187.250969 1621.73908,211.850969 1767.83908,263.750969 C2124.83908,390.450969 2391.53908,654.550969 2528.83908,973.950969 L2630.45216,1147.37565 C2626.11449,1093.73605 2613.78281,1026.97102 2593.4571,947.080549 C2458.38498,416.177645 1954.6,9 1388.1,0.2 Z" id="Path"></path>
+            </g>
+        </g>
+    </g>
+</svg>
