@@ -1,384 +1,704 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLocation, useSearch } from 'wouter';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { trpc } from '@/lib/api/trpc';
-import { Loader2, Search, Stethoscope, Calendar, User, Building2, X } from 'lucide-react';
-import { COMPANY_CITY, getCompanyName } from '@/const';
-import PageLayout from '@/components/layout/PageLayout';
-import HeroSection from '@/components/HeroSection';
-import AnimatedCard from '@/components/AnimatedCard';
-import SectionDivider from '@/components/SectionDivider';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
-import BackToTopButton from '@/components/BackToTopButton';
-import ScrollReveal from '@/components/ScrollReveal';
-import { usePublicSEOSettings, usePublicTextContent } from '@/hooks/usePublicContent';
+import { MapPin, Search, ChevronDown } from 'lucide-react';
+import { getCompanyName } from '@/const';
+import { usePublicSEOSettings } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
+import PageLayout from '@/components/layout/PageLayout';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
+const ITEMS_PER_PAGE = 9;
+
+// Root Component
 export default function Doctors() {
   const companyName = getCompanyName('ar');
   const { language } = useLanguage();
   const { data: doctorsSEOSettings = [] } = usePublicSEOSettings({ slug: 'doctors', language });
   const doctorsSEO = doctorsSEOSettings[0];
+
   return (
     <PageLayout
-      title={doctorsSEO?.title || `الأطباء - ${companyName}`}
-      description={
-        doctorsSEO?.description ||
-        `احجز موعدك مع أفضل الأطباء في ${companyName}${COMPANY_CITY ? ` بـ ${COMPANY_CITY}` : ''}`
-      }
+      title={doctorsSEO?.title || `الأطباء | ${companyName}`}
+      description={doctorsSEO?.description || `احجز موعدك مع أفضل الأطباء في ${companyName} بصنعاء`}
       keywords={doctorsSEO?.keywords || 'أطباء, استشاريين, تخصصات طبية, حجز موعد'}
+      useContainer={true}
     >
+      <PageProgress />
+      <FloatingButtons />
       <DoctorsContent />
     </PageLayout>
   );
 }
 
+// Main Page Content
 function DoctorsContent() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const searchParams = new URLSearchParams(searchString);
   const departmentParam = searchParams.get('department');
   const { openBookingModal } = useBookingModal();
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [specialtyFilter, setSpecialtyFilter] = useState<string>('all');
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState<number | null>(
+    departmentParam ? Number(departmentParam) : null
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // الحصول على اللغة الحالية
-  const { language } = useLanguage();
-
-  // جلب المحتوى من قاعدة البيانات باستخدام المفاتيح الديناميكية
-  const { data: doctorsTitle } = usePublicTextContent({
-    key: `doctors.title.${language}`,
-    section: 'doctors',
-    type: 'title',
-  });
-  const { data: doctorsDescription } = usePublicTextContent({
-    key: `doctors.description.${language}`,
-    section: 'doctors',
-    type: 'description',
-  });
-  const { data: doctorsBadge } = usePublicTextContent({
-    key: `doctors.badge.${language}`,
-    section: 'doctors',
-    type: 'text',
-  });
-  const { data: searchPlaceholder } = usePublicTextContent({
-    key: `doctors.search.placeholder.${language}`,
-    section: 'doctors',
-  });
-  const { data: allSpecialtiesLabel } = usePublicTextContent({
-    key: `doctors.filter.all.${language}`,
-    section: 'doctors',
-  });
-  const { data: emptyTitle } = usePublicTextContent({
-    key: `doctors.empty.title.${language}`,
-    section: 'doctors',
-  });
-  const { data: emptyDescription } = usePublicTextContent({
-    key: `doctors.empty.description.${language}`,
-    section: 'doctors',
-  });
-  const { data: bookingCta } = usePublicTextContent({
-    key: `doctors.booking.cta.${language}`,
-    section: 'doctors',
-    type: 'button',
-  });
-
-  // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
-  const fallback =
-    language === 'en'
-      ? {
-          title: 'Our Distinguished Doctors',
-          description: 'An integrated medical team of the best doctors in various specialties',
-          badge: 'Specialized Doctors',
-          search: 'Search for a doctor or specialty...',
-          allSpecialties: 'All specialties',
-          emptyTitle: 'No results match your search',
-          emptyDescription: 'Try changing your search criteria',
-          booking: 'Book an appointment',
-        }
-      : {
-          title: 'أطباؤنا المتميزون',
-          description: 'فريق طبي متكامل من أفضل الأطباء في مختلف التخصصات',
-          badge: 'أطباء متخصصون',
-          search: 'ابحث عن طبيب أو تخصص...',
-          allSpecialties: 'جميع التخصصات',
-          emptyTitle: 'لا توجد نتائج مطابقة للبحث',
-          emptyDescription: 'جرب تغيير معايير البحث',
-          booking: 'احجز موعد',
-        };
-  const title = doctorsTitle?.data?.[0]?.content || fallback.title;
-  const description = doctorsDescription?.data?.[0]?.content || fallback.description;
-  const badgeText = doctorsBadge?.data?.[0]?.content || fallback.badge;
-  const searchPlaceholderText = searchPlaceholder?.data?.[0]?.content || fallback.search;
-  const allSpecialtiesText = allSpecialtiesLabel?.data?.[0]?.content || fallback.allSpecialties;
-  const emptyTitleText = emptyTitle?.data?.[0]?.content || fallback.emptyTitle;
-  const emptyDescriptionText = emptyDescription?.data?.[0]?.content || fallback.emptyDescription;
-  const bookingCtaText = bookingCta?.data?.[0]?.content || fallback.booking;
-
-  // Fetch doctors list (only available doctors)
   const { data: doctors, isLoading } = trpc.doctors.list.useQuery();
-
-  // Fetch departments to resolve department name when filtered
   const { data: departments } = trpc.departments.list.useQuery();
-  const selectedDepartment = departments?.find((d) => {
-    if (!departmentParam) {
-      return false;
+
+  const availableDepartments = useMemo(() => {
+    if (!departments || !doctors) {
+      return [];
     }
-    return String(d.id) === departmentParam || d.slug === departmentParam;
-  });
+    return departments.filter((dept) =>
+      doctors.some(
+        (d) => d.available === 'yes' && d.isVisiting !== 'yes' && d.departmentId === dept.id
+      )
+    );
+  }, [departments, doctors]);
 
-  // Filter doctors based on search, specialty, and department (regular clinic doctors only)
-  const filteredDoctors = Array.isArray(doctors)
-    ? doctors.filter((doctor) => {
-        // Only show available doctors
-        if (doctor.available !== 'yes') {
+  const filteredDoctors = useMemo(() => {
+    if (!Array.isArray(doctors)) {
+      return [];
+    }
+    return doctors.filter((doctor) => {
+      if (doctor.available !== 'yes') {
+        return false;
+      }
+      if (doctor.isVisiting === 'yes') {
+        return false;
+      }
+      if (selectedDepartmentId && doctor.departmentId !== selectedDepartmentId) {
+        return false;
+      }
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        if (
+          !doctor.name.toLowerCase().includes(term) &&
+          !doctor.specialty.toLowerCase().includes(term)
+        ) {
           return false;
         }
+      }
+      return true;
+    });
+  }, [doctors, selectedDepartmentId, searchTerm]);
 
-        // Exclude visiting doctors (they have their own dedicated page /visiting-doctors)
-        if (doctor.isVisiting === 'yes') {
-          return false;
-        }
-
-        // Department filter
-        if (departmentParam) {
-          const targetDeptId = selectedDepartment ? selectedDepartment.id : Number(departmentParam);
-          if (doctor.departmentId !== targetDeptId) {
-            return false;
-          }
-        }
-
-        // Search filter
-        const matchesSearch =
-          doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-
-        // Specialty filter
-        const matchesSpecialty = specialtyFilter === 'all' || doctor.specialty === specialtyFilter;
-
-        return matchesSearch && matchesSpecialty;
-      })
-    : [];
-
-  // Count available visiting doctors for optional discovery banner
-  const visitingDoctorsCount = Array.isArray(doctors)
-    ? doctors.filter((d) => d.available === 'yes' && d.isVisiting === 'yes').length
-    : 0;
-
-  // Get unique specialties for filter (regular clinic doctors only)
-  const specialties = Array.from(
-    new Set(
-      Array.isArray(doctors)
-        ? doctors
-            .filter((d) => d.available === 'yes' && d.isVisiting !== 'yes')
-            .map((d) => d.specialty)
-        : []
-    )
+  const totalPages = Math.ceil(filteredDoctors.length / ITEMS_PER_PAGE);
+  const paginatedDoctors = filteredDoctors.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
 
+  const handleDepartmentChange = (id: number | null) => {
+    setSelectedDepartmentId(id);
+    setCurrentPage(1);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="space-y-6" dir="rtl">
-      <ReadingProgressBar color="green" />
+    <div
+      dir="rtl"
+      className="doctors-list-page"
+      style={{ fontFamily: "'Diodrum Arabic', 'Cairo', sans-serif" }}
+    >
+      {/* 1. Featured Image Banner - Using shared component */}
+      <PublicPageHeader title="الأطباء" backgroundImage="/sgh/doctors-banner.png" />
 
-      {/* Hero Section */}
-      <HeroSection
-        title={title}
-        description={description}
-        badge={{ text: badgeText, icon: Stethoscope }}
-      />
+      {/* 2. Search Bar Strip */}
+      <div style={{ background: '#f8f8f8', borderBottom: '1px solid #eee', padding: '10px 0' }}>
+        <div className="container mx-auto px-[15px] max-w-[1380px]">
+          <form
+            onSubmit={handleSearchSubmit}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}
+          >
+            <span
+              className="sgh-branch-badge"
+              style={{
+                display: 'none',
+                fontSize: '13px',
+                color: '#555',
+                background: 'white',
+                border: '1px solid #ddd',
+                borderRadius: '20px',
+                padding: '4px 12px',
+                whiteSpace: 'nowrap',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <MapPin style={{ width: '14px', height: '14px', color: '#2eb34b' }} />
+              صنعاء
+            </span>
 
-      {/* Search and Filter */}
-      <ScrollReveal delay={0.1}>
-        <section className="pb-4 sm:pb-6 md:pb-8 px-4 sm:px-5 md:px-6">
-          <div className="container mx-auto max-w-4xl">
-            <AnimatedCard className="dark:bg-gray-800/50 dark:border-gray-700/50" delay={0.1}>
-              <div className="pt-4 sm:pt-6 px-3 sm:px-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
-                  <div className="relative">
-                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4 sm:w-5 sm:h-5" />
-                    <Input
-                      placeholder={searchPlaceholderText}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pr-9 sm:pr-10 text-right text-xs sm:text-sm h-9 sm:h-10"
-                    />
-                  </div>
-                  <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
-                    <SelectTrigger className="text-xs sm:text-sm h-9 sm:h-10">
-                      <SelectValue placeholder={allSpecialtiesText} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{allSpecialtiesText}</SelectItem>
-                      {specialties.map((specialty) => (
-                        <SelectItem key={specialty} value={specialty}>
-                          {specialty}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div style={{ position: 'relative', flex: '1', maxWidth: '480px', minWidth: '200px' }}>
+              <Search
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  width: '16px',
+                  height: '16px',
+                  color: '#aaa',
+                  pointerEvents: 'none',
+                }}
+              />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="ابحث عن طبيب أو تخصص..."
+                style={{
+                  width: '100%',
+                  border: '1px solid #ddd',
+                  borderRadius: '20px',
+                  padding: '7px 36px 7px 14px',
+                  fontSize: '14px',
+                  outline: 'none',
+                  background: 'white',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
 
-                {/* Quick Link to Visiting Doctors */}
-                {visitingDoctorsCount > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                      <span>هل تبحث عن الاستشاريين والأطباء الزائرين للمركز؟</span>
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocation('/visiting-doctors')}
-                      className="h-7 text-xs border-purple-200 text-purple-700 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-300 dark:hover:bg-purple-950/40 rounded-lg gap-1.5 self-start sm:self-auto"
-                    >
-                      <span>عرض الأطباء الزائرين ({visitingDoctorsCount})</span>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </AnimatedCard>
+            <button
+              type="submit"
+              style={{
+                background: '#2eb34b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '20px',
+                padding: '7px 20px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                fontFamily: 'inherit',
+              }}
+            >
+              ابحث
+            </button>
+          </form>
+        </div>
+      </div>
 
-            {/* Active Department Filter Banner */}
-            {Boolean(departmentParam) && (
-              <div className="mt-3.5 flex items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
-                <div className="flex items-center gap-2.5 text-xs sm:text-sm">
-                  <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>
-                    عرض أطباء قسم:{' '}
-                    <strong className="font-bold text-emerald-800 dark:text-emerald-300">
-                      {selectedDepartment?.name || `قسم #${departmentParam}`}
-                    </strong>
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setLocation('/doctors')}
-                  className="h-8 px-3 text-xs text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl gap-1.5 font-medium"
+      {/* 3. Listing Section */}
+      <section style={{ padding: '0' }}>
+        <div className="container mx-auto px-[15px] max-w-[1380px]">
+          <div
+            className="doctors-page-layout"
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'flex-start',
+              padding: '24px 0',
+              gap: '0',
+            }}
+          >
+            {/* Left Sidebar */}
+            <div
+              className="doctors-sidebar"
+              style={{ width: '220px', paddingLeft: '24px', flexShrink: 0 }}
+            >
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+                className="doctors-sidebar-toggle"
+                style={{
+                  display: 'none',
+                  width: '100%',
+                  background: '#f5f5f5',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '10px 14px',
+                  marginBottom: '10px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  color: '#333',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontFamily: 'inherit',
+                }}
+              >
+                <span>الأقسام الطبية</span>
+                <ChevronDown
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    transform: filtersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s',
+                  }}
+                />
+              </button>
+
+              <div className="filter-box" style={{ display: filtersOpen ? 'block' : '' }}>
+                <h3
+                  className="filter-title"
+                  style={{
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    color: '#333',
+                    marginBottom: '10px',
+                    paddingBottom: '8px',
+                    borderBottom: '1px solid #eee',
+                  }}
                 >
-                  <X className="w-3.5 h-3.5" />
-                  <span>عرض جميع الأطباء</span>
-                </Button>
-              </div>
-            )}
-          </div>
-        </section>
-      </ScrollReveal>
+                  الأقسام الطبية
+                </h3>
 
-      <SectionDivider />
-
-      {/* Doctors Grid */}
-      <ScrollReveal delay={0.2}>
-        <section className="pb-8 sm:pb-12 md:pb-16 px-4 sm:px-5 md:px-6">
-          <div className="container mx-auto">
-            {isLoading ? (
-              <div className="flex justify-center items-center py-16 sm:py-20">
-                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-emerald-600" />
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  <DeptRadioItem
+                    label="جميع الأقسام"
+                    selected={selectedDepartmentId === null}
+                    onClick={() => handleDepartmentChange(null)}
+                  />
+                  {availableDepartments.map((dept) => (
+                    <DeptRadioItem
+                      key={dept.id}
+                      label={dept.name}
+                      selected={selectedDepartmentId === dept.id}
+                      onClick={() => handleDepartmentChange(dept.id)}
+                    />
+                  ))}
+                </ul>
               </div>
-            ) : filteredDoctors && filteredDoctors.length > 0 ? (
-              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
-                {filteredDoctors.map((doctor, index) => (
-                  <AnimatedCard
-                    key={doctor.id}
-                    className="hover:shadow-lg transition-all cursor-pointer group dark:bg-gray-800/50 dark:border-gray-700/50 dark:hover:border-emerald-600/50 overflow-hidden"
-                    delay={index * 0.1}
-                    onClick={() => setLocation(`/doctors/${doctor.slug}`)}
-                  >
-                    <div className="flex flex-row sm:flex-col">
-                      {/* Image */}
-                      <div className="flex items-center justify-center p-2.5 sm:p-0 sm:pt-5">
-                        {doctor.image ? (
-                          <img
-                            src={doctor.image}
-                            alt={doctor.name}
-                            loading="lazy"
-                            className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full object-cover border-2 border-emerald-100 dark:border-emerald-800 group-hover:border-emerald-300 dark:group-hover:border-emerald-600 transition-colors shrink-0"
-                          />
-                        ) : (
-                          <div className="w-16 h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40 flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800 shrink-0">
-                            <User className="w-6 h-6 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-emerald-500 dark:text-emerald-400" />
-                          </div>
-                        )}
+            </div>
+
+            {/* Right: Doctor Cards Grid */}
+            <div style={{ flex: '1', minWidth: '0' }}>
+              {isLoading ? (
+                <ul
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: '20px',
+                    listStyle: 'none',
+                    margin: 0,
+                    padding: 0,
+                  }}
+                >
+                  {[...Array(6)].map((_, i) => (
+                    <li key={i}>
+                      <div
+                        style={{ background: '#f0f0f0', paddingTop: '75%', borderRadius: '2px' }}
+                      />
+                      <div style={{ padding: '12px' }}>
+                        <div
+                          style={{
+                            height: '14px',
+                            background: '#e0e0e0',
+                            borderRadius: '4px',
+                            marginBottom: '8px',
+                            width: '70%',
+                          }}
+                        />
+                        <div
+                          style={{
+                            height: '12px',
+                            background: '#e8e8e8',
+                            borderRadius: '4px',
+                            width: '90%',
+                          }}
+                        />
                       </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : paginatedDoctors.length > 0 ? (
+                <>
+                  <ul
+                    className="doctors-grid"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '20px',
+                      listStyle: 'none',
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    {paginatedDoctors.map((doctor) => (
+                      <DoctorCard
+                        key={doctor.id}
+                        doctor={doctor}
+                        onView={() => setLocation(`/doctors/${doctor.slug}`)}
+                        onBook={() =>
+                          openBookingModal({
+                            doctorId: doctor.id,
+                            departmentId: doctor.departmentId || undefined,
+                          })
+                        }
+                      />
+                    ))}
+                  </ul>
 
-                      {/* Content */}
-                      <div className="flex-1 p-2.5 sm:p-3 md:p-4 sm:text-center">
-                        <h3 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-foreground dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 mb-0.5 sm:mb-1">
-                          {doctor.name}
-                        </h3>
-                        <p className="text-[10px] sm:text-xs md:text-sm text-emerald-600 dark:text-emerald-400 font-medium mb-1.5 sm:mb-2 line-clamp-1">
-                          {doctor.specialty}
-                        </p>
-
-                        {doctor.experience && (
-                          <p className="text-[10px] sm:text-xs text-muted-foreground dark:text-muted-foreground mb-0.5 sm:mb-1 line-clamp-1">
-                            <span className="font-semibold">الخبرة:</span> {doctor.experience}
-                          </p>
-                        )}
-                        {doctor.consultationFee && (
-                          <p className="text-[10px] sm:text-xs text-muted-foreground dark:text-muted-foreground mb-1.5 sm:mb-2">
-                            <span className="font-semibold">رسوم الاستشارة:</span>{' '}
-                            {doctor.consultationFee}
-                          </p>
-                        )}
-
-                        <Button
-                          size="sm"
-                          className="w-full mt-0.5 sm:mt-1 bg-emerald-600 hover:bg-emerald-700 text-[10px] sm:text-xs md:text-sm h-7 sm:h-8 md:h-9"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openBookingModal({
-                              doctorId: doctor.id,
-                              departmentId: doctor.departmentId || undefined,
-                            });
+                  {totalPages > 1 && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        marginTop: '32px',
+                      }}
+                    >
+                      {[...Array(totalPages)].map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => {
+                            setCurrentPage(i + 1);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            border: '1px solid',
+                            borderColor: currentPage === i + 1 ? '#2eb34b' : '#ddd',
+                            borderRadius: '4px',
+                            background: currentPage === i + 1 ? '#2eb34b' : 'white',
+                            color: currentPage === i + 1 ? 'white' : '#333',
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
                           }}
                         >
-                          <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 ml-1 sm:ml-1.5" />
-                          {bookingCtaText}
-                        </Button>
-                      </div>
+                          {i + 1}
+                        </button>
+                      ))}
                     </div>
-                  </AnimatedCard>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 sm:py-20">
-                <Stethoscope className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 dark:text-muted-foreground mx-auto mb-3 sm:mb-4" />
-                <p className="text-base sm:text-xl text-muted-foreground dark:text-muted-foreground">
-                  {emptyTitleText}
-                </p>
-                <p className="text-xs sm:text-base text-muted-foreground dark:text-muted-foreground mt-1 sm:mt-2">
-                  {emptyDescriptionText}
-                </p>
-                {Boolean(departmentParam) && (
-                  <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocation('/doctors')}
-                      className="rounded-xl gap-2 text-xs"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                      <span>إلغاء التصفية وعرض جميع الأطباء</span>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                  <p style={{ fontSize: '16px', color: '#666', marginBottom: '12px' }}>
+                    لا توجد نتائج مطابقة للبحث
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchTerm('');
+                      setSelectedDepartmentId(null);
+                    }}
+                    style={{
+                      color: '#2eb34b',
+                      background: 'none',
+                      border: 'none',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    عرض جميع الأطباء
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </section>
-      </ScrollReveal>
+        </div>
+      </section>
 
-      <BackToTopButton threshold={300} />
+      <style>{`
+        @media (min-width: 768px) {
+          .sgh-branch-badge { display: inline-flex !important; }
+        }
+        @media (max-width: 899px) {
+          .doctors-page-layout { flex-direction: column !important; }
+          .doctors-sidebar {
+            width: 100% !important;
+            padding-left: 0 !important;
+            margin-bottom: 20px;
+          }
+          .doctors-sidebar-toggle { display: flex !important; }
+          .filter-title { display: none !important; }
+          .filter-box { display: none; }
+          .doctors-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
+        @media (max-width: 540px) {
+          .doctors-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
+  );
+}
+
+// Department Radio Item
+function DeptRadioItem({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <li
+      onClick={onClick}
+      style={{
+        padding: '5px 8px',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        background: selected ? '#f0fbf3' : 'transparent',
+        marginBottom: '2px',
+        listStyle: 'none',
+      }}
+    >
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+        }}
+      >
+        <span
+          style={{
+            width: '16px',
+            height: '16px',
+            borderRadius: '50%',
+            border: selected ? '2px solid #2eb34b' : '2px solid #bbb',
+            background: selected ? '#2eb34b' : 'white',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'all 0.15s',
+          }}
+        >
+          {selected && (
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: 'white',
+                display: 'block',
+              }}
+            />
+          )}
+        </span>
+        <span style={{ fontSize: '13px', color: '#333', lineHeight: '1.3' }}>{label}</span>
+      </span>
+    </li>
+  );
+}
+
+// Doctor Card
+interface DoctorCardProps {
+  doctor: {
+    id: number;
+    name: string;
+    slug: string;
+    specialty: string;
+    image?: string | null;
+    bio?: string | null;
+    gender?: string | null;
+    departmentId?: number | null;
+  };
+  onView: () => void;
+  onBook: () => void;
+}
+
+function DoctorCard({ doctor, onView, onBook }: DoctorCardProps) {
+  const placeholderImg =
+    doctor.gender === 'female'
+      ? '/sgh/female_doc_placeholder_sgh.jpg'
+      : '/sgh/doc_placeholder_sgh.jpg';
+  const photoUrl = doctor.image || placeholderImg;
+
+  return (
+    <li style={{ listStyle: 'none' }}>
+      <div
+        style={{
+          background: 'white',
+          border: '1px solid #eee',
+          transition: 'box-shadow 0.2s',
+        }}
+        onMouseEnter={(e) =>
+          ((e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)')
+        }
+        onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.boxShadow = 'none')}
+      >
+        {/* Photo */}
+        <div
+          onClick={onView}
+          style={{
+            display: 'block',
+            width: '100%',
+            paddingTop: '75%',
+            backgroundImage: `url(${photoUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#e8f0e8',
+            cursor: 'pointer',
+          }}
+          aria-label={doctor.name}
+          role="button"
+          tabIndex={0}
+        />
+
+        {/* Content */}
+        <div style={{ padding: '12px 14px 6px' }}>
+          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: '700', lineHeight: '1.3' }}>
+            <span
+              onClick={onView}
+              style={{
+                color: '#212529',
+                textDecoration: 'none',
+                transition: 'color 0.15s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#2eb34b')}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = '#212529')}
+            >
+              {doctor.name}
+            </span>
+          </h2>
+
+          {doctor.specialty && (
+            <div style={{ marginTop: '4px' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontSize: '12px',
+                  color: '#2eb34b',
+                  fontWeight: '600',
+                }}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: '#2eb34b',
+                    flexShrink: 0,
+                  }}
+                />
+                {doctor.specialty}
+              </span>
+            </div>
+          )}
+
+          {doctor.bio && (
+            <p
+              style={{
+                fontSize: '12.5px',
+                color: '#777',
+                lineHeight: '1.45',
+                marginTop: '8px',
+                marginBottom: 0,
+                overflow: 'hidden',
+                display: '-webkit-box',
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {doctor.bio}
+            </p>
+          )}
+        </div>
+
+        {/* Location */}
+        <div style={{ padding: '6px 14px' }}>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              fontSize: '12px',
+              color: '#777',
+            }}
+          >
+            <MapPin style={{ width: '13px', height: '13px', color: '#2eb34b', flexShrink: 0 }} />
+            صنعاء
+          </span>
+        </div>
+
+        {/* Actions */}
+        <div style={{ padding: '6px 14px 14px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={onView}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '13px',
+              fontWeight: '600',
+              padding: '6px 14px',
+              borderRadius: '4px',
+              border: '1px solid #2eb34b',
+              color: '#2eb34b',
+              textDecoration: 'none',
+              background: 'transparent',
+              transition: 'all 0.15s',
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = '#2eb34b';
+              el.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLButtonElement;
+              el.style.background = 'transparent';
+              el.style.color = '#2eb34b';
+            }}
+          >
+            عرض المزيد ←
+          </button>
+
+          <button
+            type="button"
+            onClick={onBook}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '13px',
+              fontWeight: '600',
+              padding: '6px 14px',
+              borderRadius: '4px',
+              border: 'none',
+              background: '#00a3e0',
+              color: 'white',
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+              fontFamily: 'inherit',
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background = '#0087ba')
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background = '#00a3e0')
+            }
+          >
+            احجز موعداً
+          </button>
+        </div>
+      </div>
+    </li>
   );
 }

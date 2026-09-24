@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 
 interface DepartmentItem {
@@ -9,54 +8,48 @@ interface DepartmentItem {
 }
 
 export default function SghDepartmentsSection() {
+  // Ordered exactly as displayed in SGH Hail reference site (Row 1: Pediatrics, Internal, Surgery | Row 2: ObGyn, Cardiology, Orthopedics | Row 3: Urology)
   const departments: DepartmentItem[] = [
     {
       id: 'pediatrics',
       title: 'طب الأطفال وحديثي الولادة',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-05/%D8%B7%D8%A8%20%D8%A7%D9%84%D8%A3%D8%B7%D9%81%D8%A7%D9%84%20%D9%88%D8%AD%D8%AF%D9%8A%D8%AB%D9%8A%20%D8%A7%D9%84%D9%88%D9%84%D8%A7%D8%AF%D8%A9.jpg?itok=-LsVlbx_',
+      image: '/sgh/departments/pediatrics.jpg',
       href: '/departments',
     },
     {
       id: 'internal',
       title: 'الطب الباطني',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-07/%D9%82%D8%B3%D9%85%20%D8%A7%D9%84%D8%B7%D8%A8%20%D8%A7%D9%84%D8%A8%D8%A7%D8%B7%D9%86%D9%8A.jpg?itok=yDVtEByt',
+      image: '/sgh/departments/internal.jpg',
       href: '/departments',
     },
     {
       id: 'surgery',
       title: 'الجراحة العامة والتخصصية',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-05/%D9%82%D8%B3%D9%85%20%D8%A7%D9%84%D8%AC%D8%B1%D8%A7%D8%AD%D8%A9%20%D8%A7%D9%84%D8%B9%D8%A7%D9%85%D8%A9.jpg?itok=3p8Yh1-v',
+      image: '/sgh/departments/surgery.jpg',
       href: '/departments',
     },
     {
       id: 'obgyn',
       title: 'قسم أمراض النساء والتوليد',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-05/%D9%82%D8%B3%D9%85%20%D8%A3%D9%85%D8%B1%D8%A7%D8%B6%20%D8%A7%D9%84%D9%86%D8%B3%D8%A7%D8%A1%20%D9%88%D8%A7%D9%84%D9%88%D9%84%D8%A7%D8%AF%D8%A9.jpg?itok=ncDmgFdS',
+      image: '/sgh/departments/obgyn.jpg',
       href: '/departments',
     },
     {
       id: 'cardiology',
       title: 'طب القلب وجراحة القلب والصدر',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-05/%D8%B7%D8%A8%20%D8%A7%D9%84%D9%82%D9%84%D8%A8.jpg?itok=x0TAeb-L',
+      image: '/sgh/departments/cardiology.jpg',
       href: '/departments',
     },
     {
       id: 'orthopedics',
       title: 'طب العظام ورعاية الإصابات',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-07/%D9%82%D8%B3%D9%85%20%D8%A7%D9%84%D8%B9%D8%B8%D8%A7%D9%85%20%D9%88%D8%A7%D9%84%D9%85%D9%81%D8%A7%D8%B5%D9%84.jpg?itok=Vgd8ujEC',
+      image: '/sgh/departments/orthopedics.jpg',
       href: '/departments',
     },
     {
       id: 'urology',
       title: 'قسم المسالك البولية',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-04/%D8%A7%D9%84%D9%85%D8%B3%D8%A7%D9%84%D9%83%20%D8%A7%D9%84%D8%A8%D9%88%D9%84%D9%8A%D8%A9.jpg?itok=lx1azW4m',
+      image: '/sgh/departments/urology.jpg',
       href: '/departments',
     },
   ];
@@ -64,67 +57,82 @@ export default function SghDepartmentsSection() {
   return (
     <section
       id="departments"
-      className="pt-16 pb-24 bg-white select-none overflow-hidden"
+      className="section section-departments block-atheme-departments-mosaic my-6 sm:my-8 bg-white select-none overflow-hidden"
       dir="rtl"
     >
-      {/* Header Container with Angled Polygon Shape on Left */}
-      <div className="relative w-full mb-16 min-h-[160px] flex items-center">
-        {/* Angled background banner on the left */}
+      {/* SGH Hail: .inner-section with authentic #f8f8f8 background card, circular gradients, and 3rem padding */}
+      <div className="inner-section relative w-full bg-[#f8f8f8] py-10 sm:py-12 px-4 sm:px-12 rounded-none sm:rounded-2xl overflow-hidden">
+        {/* Exact organic circular gradient shapes from SGH Hail CSS */}
         <div
-          className="absolute inset-y-0 left-0 w-full sm:w-2/3 md:w-1/2 bg-[#f4f6f8] z-0"
+          className="absolute -top-[50%] right-[30%] w-[200%] h-[200%] rounded-full pointer-events-none z-0"
           style={{
-            clipPath: 'polygon(0 0, 85% 0, 100% 100%, 0 100%)',
+            background:
+              'linear-gradient(180deg, rgba(226, 226, 226, 0.6) 0%, rgba(226, 226, 226, 0.2) 40%, transparent 70%)',
           }}
+          aria-hidden="true"
+        />
+        <div
+          className="absolute top-[30%] -right-[50%] w-[200%] h-[200%] rounded-full pointer-events-none z-0"
+          style={{
+            background:
+              'linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.36) 40%, transparent 70%)',
+          }}
+          aria-hidden="true"
         />
 
-        <div className="container mx-auto px-6 lg:px-16 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Title on the Right */}
-          <div className="text-right w-full md:w-auto">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-950 tracking-tight">
-              أقسامنا الطبية
-            </h2>
-          </div>
-
-          {/* Text and Button inside the angled block on the Left */}
-          <div className="w-full md:w-auto max-w-md text-right space-y-3 py-4">
-            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-              لقد جمعنا أفضل الأطباء في الرعاية الصحية لنقدم لك خدمة طبية فائقة الجودة بمستوى عالمي
-            </p>
-            <div>
-              <Link href="/departments">
-                <span className="inline-block px-8 py-2.5 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer">
-                  عرض المزيد
-                </span>
-              </Link>
+        {/* Inner Content Grid: .col-md-10.offset-md-1 (max-w-[1140px] mx-auto) */}
+        <div className="w-full max-w-[1140px] mx-auto relative z-10">
+          {/* Header Section (.section-header with-cta align-top) */}
+          <header className="section-header with-cta align-top flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12">
+            <div className="w-full md:w-auto">
+              <h2 className="text-[28px] sm:text-[32px] font-bold text-[#212529] tracking-tight m-0 leading-tight">
+                أقسامنا الطبية
+              </h2>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3-Column Department Cards Grid */}
-      <div className="container mx-auto px-6 lg:px-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {departments.map((dept) => (
-            <Link key={dept.id} href={dept.href}>
-              <div className="group h-80 rounded-3xl overflow-hidden bg-[#f4f6f8] border border-slate-200/50 shadow-xs hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between p-6">
-                {/* Image Container */}
-                <div className="relative h-48 w-full rounded-2xl overflow-hidden bg-white shadow-xs">
-                  <img
-                    src={dept.image}
-                    alt={dept.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Department Title */}
-                <div className="text-center pt-2">
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#00a3e0] transition-colors leading-snug">
-                    {dept.title}
-                  </h3>
-                </div>
+            <div className="w-full md:max-w-[420px] text-right space-y-3">
+              <p className="text-[15px] sm:text-[16px] text-[#212529] leading-relaxed m-0 font-normal">
+                لقد جمعنا أفضل الأطباء في الرعاية الصحية لنقدم لك خدمة طبية فائقة الجودة بمستوى
+                عالمي
+              </p>
+              <div>
+                <Link href="/departments">
+                  <span className="inline-block bg-[#1ca8e5] hover:bg-[#1896cd] text-white text-[15px] sm:text-[16px] font-normal px-[22.4px] py-[6px] rounded-[30px] transition-all duration-200 cursor-pointer shadow-xs">
+                    عرض المزيد
+                  </span>
+                </Link>
               </div>
-            </Link>
-          ))}
+            </div>
+          </header>
+
+          {/* Department Cards Mosaic Grid (3 Columns, 110% aspect ratio, 30px rounded corners) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {departments.map((dept) => (
+              <div key={dept.id} className="department-item w-full">
+                <Link href={dept.href}>
+                  <div className="node-title block cursor-pointer">
+                    {/* Card with 60% height padding on mobile and 110% on desktop, 10px radius on mobile and 30px on desktop */}
+                    <span
+                      className="relative block w-full pt-[60%] sm:pt-[110%] rounded-[10px] sm:rounded-[30px] overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.19)] transition-transform duration-500 hover:scale-[1.03] bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(${dept.image})`,
+                      }}
+                    >
+                      {/* Title Pill Tab anchored to the RIGHT edge with rounded-l-[20px] on mobile, rounded-l-[30px] on desktop */}
+                      <h3
+                        className="absolute right-0 bottom-[10%] max-w-[90%] z-10 m-0 py-2 px-4 sm:py-3.5 sm:px-8 text-[#333333] text-[15px] sm:text-[20px] font-semibold leading-tight rounded-l-[20px] sm:rounded-l-[30px] rounded-r-none backdrop-blur-xs shadow-xs"
+                        style={{
+                          background:
+                            'linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.42) 100%)',
+                        }}
+                      >
+                        {dept.title}
+                      </h3>
+                    </span>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,88 +1,138 @@
-import { Shield } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
+
+interface Partner {
+  name: string;
+  logo: string;
+}
+
+const PARTNERS: Partner[] = [
+  { name: 'مدنت', logo: '/sgh/insurance/mednet.png' },
+  { name: 'عناية السعودية', logo: '/sgh/insurance/3inaya.png' },
+  { name: 'تكافل الراجحي', logo: '/sgh/insurance/alrajhi.png' },
+  { name: 'سايكو', logo: '/sgh/insurance/saico.png' },
+  { name: 'غلوب ميد', logo: '/sgh/insurance/globemed.png' },
+  { name: 'بوبا العربية', logo: '/sgh/insurance/bupa.png' },
+  { name: 'التعاونية للتأمين', logo: '/sgh/insurance/tawuniya.png' },
+  { name: 'ميدغلف', logo: '/sgh/insurance/medgulf.png' },
+  { name: 'نكست كير', logo: '/sgh/insurance/nextcare.png' },
+  { name: 'ملاذ للتأمين', logo: '/sgh/insurance/malath.png' },
+  { name: 'TCS', logo: '/sgh/insurance/tcs.png' },
+  { name: 'AXA', logo: '/sgh/insurance/axa.png' },
+  { name: 'شركة التأمين الخليجية', logo: '/sgh/insurance/gulfinsurance.png' },
+];
 
 export default function SghInsuranceCarousel() {
-  const partners = [
-    {
-      name: 'بوبا العربية',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/bupa.png?itok=XOio3Jfl',
-    },
-    {
-      name: 'التعاونية للتأمين',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/tawuiniya.png?itok=qsFlrQwS',
-    },
-    {
-      name: 'تكافل الراجحي',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/alrajhi.png?itok=noLff1oe',
-    },
-    {
-      name: 'ميدغلف',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/medgulf.png?itok=L6INJqny',
-    },
-    {
-      name: 'سايكو',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/saico.png?itok=oAap-aTm',
-    },
-    {
-      name: 'نكست كير',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/nextcare.png?itok=IY9fJT_5',
-    },
-    {
-      name: 'غلوب ميد',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/globemed.png?itok=BtlQMNLq',
-    },
-    {
-      name: 'مدنت',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/mednet.png?itok=JdlkVL8u',
-    },
-    {
-      name: 'ملاذ للتأمين',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/malath.png?itok=pFhXq6om',
-    },
-    {
-      name: 'عناية للتأمين',
-      logo: 'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-02/3inaya.png?itok=BWsZDtXW',
-    },
-  ];
+  const [startIndex, setStartIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const itemsPerPage = isMobile ? 1 : 4;
+
+  // Auto-slide every 4 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setStartIndex((prev) => (prev + 1) % PARTNERS.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handlePrev = () => {
+    setStartIndex((prev) => (prev - 1 + PARTNERS.length) % PARTNERS.length);
+  };
+
+  const handleNext = () => {
+    setStartIndex((prev) => (prev + 1) % PARTNERS.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) {
+      return;
+    }
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (diff > 40) {
+      handleNext();
+    } else if (diff < -40) {
+      handlePrev();
+    }
+    setTouchStart(null);
+  };
+
+  // Get current circular items
+  const visiblePartners: Partner[] = [];
+  for (let i = 0; i < itemsPerPage; i++) {
+    visiblePartners.push(PARTNERS[(startIndex + i) % PARTNERS.length]);
+  }
 
   return (
-    <section className="py-20 bg-white select-none overflow-hidden" dir="rtl">
-      <div className="container mx-auto px-6 lg:px-16">
-        <div className="text-center max-w-xl mx-auto mb-12">
-          <h2 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight">
-            شركاء التأمين
-          </h2>
-        </div>
+    <section
+      className="section section-carousel my-6 sm:my-8 bg-white select-none overflow-hidden"
+      dir="rtl"
+    >
+      {/* SGH Hail: .inner-section with authentic #f8f8f8 background card: 1rem (16px) on mobile, 3rem (48px) on desktop */}
+      <div className="inner-section w-full bg-[#f8f8f8] py-4 sm:py-12 px-4 sm:px-12 rounded-none sm:rounded-2xl">
+        {/* Inner Content Grid: .col-md-10.offset-md-1 (max-w-[1140px] mx-auto) */}
+        <div className="max-w-[1140px] mx-auto">
+          <header className="section-header text-center mb-6 sm:mb-10">
+            <h2 className="text-[24px] sm:text-[32px] font-bold text-[#212529] tracking-tight m-0">
+              شركاء التأمين
+            </h2>
+          </header>
 
-        {/* Logos Grid matching reference site */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-          {partners.map((partner, idx) => (
-            <div
-              key={idx}
-              className="h-28 bg-[#f8f9fa] rounded-2xl border border-slate-100/80 shadow-xs hover:shadow-md p-5 flex items-center justify-center transition-all duration-300 hover:scale-105 group"
-            >
-              <img
-                src={partner.logo}
-                alt={partner.name}
-                className="max-h-12 max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-60 group-hover:opacity-100"
-              />
+          {/* Clean Logo Row: 1 logo on mobile, 4 logos on desktop with exact 140px container */}
+          <div
+            className="w-full mx-auto"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-8 items-center justify-items-center">
+              {visiblePartners.map((partner, idx) => (
+                <div
+                  key={`${partner.name}-${idx}`}
+                  className="w-full h-[140px] flex items-center justify-center p-2 sm:p-4 transition-transform duration-300 hover:scale-105"
+                >
+                  <img
+                    src={partner.logo}
+                    alt={partner.name}
+                    className="max-h-[85px] sm:max-h-[95px] max-w-[200px] sm:max-w-[220px] w-auto h-auto object-contain filter drop-shadow-xs"
+                  />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Navigation Arrows matching reference site */}
-        <div className="flex items-center justify-center gap-3 pt-10">
-          <button
-            className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-500 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-            aria-label="السابق"
-          >
-            <span className="text-xs">❯</span>
-          </button>
-          <button
-            className="w-8 h-8 rounded-full border border-slate-300 hover:border-slate-500 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-            aria-label="التالي"
-          >
-            <span className="text-xs">❮</span>
-          </button>
+          {/* Minimal Delicate Chevron Navigation Arrows (< and >) */}
+          <div className="navigator flex items-center justify-center gap-3 pt-6 sm:pt-8">
+            <button
+              onClick={handlePrev}
+              className="na-slider-actions prev text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer active:scale-95"
+              aria-label="السابق"
+            >
+              <ChevronRight className="w-5 h-5 stroke-[2]" />
+            </button>
+            <span className="w-1 h-1 rounded-full bg-slate-300" />
+            <button
+              onClick={handleNext}
+              className="na-slider-actions next text-slate-400 hover:text-slate-700 transition-colors p-1 cursor-pointer active:scale-95"
+              aria-label="التالي"
+            >
+              <ChevronLeft className="w-5 h-5 stroke-[2]" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

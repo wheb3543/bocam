@@ -6,29 +6,28 @@ interface SlideItem {
   image: string;
   isGraphicBanner?: boolean;
   slideLink?: string;
-  title?: string;
+  title?: string | React.ReactNode;
   button?: {
     label: string;
     href: string;
   };
 }
 
-const SLIDE_DURATION = 6500; // 6.5 seconds per slide
+const SLIDE_DURATION = 6500; // 6.5 seconds per slide (matches SGH Hail)
 const RADIUS = 34;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ~213.6
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ~213.63
 
 export default function SghHeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
   const progressStartTimeRef = useRef<number>(Date.now());
-  const elapsedBeforePauseRef = useRef<number>(0);
 
   const slides: SlideItem[] = [
     {
       id: 1,
       image: '/sgh/banner1.jpg',
       isGraphicBanner: true,
+      slideLink: 'https://hail.saudigermanhealth.com/ar',
     },
     {
       id: 2,
@@ -51,7 +50,13 @@ export default function SghHeroSlider() {
     {
       id: 4,
       image: '/sgh/slide4.jpg',
-      title: 'توفير رعاية مبتكرة وشاملة\nتركز على حاجات المرضى',
+      title: (
+        <>
+          توفير رعاية مبتكرة وشاملة
+          <br />
+          تركز على حاجات المرضى
+        </>
+      ),
       button: {
         label: 'جميع الأطباء',
         href: '/doctors',
@@ -71,7 +76,6 @@ export default function SghHeroSlider() {
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index);
     setProgress(0);
-    elapsedBeforePauseRef.current = 0;
     progressStartTimeRef.current = Date.now();
   }, []);
 
@@ -83,7 +87,7 @@ export default function SghHeroSlider() {
     goToSlide((currentSlide - 1 + slides.length) % slides.length);
   }, [currentSlide, goToSlide, slides.length]);
 
-  // Smooth continuous animation without pause-on-hover to match SGH Hail behavior
+  // Continuous timer matching SGH Hail na-main-slider
   useEffect(() => {
     progressStartTimeRef.current = Date.now();
 
@@ -103,166 +107,155 @@ export default function SghHeroSlider() {
   const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
-    <section className="w-full bg-white py-0 overflow-hidden" dir="rtl">
-      {/* عرض وارتفاع حاوية السلايدر بالموقع المرجعي: container بعرض 1350px ونسبة ~93.75% من الشاشة مع ارتفاع ~580px */}
-      <div className="container mx-auto px-0 sm:px-4 max-w-[1350px]">
-        <div className="relative w-full h-[460px] sm:h-[500px] md:h-[540px] lg:h-[580px] overflow-hidden bg-black select-none group">
-          {/* Slides Container */}
-          {slides.map((slide, index) => {
-            const isActive = index === currentSlide;
-            return (
+    <section className="layout slider-layout w-full bg-white py-0 overflow-hidden" dir="rtl">
+      {/* Responsive slider container matching SGH Hail height: 45% ratio on all screen sizes */}
+      <div className="relative w-full h-[195px] sm:h-[310px] md:h-[450px] lg:h-[607px] overflow-hidden bg-black select-none group">
+        {/* Slides List */}
+        {slides.map((slide, index) => {
+          const isActive = index === currentSlide;
+          return (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
+            >
+              {/* Background Image */}
               <div
-                key={slide.id}
-                className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                }`}
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${slide.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
               >
-                {/* Slide Background Image */}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `url(${slide.image})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }}
-                >
-                  {/* تظليل سفلي متدرج خفيف للشرائح النصية كالأصل */}
-                  {slide.title && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent pointer-events-none" />
-                  )}
-                </div>
-
-                {/* Clickable Area for Full Graphic Banners (Slide 1) */}
-                {slide.isGraphicBanner && slide.slideLink && (
-                  <a
-                    href={slide.slideLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute inset-0 z-10 cursor-pointer"
-                    aria-label="رابط الشريحة"
-                  />
-                )}
-
-                {/* زر تحميل التطبيق في الشريحة الثانية (Download Now) بموضعه الدقيق في المساحة المخصصة أسفل الشارات وبجانب QR */}
-                {slide.id === 2 && slide.button && (
-                  <div className="absolute right-[12%] sm:right-[16%] md:right-[20%] lg:right-[23%] top-[72%] sm:top-[70%] md:top-[68%] z-10">
-                    <a
-                      href={slide.button.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center bg-[#00a3e0] hover:bg-[#0092c8] active:bg-[#0081b0] text-white text-xs sm:text-sm md:text-base font-semibold px-6 sm:px-8 py-2 sm:py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer"
-                    >
-                      {slide.button.label}
-                    </a>
-                  </div>
-                )}
-
-                {/* أماكن النصوص والأزرار للشرائح الأخرى (3، 4، 5) - موسط أفقياً في الثلث السفلي مباشرة فوق الكاونتر */}
+                {/* Subtle dark gradient overlay for text readability as in reference */}
                 {slide.title && (
-                  <div className="absolute inset-x-0 bottom-24 sm:bottom-28 md:bottom-30 flex flex-col items-center justify-center text-center px-4 sm:px-8 z-10 pointer-events-none">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] xl:text-[46px] font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] whitespace-nowrap text-center mb-4 sm:mb-5 tracking-wide">
-                      {slide.title}
-                    </h1>
-
-                    {slide.button && (
-                      <div className="pointer-events-auto">
-                        <a
-                          href={slide.button.href}
-                          className="inline-flex items-center justify-center bg-[#00a3e0] hover:bg-[#0092c8] active:bg-[#0081b0] text-white text-base sm:text-lg font-medium px-8 sm:px-10 py-2 sm:py-2.5 rounded-full shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer"
-                        >
-                          {slide.button.label}
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent pointer-events-none" />
                 )}
               </div>
-            );
-          })}
 
-          {/* الأسهم الجانبية التي تظهر عند التمرير بالماوس فوق السلايدر (Hover) في الطرف الأيمن والأيسر */}
-          <button
-            onClick={prevSlide}
-            aria-label="الشريحة السابقة"
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-16 sm:w-12 sm:h-20 flex items-center justify-center text-white/80 hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300 focus:outline-none"
-          >
-            <ChevronLeft className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:-translate-x-1 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]" />
-          </button>
+              {/* Clickable Area for Full Graphic Banner */}
+              {slide.isGraphicBanner && slide.slideLink && (
+                <a
+                  href={slide.slideLink}
+                  className="absolute inset-0 z-10 cursor-pointer"
+                  aria-label="رابط الشريحة"
+                />
+              )}
 
-          <button
-            onClick={nextSlide}
-            aria-label="الشريحة التالية"
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-16 sm:w-12 sm:h-20 flex items-center justify-center text-white/80 hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100 duration-300 focus:outline-none"
-          >
-            <ChevronRight className="w-8 h-8 sm:w-10 sm:h-10 transition-transform group-hover:translate-x-1 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]" />
-          </button>
+              {/* Centered Text and Button Container (.na-slide-text) - Matches reference site mobile 0.9rem */}
+              {(slide.title || slide.button) && (
+                <div className="absolute inset-x-0 bottom-[22px] sm:bottom-[36px] md:bottom-[60px] lg:bottom-[76px] flex flex-col items-center justify-center text-center px-3 z-10">
+                  {slide.title && (
+                    <h1 className="text-[13px] sm:text-[18px] md:text-[28px] lg:text-[36px] font-medium text-white text-center mb-1 sm:mb-2 leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] max-w-[90%]">
+                      {slide.title}
+                    </h1>
+                  )}
 
-          {/* مكان المؤشرات الدائرية والخط الرابط السفلي */}
-          <div
-            className="absolute bottom-3 sm:bottom-5 inset-x-0 z-20 flex items-center justify-center"
-            dir="ltr"
-          >
-            <div className="relative w-full max-w-4xl lg:max-w-5xl px-6 sm:px-12 flex items-center justify-between">
-              {/* الخط الأفقي الرفيع الرابط خلف الدوائر */}
-              <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-[1px] bg-white/40 pointer-events-none z-0" />
-
-              {slides.map((slide, idx) => {
-                const isActive = idx === currentSlide;
-                return (
-                  <button
-                    key={slide.id}
-                    onClick={() => goToSlide(idx)}
-                    aria-label={`انتقال للشريحة ${idx + 1}`}
-                    className="relative z-10 w-[52px] h-[52px] flex items-center justify-center cursor-pointer transition-all duration-300 focus:outline-none group/thumb"
-                  >
-                    {/* حلقة التوقيت التنازلي للشريحة النشطة */}
-                    {isActive ? (
-                      <svg
-                        width="52px"
-                        height="52px"
-                        viewBox="0 0 70 70"
-                        className="absolute inset-0 m-auto pointer-events-none -rotate-90"
+                  {slide.button && (
+                    <div className="mt-0.5 sm:mt-1">
+                      <a
+                        href={slide.button.href}
+                        target={slide.button.href.startsWith('http') ? '_blank' : undefined}
+                        rel={
+                          slide.button.href.startsWith('http') ? 'noopener noreferrer' : undefined
+                        }
+                        className="inline-block bg-[#1ca8e5] hover:bg-[#1896cd] text-white text-[11px] sm:text-[13px] md:text-[16px] font-normal px-2.5 py-0.5 sm:px-4 sm:py-1 md:px-[22.4px] md:py-[6px] rounded-[30px] transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg leading-tight"
                       >
-                        <circle
-                          cx="35"
-                          cy="35"
-                          r={RADIUS}
-                          fill="none"
-                          stroke="rgba(255, 255, 255, 0.35)"
-                          strokeWidth="2.5"
-                        />
-                        <circle
-                          cx="35"
-                          cy="35"
-                          r={RADIUS}
-                          fill="none"
-                          stroke="#FFFFFF"
-                          strokeWidth="3.5"
-                          strokeDasharray={CIRCUMFERENCE}
-                          strokeDashoffset={strokeDashoffset}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    ) : null}
-
-                    {/* الصورة الدائرية المصغرة */}
-                    <div
-                      className={`w-[34px] h-[34px] rounded-full overflow-hidden shadow-[0_2px_6px_rgba(0,0,0,0.6)] transition-all duration-300 ${
-                        isActive
-                          ? 'scale-105 ring-2 ring-white'
-                          : 'opacity-85 group-hover/thumb:opacity-100 group-hover/thumb:scale-110 ring-1 ring-white/70'
-                      }`}
-                      style={{
-                        backgroundImage: `url(${slide.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }}
-                    />
-                  </button>
-                );
-              })}
+                        {slide.button.label}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
+          );
+        })}
+
+        {/* Left Arrow Action (.na-slider-actions.prev) - width: 50px-100px */}
+        <button
+          onClick={prevSlide}
+          aria-label="الشريحة السابقة"
+          className="absolute left-0 top-0 bottom-0 w-[40px] sm:w-[70px] lg:w-[100px] z-20 flex items-center justify-center text-white/70 hover:text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none bg-gradient-to-r from-black/25 to-transparent"
+        >
+          <ChevronLeft className="w-6 h-6 sm:w-9 sm:h-9 lg:w-11 lg:h-11 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] transition-transform hover:-translate-x-1" />
+        </button>
+
+        {/* Right Arrow Action (.na-slider-actions.next) - width: 50px-100px */}
+        <button
+          onClick={nextSlide}
+          aria-label="الشريحة التالية"
+          className="absolute right-0 top-0 bottom-0 w-[40px] sm:w-[70px] lg:w-[100px] z-20 flex items-center justify-center text-white/70 hover:text-white cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 focus:outline-none bg-gradient-to-l from-black/25 to-transparent"
+        >
+          <ChevronRight className="w-6 h-6 sm:w-9 sm:h-9 lg:w-11 lg:h-11 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] transition-transform hover:translate-x-1" />
+        </button>
+
+        {/* Thumbnails Navigation Loader (.na-slides-loader) - Responsive compact design for mobile */}
+        <div
+          className="absolute bottom-[4px] sm:bottom-[6px] inset-x-0 z-20 flex items-center justify-center px-2 sm:px-[50px] lg:px-[67.5px]"
+          dir="ltr"
+        >
+          <div className="relative w-[85%] sm:w-full max-w-[1215px] h-[30px] sm:h-[42px] md:h-[50px] flex items-center justify-between">
+            {/* Horizontal Connecting White Line Passing Behind Thumb Centers */}
+            <div className="absolute left-[12px] sm:left-[18px] md:left-[25px] right-[12px] sm:right-[18px] md:right-[25px] top-1/2 -translate-y-1/2 h-[1px] bg-white/40 pointer-events-none z-0" />
+
+            {slides.map((slide, idx) => {
+              const isActive = idx === currentSlide;
+              return (
+                <button
+                  key={slide.id}
+                  onClick={() => goToSlide(idx)}
+                  aria-label={`الانتقال إلى الشريحة ${idx + 1}`}
+                  className="relative z-10 w-[24px] h-[24px] sm:w-[36px] sm:h-[36px] md:w-[50px] md:h-[50px] flex items-center justify-center cursor-pointer focus:outline-none group/thumb"
+                >
+                  {/* SVG Countdown Ring Indicator on Active Slide */}
+                  {isActive && (
+                    <svg
+                      viewBox="0 0 70 70"
+                      className="absolute inset-0 w-full h-full m-auto pointer-events-none -rotate-90"
+                    >
+                      {/* Static faint background circle */}
+                      <circle
+                        cx="35"
+                        cy="35"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="rgba(255, 255, 255, 0.3)"
+                        strokeWidth="2"
+                      />
+                      {/* Animated progress circle */}
+                      <circle
+                        cx="35"
+                        cy="35"
+                        r={RADIUS}
+                        fill="none"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                        strokeDasharray={CIRCUMFERENCE}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+
+                  {/* Circular Thumbnail Preview Image */}
+                  <div
+                    className={`w-[16px] h-[16px] sm:w-[24px] sm:h-[24px] md:w-[34px] md:h-[34px] rounded-full overflow-hidden transition-all duration-300 ${
+                      isActive
+                        ? 'ring-1.5 sm:ring-2 ring-white scale-100 shadow-[0_0_6px_rgba(0,0,0,0.6)]'
+                        : 'opacity-85 group-hover/thumb:opacity-100 group-hover/thumb:scale-105 ring-1 ring-white/60 shadow-[0_0_4px_rgba(0,0,0,0.42)]'
+                    }`}
+                    style={{
+                      backgroundImage: `url(${slide.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

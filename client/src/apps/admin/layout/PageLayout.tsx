@@ -21,6 +21,7 @@ interface PageLayoutProps {
   showInstallPWA?: boolean;
   showBackToTop?: boolean;
   className?: string;
+  useContainer?: boolean; // استخدام الحاوية الموحدة مع الهوامش الجانبية
 }
 
 export default function PageLayout({
@@ -32,6 +33,7 @@ export default function PageLayout({
   showInstallPWA = true,
   showBackToTop: _showBackToTop = true,
   className = '',
+  useContainer = false,
 }: PageLayoutProps) {
   return (
     <div
@@ -54,7 +56,11 @@ export default function PageLayout({
 
       {/* Main Content */}
       <main id="main-content" className="flex-1">
-        {children}
+        {useContainer ? (
+          <div className="container mx-auto px-[15px] max-w-[1380px]">{children}</div>
+        ) : (
+          children
+        )}
       </main>
 
       {/* Install PWA Button */}

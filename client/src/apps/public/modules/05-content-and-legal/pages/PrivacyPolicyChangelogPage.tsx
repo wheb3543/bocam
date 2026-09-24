@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { CheckCircle2, FileText, History, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, FileText, ShieldCheck } from 'lucide-react';
 import { Link } from 'wouter';
 import PageLayout from '@/components/layout/PageLayout';
 import AnimatedCard from '@/components/AnimatedCard';

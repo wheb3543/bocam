@@ -1,149 +1,193 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, ChevronLeft } from 'lucide-react';
-import { Link } from 'wouter';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
 
-interface OfferItem {
+interface OfferPackage {
   id: string;
   title: string;
   price: number;
-  date: string;
   image: string;
 }
 
+const OFFERS_LIST: OfferPackage[] = [
+  {
+    id: 'o1',
+    title: 'باقة الربو',
+    price: 1250,
+    image: '/sgh/offers/offer-1.png',
+  },
+  {
+    id: 'o2',
+    title: 'باقة الانسداد الشعبي للمدخنين',
+    price: 770,
+    image: '/sgh/offers/offer-2.jpg',
+  },
+  {
+    id: 'o3',
+    title: 'إبرة النيوفوند',
+    price: 1199,
+    image: '/sgh/offers/offer-3.jpg',
+  },
+  {
+    id: 'o4',
+    title: 'جلسة بلازما متطورة',
+    price: 1199,
+    image: '/sgh/offers/offer-4.jpg',
+  },
+];
+
 export default function SghOffersSection() {
   const { openBookingModal } = useBookingModal();
-  const [scrollIndex, setScrollIndex] = useState(0);
+  const [page, setPage] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
-  const offers: OfferItem[] = [
-    {
-      id: 'o1',
-      title: 'باقة الربو',
-      price: 1250,
-      date: '12 شباط',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2023-07/%D9%81%D8%AD%D8%B5%20%D8%A7%D9%84%D8%B1%D8%A8%D9%88.png?itok=HUlGVik8',
-    },
-    {
-      id: 'o2',
-      title: 'باقة الانسداد الشعبي للمدخنين',
-      price: 770,
-      date: '12 شباط',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2021-08/4%20%D9%86%D8%B5%D8%A7%D8%A6%D8%AD%20%D9%84%D9%85%D8%B1%D8%B6%D9%89%20%D8%A3%D9%85%D8%B1%D8%A7%D8%B6%20%D8%A7%D9%84%D8%B1%D8%A6%D8%A9%20%D8%A7%D9%84%D9%85%D8%B2%D9%85%D9%86%D8%A9%20%D9%84%D8%AA%D8%AD%D8%B3%D9%8A%D9%86%20%D9%82%D8%AF%D8%B1%D8%AA%D9%87%D9%85%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%AA%D9%86%D9%81%D8%B3.jpg?itok=BxpmTA_b',
-    },
-    {
-      id: 'o3',
-      title: 'إبرة النيوفوند',
-      price: 1199,
-      date: 'كانون الثاني',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2022-05/%D8%A7%D8%A8%D8%B1%D8%A9%20%D8%A7%D9%84%D9%85%D8%B4%D8%A7%D9%87%D9%8A%D8%B1%20.jpg?itok=lzVUzAO6',
-    },
-    {
-      id: 'o4',
-      title: 'إبرة البروفايلو',
-      price: 1199,
-      date: 'كانون الثاني',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-07/%D8%AC%D9%84%D8%B3%D8%A9%20%D8%A8%D9%84%D8%A7%D8%B2%D9%85%D8%A7.jpg?itok=hF2T3Gb_',
-    },
-    {
-      id: 'o5',
-      title: 'إبره إنوفيال',
-      price: 1199,
-      date: 'كانون الثاني',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2024-01/%D8%AC%D9%84%D8%B3%D8%A9%20%D8%A8%D9%84%D8%A7%D8%B2%D9%85%D8%A7.jpg?itok=tmTYQMZ8',
-    },
-    {
-      id: 'o6',
-      title: 'فحص حصوات',
-      price: 499,
-      date: 'عرض سارٍ',
-      image:
-        'https://hail.saudigermanhealth.com/sites/default/files/styles/large/public/2022-02/shutterstock_1859648578.jpg?itok=MQ9j_Mp8',
-    },
-  ];
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const itemsPerPage = isMobile ? 1 : 2;
+  const totalPages = Math.ceil(OFFERS_LIST.length / itemsPerPage);
+
+  const handlePrev = () => {
+    setPage((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
+  const handleNext = () => {
+    setPage((prev) => (prev + 1) % totalPages);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) {
+      return;
+    }
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (diff > 40) {
+      handleNext();
+    } else if (diff < -40) {
+      handlePrev();
+    }
+    setTouchStart(null);
+  };
+
+  const safePage = page % totalPages;
+  const visibleOffers = OFFERS_LIST.slice(
+    safePage * itemsPerPage,
+    safePage * itemsPerPage + itemsPerPage
+  );
 
   return (
-    <section id="offers" className="py-16 bg-white select-none" dir="rtl">
-      {/* Full-width Cyan Blue Banner Exactly Like Reference */}
-      <div className="w-full bg-[#00a3e0] py-8 px-6 lg:px-16 text-white mb-12">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-1 text-right">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
-              احصل على أفضل العروض اليوم!
-            </h2>
-            <p className="text-xs sm:text-sm text-white/90 italic">
-              لقد قمنا بجمع قائمة بالعروض المذهلة عبر الإنترنت لتحويل حياتك الصحية إلى الأفضل
-            </p>
-          </div>
+    <div id="offers" className="select-none" dir="rtl">
+      {/* 1. Full-Width Cyan CTA Banner (section-cta) */}
+      <section className="section section-cta relative overflow-hidden bg-[#00a3e0] py-6 px-4 lg:px-8 text-white shadow-sm">
+        {/* Subtle decorative geometric overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-25"
+          style={{
+            backgroundImage:
+              'linear-gradient(115deg, rgba(255, 255, 255, 0.25) 0%, transparent 45%, rgba(0, 0, 0, 0.1) 100%)',
+          }}
+        />
 
-          <div>
-            <Link href="/offers">
-              <span className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-[#00a3e0] hover:bg-slate-50 font-bold text-xs sm:text-sm transition-all shadow-sm cursor-pointer whitespace-nowrap">
-                <span>جميع العروض</span>
-                <ArrowLeft className="w-3.5 h-3.5" />
-              </span>
-            </Link>
+        <div className="container max-w-[1380px] mx-auto px-[15px] relative z-10">
+          <div className="max-w-[1140px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <header className="section-header with-cta text-right">
+              <h2 className="text-[20px] sm:text-[24px] lg:text-[27px] font-bold text-white leading-snug">
+                احصل على أفضل العروض اليوم!
+                <i className="block text-[13px] sm:text-[14.5px] font-normal not-italic text-white/95 mt-1 font-light">
+                  لقد قمنا بجمع قائمة بالعروض المذهلة عبر الإنترنت لتحويل حياتك الصحية إلى الأفضل.
+                </i>
+              </h2>
+            </header>
+
+            <a
+              href="/offers"
+              className="btn btn-primary btn-white bg-white hover:bg-slate-50 text-[#00a3e0] text-[15px] sm:text-[16px] font-bold px-7 py-2.5 rounded-full transition-all shadow-sm flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0 active:scale-95"
+            >
+              <span>جميع العروض</span>
+              <ArrowLeft className="w-4 h-4" />
+            </a>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Offers Carousel / Grid */}
-      <div className="container mx-auto px-4 lg:px-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-          {offers.map((offer) => (
-            <div
-              key={offer.id}
-              onClick={() => openBookingModal()}
-              className="bg-[#f8f9fa] rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between cursor-pointer group p-3"
-            >
-              {/* Image & Price */}
-              <div className="relative h-44 rounded-xl overflow-hidden bg-slate-200">
+      {/* 2. Offers Packages Carousel (section-offers) */}
+      <section className="section section-offers py-8 sm:py-10 bg-white">
+        {/* Standardized Unified Container Margins */}
+        <div className="inner-section max-w-[1140px] mx-auto px-4 sm:px-6">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {visibleOffers.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => openBookingModal()}
+                className="relative w-full pt-[70%] overflow-hidden group cursor-pointer shadow-md rounded-xs border border-slate-100"
+              >
+                {/* Background Image */}
                 <img
-                  src={offer.image}
-                  alt={offer.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  src={item.image}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#00a3e0]/80 via-transparent to-transparent" />
 
-                {/* Price Display */}
-                <div className="absolute bottom-2.5 right-2.5 text-white">
-                  <span className="text-[10px] font-bold block opacity-90">SAR</span>
-                  <span className="text-2xl font-black leading-none">{offer.price}</span>
+                {/* Curved Price Badge in Top-Left Corner (in LTR) or Top-Right (in RTL) */}
+                <div className="price-badge absolute top-0 left-0 bg-[#00a3e0] text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-br-[32px] sm:rounded-br-[36px] shadow-sm flex items-baseline gap-1.5 z-20">
+                  <span className="text-[10px] sm:text-[12px] font-bold tracking-wider opacity-95">
+                    SAR
+                  </span>
+                  <span className="text-[20px] sm:text-[28px] font-bold leading-none">
+                    {item.price}
+                  </span>
                 </div>
-              </div>
 
-              {/* Title */}
-              <div className="pt-3 pb-1 text-center">
-                <h3 className="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-[#00a3e0] transition-colors line-clamp-2">
-                  {offer.title}
+                {/* Deep Blue Bottom Gradient for title readability */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-3/5 pointer-events-none z-10"
+                  style={{
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #0d4e9c 100%)',
+                  }}
+                />
+
+                {/* Title in Bottom-Right Corner: font-size 1rem (16px) on mobile, 24-28px on desktop */}
+                <h3 className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 z-20 text-[16px] sm:text-[24px] lg:text-[26px] font-bold text-white drop-shadow-md leading-tight text-right max-w-[85%] sm:max-w-[70%] m-0">
+                  {item.title}
                 </h3>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* Navigation Arrows */}
-        <div className="flex items-center justify-center gap-3 pt-10">
-          <button
-            onClick={() => setScrollIndex((p) => Math.max(0, p - 1))}
-            className="w-8 h-8 rounded-full bg-[#00a3e0] text-white flex items-center justify-center hover:bg-[#008fc5] transition-colors cursor-pointer"
-            aria-label="السابق"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setScrollIndex((p) => p + 1)}
-            className="w-8 h-8 rounded-full bg-[#00a3e0] text-white flex items-center justify-center hover:bg-[#008fc5] transition-colors cursor-pointer"
-            aria-label="التالي"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+          {/* SGH Carousel Pagination Navigation Controls */}
+          <div className="navigator flex items-center justify-center gap-3 pt-8 sm:pt-10">
+            <button
+              onClick={handlePrev}
+              className="w-10 h-10 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white flex items-center justify-center transition-colors shadow-sm cursor-pointer active:scale-95"
+              aria-label="السابق"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="w-10 h-10 rounded-full bg-[#00a3e0] hover:bg-[#008fc5] text-white flex items-center justify-center transition-colors shadow-sm cursor-pointer active:scale-95"
+              aria-label="التالي"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
