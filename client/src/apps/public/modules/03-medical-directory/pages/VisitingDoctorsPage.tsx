@@ -5,7 +5,7 @@
  */
 import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
-import { Search, Stethoscope, Calendar, Award, Loader2, Users, Phone } from 'lucide-react';
+import { Search, Stethoscope, Calendar, Award, Loader2, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,7 +158,6 @@ function VisitingDoctorsContent() {
   const text = (key: string, fallbackValue: string) =>
     pageContent?.textContents.find((item) => item.key === key)?.content || fallbackValue;
   const title = text(`visitingDoctors.title.${language}`, fallback.title);
-  const description = text(`visitingDoctors.description.${language}`, fallback.description);
   const contactLabel = text(`visitingDoctors.contact.label.${language}`, fallback.contactLabel);
   const phone = text(`visitingDoctors.contact.phone.${language}`, fallback.phone);
   const searchPlaceholder = text(`visitingDoctors.search.placeholder.${language}`, fallback.search);

@@ -16,7 +16,6 @@ import {
   ArrowRight,
   Phone,
   Mail,
-  Calendar,
   CheckCircle2,
   Loader2,
   Tag,
@@ -61,7 +60,6 @@ export default function OfferDetailPage() {
 function OfferDetailContent({ slug }: { slug: string }) {
   const { getCallLink, validateYemeniPhone, processPhoneInput } = usePhoneFormat();
   const { getSavedPatientInfo, savePatientInfo } = usePatientStorage();
-  const { formatDate } = useFormatDate();
   const [, setLocation] = useLocation();
   const [phoneError, setPhoneError] = useState<string>('');
 
@@ -362,9 +360,6 @@ function OfferDetailContent({ slug }: { slug: string }) {
   const breadcrumbHome = breadcrumbHomeData?.data?.[0]?.content || 'الرئيسية';
   const breadcrumbOffers = breadcrumbOffersData?.data?.[0]?.content || 'العروض';
   const heroBadge = heroBadgeData?.data?.[0]?.content || 'عرض خاص محدود';
-  const heroBookNow = heroBookNowData?.data?.[0]?.content || 'احجز الآن';
-  const heroDuration = heroDurationData?.data?.[0]?.content || 'مدة العرض';
-  const heroUntil = heroUntilData?.data?.[0]?.content || 'حتى';
   const heroRemaining = heroRemainingData?.data?.[0]?.content || 'متبقي';
   const heroDay = heroDayData?.data?.[0]?.content || 'يوم';
   const heroDays = heroDaysData?.data?.[0]?.content || 'أيام';

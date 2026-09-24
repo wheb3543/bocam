@@ -127,9 +127,6 @@ function OffersListContent() {
 
   // Extract content from data
   const heroTitle = heroTitleData?.data?.[0]?.content || 'عروضنا الطبية المميزة';
-  const heroDescription =
-    heroDescriptionData?.data?.[0]?.content ||
-    'استفد من عروضنا الخاصة على مختلف الخدمات الطبية بأسعار تنافسية';
   const searchPlaceholder = searchPlaceholderData?.data?.[0]?.content || 'ابحث عن عرض...';
   const activeTabLabel = activeTabLabelData?.data?.[0]?.content || 'العروض الجارية';
   const expiredTabLabel = expiredTabLabelData?.data?.[0]?.content || 'المنتهية';

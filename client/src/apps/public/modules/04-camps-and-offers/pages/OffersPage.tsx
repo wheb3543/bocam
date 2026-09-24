@@ -180,10 +180,6 @@ function OffersPageContent() {
 
   // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
   const title = offersTitle?.data?.[0]?.content || 'العروض الطبية';
-  const description =
-    offersDescription?.data?.[0]?.content ||
-    'استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة';
-  const badgeText = offersBadge?.data?.[0]?.content || 'عروض خاصة';
   const emptyTitle = emptyTitleData?.data?.[0]?.content || 'لا توجد عروض متاحة حالياً';
   const cardSelected = cardSelectedData?.data?.[0]?.content || 'تم الاختيار';
   const cardSelect = cardSelectData?.data?.[0]?.content || 'اختر هذا العرض';

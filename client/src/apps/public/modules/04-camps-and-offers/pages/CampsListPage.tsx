@@ -174,10 +174,6 @@ function CampsListContent() {
 
   // استخدام المحتوى من قاعدة البيانات أو القيم الافتراضية
   const title = campsTitle?.data?.[0]?.content || 'المخيمات الطبية الخيرية';
-  const description =
-    campsDescription?.data?.[0]?.content ||
-    'مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين';
-  const badgeText = campsBadge?.data?.[0]?.content || 'مخيمات خيرية';
   const aboutTitle = campsAboutTitle?.data?.[0]?.content || 'عن المخيمات الطبية الخيرية';
   const aboutDescription =
     campsAboutDescription?.data?.[0]?.content ||
