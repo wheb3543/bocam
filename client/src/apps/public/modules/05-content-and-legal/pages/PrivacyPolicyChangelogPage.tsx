@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { CheckCircle2, FileText, History, ShieldCheck } from 'lucide-react';
 import { Link } from 'wouter';
 import PageLayout from '@/components/layout/PageLayout';
-import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
 import ScrollReveal from '@/components/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { COMPANY_ARABIC_NAME } from '@/const';
+import { PublicPageHeader, PageProgress, FloatingButtons } from '@/apps/public/shared/components';
 
 type PublicPageTextContent = {
   key: string;
@@ -56,20 +56,17 @@ export default function PrivacyPolicyChangelogPage() {
         `اطلع على الإصدارات والتحديثات المنشورة لسياسة خصوصية ${COMPANY_ARABIC_NAME}.`
       )}
       keywords={t('meta.keywords', 'سجل الخصوصية, تحديثات السياسة, حماية البيانات')}
+      useContainer={true}
     >
+      <PageProgress />
+      <FloatingButtons showBookingButton={false} />
       <main dir={copy.language === 'ar' ? 'rtl' : 'ltr'}>
-        <HeroSection
+        <PublicPageHeader
           title={t('title', 'سجل تغييرات سياسة الخصوصية')}
-          subtitle={t('current.badge', 'الإصدار الساري')}
-          description={t(
-            'hero.description',
-            'نوضح هنا الإصدارات المنشورة والتحديثات الجوهرية على سياسة الخصوصية حتى تتمكن من مراجعة ما تغيّر بوضوح.'
-          )}
-          badge={{ text: t('current.version', 'الإصدار 2026-03-01'), icon: History }}
-          backgroundGradient="from-green-800 to-green-600"
+          backgroundImage="/sgh/doctors-banner.png"
         />
 
-        <section className="container mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+        <section className="max-w-4xl py-10 sm:py-14">
           <ScrollReveal>
             <AnimatedCard
               className="border border-gray-100 bg-white p-6 shadow-sm sm:p-8"

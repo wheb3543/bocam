@@ -5,25 +5,85 @@
  */
 import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
 import { Search, Stethoscope, Calendar, Award, Loader2, Users, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import PageLayout from '@/components/layout/PageLayout';
 
 import { trpc } from '@/lib/api/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { COMPANY_PHONE } from '@/const';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 export default function VisitingDoctors() {
+  const { language } = useLanguage();
+  const pageContentQuery = usePublicPageContent('visiting-doctors', language) as {
+    data?: { textContents: PublicPageTextContent[] };
+  };
+  const pageContent = pageContentQuery.data;
+
+  const fallback =
+    language === 'en'
+      ? {
+          title: 'Visiting Doctors',
+          description: 'Specialized consultants from various medical fields at your service',
+          contactLabel: 'For bookings and inquiries:',
+          phone: COMPANY_PHONE || 'رقم الاتصال غير متوفر',
+          search: 'Search for a doctor or specialty...',
+          allSpecialties: 'All specialties',
+          resultsSuffix: 'visiting doctors available',
+          emptySearchTitle: 'No search results found',
+          emptyNoneTitle: 'No visiting doctors are currently available',
+          emptySearchDescription: 'Try different search terms or select another specialty',
+          emptyNoneDescription: 'Visiting doctors will be added soon',
+          allDoctors: 'View all doctors',
+          badge: 'Visiting doctor',
+          feeSuffix: 'YER',
+          booking: 'Book an appointment',
+        }
+      : {
+          title: 'برنامج الأطباء الزائرين',
+          description: 'استشاريون متخصصون من مختلف التخصصات الطبية لخدمتكم',
+          contactLabel: 'للحجز والاستفسار:',
+          phone: COMPANY_PHONE || 'رقم الاتصال غير متوفر',
+          search: 'ابحث عن طبيب أو تخصص...',
+          allSpecialties: 'جميع التخصصات',
+          resultsSuffix: 'أطباء زائرين متاحين',
+          emptySearchTitle: 'لم يتم العثور على نتائج بحث',
+          emptyNoneTitle: 'لا يوجد أطباء زائرين حالياً',
+          emptySearchDescription: 'جرب مصطلحات بحث مختلفة أو اختر تخصصاً آخر',
+          emptyNoneDescription: 'سيتم إضافة الأطباء الزائرين قريباً',
+          allDoctors: 'عرض جميع الأطباء',
+          badge: 'طبيب زائر',
+          feeSuffix: 'ريال',
+          booking: 'احجز موعداً',
+        };
+
+  const t = (key: string, fallback: string) => {
+    if (!pageContent?.textContents) {
+      return fallback;
+    }
+    const content = pageContent.textContents.find(
+      (item) => item.key === `visiting.doctors.${key}.${language}`
+    );
+    return content?.content || fallback;
+  };
+
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title={t('title', fallback.title)}
+      description={t('description', fallback.description)}
+      keywords="أطباء زائرين, استشاريين, حجز موعد, تخصصات طبية"
+      useContainer={true}
+    >
+      <PageProgress />
+      <FloatingButtons />
       <VisitingDoctorsContent />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -94,6 +154,7 @@ function VisitingDoctorsContent() {
           feeSuffix: 'ريال',
           booking: 'احجز موعد',
         };
+
   const text = (key: string, fallbackValue: string) =>
     pageContent?.textContents.find((item) => item.key === key)?.content || fallbackValue;
   const title = text(`visitingDoctors.title.${language}`, fallback.title);
@@ -170,68 +231,54 @@ function VisitingDoctorsContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      {/* Hero Section */}
-      <section className="py-8 sm:py-10 md:py-12 bg-gradient-to-r from-green-600 to-blue-600 text-white">
-        <div className="container mx-auto px-4 sm:px-5 md:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="flex justify-center mb-3 sm:mb-4">
-              <div className="bg-white/20 p-3 sm:p-4 rounded-full">
-                <Users className="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12" />
-              </div>
-            </div>
-            <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 text-center">
-              {title}
-            </h1>
-            <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-green-100 px-2">
-              {description}
-            </p>
-            <div className="mt-4 sm:mt-6 flex items-center justify-center gap-1.5 sm:gap-2 text-green-100">
-              <Phone className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="text-sm sm:text-lg">{contactLabel}</span>
-              <a
-                href={`tel:${phoneHref}`}
-                className="text-lg sm:text-2xl font-bold hover:text-white transition-colors"
-              >
-                {phone}
-              </a>
-            </div>
-          </div>
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader title={title} backgroundImage="/sgh/doctors-banner.png" />
+
+      {/* Contact Info */}
+      <div className="max-w-5xl mx-auto px-4 -mt-4">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-sm p-4 sm:p-6 flex items-center justify-center gap-2 sm:gap-3">
+          <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
+          <span className="text-sm sm:text-base text-muted-foreground">{contactLabel}</span>
+          <a
+            href={`tel:${phoneHref}`}
+            className="text-base sm:text-xl font-bold text-foreground hover:text-green-600 transition-colors"
+          >
+            {phone}
+          </a>
         </div>
-      </section>
+      </div>
 
       {/* Search and Filter Section */}
       <section className="py-4 sm:py-6 md:py-8 bg-white dark:bg-card border-b">
-        <div className="container mx-auto px-4 sm:px-5 md:px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
-                <Input
-                  type="text"
-                  placeholder={searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-9 sm:pr-10 h-9 sm:h-10 md:h-12 text-xs sm:text-sm md:text-lg"
-                />
-              </div>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+              <Input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pr-9 sm:pr-10 h-9 sm:h-10 md:h-12 text-xs sm:text-sm md:text-lg"
+              />
+            </div>
 
-              {/* Specialty Filter */}
-              <div className="relative">
-                <Stethoscope className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
-                <select
-                  value={selectedSpecialty}
-                  onChange={(e) => setSelectedSpecialty(e.target.value)}
-                  className="w-full h-9 sm:h-10 md:h-12 pr-9 sm:pr-10 pl-3 sm:pl-4 text-xs sm:text-sm md:text-lg border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-card"
-                >
-                  <option value="all">{allSpecialties}</option>
-                  {specialties.map((specialty: string) => (
-                    <option key={specialty} value={specialty}>
-                      {specialty}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            {/* Specialty Filter */}
+            <div className="relative">
+              <Stethoscope className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => setSelectedSpecialty(e.target.value)}
+                className="w-full h-9 sm:h-10 md:h-12 pr-9 sm:pr-10 pl-3 sm:pl-4 text-xs sm:text-sm md:text-lg border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-card"
+              >
+                <option value="all">{allSpecialties}</option>
+                {specialties.map((specialty: string) => (
+                  <option key={specialty} value={specialty}>
+                    {specialty}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Results Count */}
@@ -244,7 +291,7 @@ function VisitingDoctorsContent() {
 
       {/* Doctors Grid */}
       <section className="py-6 sm:py-8 md:py-12 flex-1">
-        <div className="container mx-auto px-4 sm:px-5 md:px-6">
+        <div className="max-w-7xl mx-auto px-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-12 sm:py-20">
               <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />

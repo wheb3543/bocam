@@ -45,6 +45,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { trpc } from '@/lib/api/trpc';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
 import { COMPANY_ARABIC_NAME } from '@/const';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 // Medical icon mapping for dynamic icon resolution
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -129,79 +130,64 @@ export default function DepartmentsPage() {
       title={`الأقسام والعيادات الطبية - ${COMPANY_ARABIC_NAME}`}
       description={`استكشف كافة العيادات والأقسام الطبية التخصصية في ${COMPANY_ARABIC_NAME}. كوادر طبية واستشارية متخصصة ومجهزة بأحدث التقنيات.`}
       keywords="أقسام طبية, عيادات تخصصية, أطباء, حجز موعد, استشارات طبية"
+      useContainer={true}
     >
+      <PageProgress />
+      <FloatingButtons />
+
       <div className="space-y-8 pb-16">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-emerald-800 via-teal-800 to-cyan-900 text-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
-          {/* Subtle Ambient Background Highlights */}
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_20%,#fff_0,transparent_50%),radial-gradient(circle_at_80%_80%,#34d399_0,transparent_50%)] pointer-events-none" />
+        {/* Hero Section - Using shared component */}
+        <PublicPageHeader
+          title="الأقسام والعيادات الطبية"
+          backgroundImage="/sgh/doctors-banner.png"
+        />
 
-          <div className="container mx-auto max-w-5xl relative z-10 text-center space-y-6">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-emerald-200 text-xs sm:text-sm font-medium shadow-inner">
-              <Layers className="w-4 h-4 text-emerald-300" />
-              <span>الرعاية التخصصية الشاملة</span>
-            </div>
-
-            {/* Title & Slogan */}
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm">
-                الأقسام والعيادات الطبية
-              </h1>
-              <p className="text-sm sm:text-base md:text-lg text-emerald-100/90 max-w-2xl mx-auto leading-relaxed">
-                منظومة متكاملة من العيادات التخصصية بإشراف نخبة من الأطباء والاستشاريين لتقديم أرقى
-                مستويات الرعاية الصحية.
-              </p>
-            </div>
-
-            {/* Live Search Bar */}
-            <div className="max-w-xl mx-auto pt-2">
-              <div className="relative flex items-center shadow-lg rounded-2xl bg-white dark:bg-gray-900 p-1.5 ring-1 ring-black/5 dark:ring-white/10">
-                <Search className="w-5 h-5 text-muted-foreground mr-3 ml-2 flex-shrink-0" />
-                <Input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="ابحث عن قسم، عيادة، أو خدمة طبية..."
-                  className="border-0 shadow-none focus-visible:ring-0 text-sm sm:text-base text-foreground placeholder:text-muted-foreground bg-transparent h-11"
-                  dir="rtl"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="p-2 text-muted-foreground hover:text-foreground rounded-xl transition-colors ml-1"
-                    title="مسح البحث"
-                    aria-label="مسح البحث"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Live Count Indicator */}
-              {!isLoading && !isError && departments && (
-                <p className="text-xs text-emerald-200/80 mt-3 font-medium">
-                  {searchQuery ? (
-                    <>
-                      تم العثور على{' '}
-                      <span className="font-bold text-white">{filteredDepartments.length}</span> قسم
-                      مطابق
-                    </>
-                  ) : (
-                    <>
-                      إجمالي الأقسام النشطة:{' '}
-                      <span className="font-bold text-white">{departments.length}</span> عيادة وقسم
-                    </>
-                  )}
-                </p>
-              )}
-            </div>
+        {/* Live Search Bar */}
+        <div className="max-w-5xl mx-auto px-4 -mt-4">
+          <div className="relative flex items-center shadow-lg rounded-2xl bg-white dark:bg-gray-900 p-1.5 ring-1 ring-black/5 dark:ring-white/10">
+            <Search className="w-5 h-5 text-muted-foreground mr-3 ml-2 flex-shrink-0" />
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحث عن قسم، عيادة، أو خدمة طبية..."
+              className="border-0 shadow-none focus-visible:ring-0 text-sm sm:text-base text-foreground placeholder:text-muted-foreground bg-transparent h-11"
+              dir="rtl"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="p-2 text-muted-foreground hover:text-foreground rounded-xl transition-colors ml-1"
+                title="مسح البحث"
+                aria-label="مسح البحث"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
-        </section>
+
+          {/* Live Count Indicator */}
+          {!isLoading && !isError && departments && (
+            <p className="text-xs text-muted-foreground mt-3 font-medium">
+              {searchQuery ? (
+                <>
+                  تم العثور على{' '}
+                  <span className="font-bold text-foreground">{filteredDepartments.length}</span>{' '}
+                  قسم مطابق
+                </>
+              ) : (
+                <>
+                  إجمالي الأقسام النشطة:{' '}
+                  <span className="font-bold text-foreground">{departments.length}</span> عيادة وقسم
+                </>
+              )}
+            </p>
+          )}
+        </div>
 
         {/* Content Container */}
-        <section className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="max-w-7xl">
           {/* Loading Skeletons */}
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

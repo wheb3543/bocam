@@ -17,14 +17,13 @@ import { toast } from 'sonner';
 import { Loader2, Gift, Calendar, Phone, Mail, User, CheckCircle } from 'lucide-react';
 import { getRegistrationSource } from '@/lib/tracking/tracking';
 import PageLayout from '@/components/layout/PageLayout';
-import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
 import SectionDivider from '@/components/SectionDivider';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
 import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PublicPageHeader, PageProgress, FloatingButtons } from '@/apps/public/shared/components';
 
 interface OfferFormData {
   fullName: string;
@@ -41,7 +40,10 @@ export default function OffersPage() {
       description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
       keywords="عروض طبية, خصومات, حجز عرض"
       showInstallPWA={false}
+      useContainer={true}
     >
+      <PageProgress />
+      <FloatingButtons />
       <OffersPageContent />
     </PageLayout>
   );
@@ -262,7 +264,7 @@ function OffersPageContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white">
+      <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
@@ -270,7 +272,7 @@ function OffersPageContent() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-white">
+      <div className="flex items-center justify-center py-20">
         <Card className="max-w-md mx-4">
           <CardContent className="pt-6 text-center">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
@@ -286,74 +288,65 @@ function OffersPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <ReadingProgressBar color="blue" />
-
-      {/* Hero Section */}
-      <HeroSection
-        title={title}
-        description={description}
-        badge={{ text: badgeText, icon: Gift }}
-        backgroundGradient="from-blue-600 via-blue-700 to-green-600"
-      />
+    <>
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader title={title} backgroundImage="/sgh/doctors-banner.png" />
 
       {/* Offers Grid */}
       <ScrollReveal delay={0.1}>
-        <section className="py-6 sm:py-8">
-          <div className="container mx-auto px-5 sm:px-6">
-            {offers && offers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {offers.map((offer, index) => (
-                  <AnimatedCard
-                    key={offer.id}
-                    className={`cursor-pointer transition-all hover:shadow-lg ${
-                      selectedOffer === offer.id ? 'ring-2 ring-blue-500' : ''
-                    }`}
-                    delay={index * 0.1}
-                    onClick={() => setSelectedOffer(offer.id)}
-                  >
-                    {offer.imageUrl && (
-                      <div className="relative h-40 sm:h-48 overflow-hidden rounded-t-lg">
-                        <img
-                          src={offer.imageUrl}
-                          alt={offer.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
+        <section className="py-6 sm:py-8 bg-gradient-to-b from-blue-50 to-white">
+          {offers && offers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {offers.map((offer, index) => (
+                <AnimatedCard
+                  key={offer.id}
+                  className={`cursor-pointer transition-all hover:shadow-lg ${
+                    selectedOffer === offer.id ? 'ring-2 ring-blue-500' : ''
+                  }`}
+                  delay={index * 0.1}
+                  onClick={() => setSelectedOffer(offer.id)}
+                >
+                  {offer.imageUrl && (
+                    <div className="relative h-40 sm:h-48 overflow-hidden rounded-t-lg">
+                      <img
+                        src={offer.imageUrl}
+                        alt={offer.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle className="text-base sm:text-xl text-blue-900">
+                      {offer.title}
+                    </CardTitle>
+                    {offer.endDate && (
+                      <CardDescription className="flex items-center gap-1 text-orange-600">
+                        <Calendar className="h-4 w-4" />
+                        {validUntil} {formatDate(offer.endDate)}
+                      </CardDescription>
                     )}
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-xl text-blue-900">
-                        {offer.title}
-                      </CardTitle>
-                      {offer.endDate && (
-                        <CardDescription className="flex items-center gap-1 text-orange-600">
-                          <Calendar className="h-4 w-4" />
-                          {validUntil} {formatDate(offer.endDate)}
-                        </CardDescription>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">{offer.description}</p>
-                      <Button
-                        className="w-full mt-4"
-                        variant={selectedOffer === offer.id ? 'default' : 'outline'}
-                      >
-                        {selectedOffer === offer.id ? cardSelected : cardSelect}
-                      </Button>
-                    </CardContent>
-                  </AnimatedCard>
-                ))}
-              </div>
-            ) : (
-              <AnimatedCard className="max-w-md mx-auto" delay={0}>
-                <CardContent className="pt-6 text-center">
-                  <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">{emptyTitle}</p>
-                </CardContent>
-              </AnimatedCard>
-            )}
-          </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{offer.description}</p>
+                    <Button
+                      className="w-full mt-4"
+                      variant={selectedOffer === offer.id ? 'default' : 'outline'}
+                    >
+                      {selectedOffer === offer.id ? cardSelected : cardSelect}
+                    </Button>
+                  </CardContent>
+                </AnimatedCard>
+              ))}
+            </div>
+          ) : (
+            <AnimatedCard delay={0}>
+              <CardContent className="pt-6 text-center">
+                <Gift className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">{emptyTitle}</p>
+              </CardContent>
+            </AnimatedCard>
+          )}
         </section>
       </ScrollReveal>
 
@@ -363,106 +356,104 @@ function OffersPageContent() {
       {selectedOffer && (
         <ScrollReveal delay={0.2}>
           <section className="py-12 bg-white dark:bg-card">
-            <div className="container mx-auto px-5 sm:px-6">
-              <AnimatedCard className="max-w-lg mx-auto" delay={0.2}>
-                <CardHeader className="text-center">
-                  <CardTitle className="text-xl sm:text-2xl text-blue-900">{formTitle}</CardTitle>
-                  <CardDescription>{formDescription}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="fullName" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {formFullname} *
-                      </Label>
-                      <Input
-                        id="fullName"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                        placeholder={formFullnamePlaceholder}
-                        required
-                        dir="rtl"
-                      />
-                    </div>
+            <AnimatedCard delay={0.2}>
+              <CardHeader className="text-center">
+                <CardTitle className="text-xl sm:text-2xl text-blue-900">{formTitle}</CardTitle>
+                <CardDescription>{formDescription}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName" className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {formFullname} *
+                    </Label>
+                    <Input
+                      id="fullName"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                      placeholder={formFullnamePlaceholder}
+                      required
+                      dir="rtl"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="flex items-center gap-2">
-                        <Phone className="h-4 w-4" />
-                        {formPhone} *
-                      </Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => {
-                          const processed = processPhoneInput(e.target.value);
-                          setFormData({ ...formData, phone: processed });
-                          if (phoneError) {
-                            const v = validateYemeniPhone(processed);
-                            setPhoneError(v.valid ? '' : v.message || '');
-                          }
-                        }}
-                        onBlur={() => {
-                          if (formData.phone) {
-                            const v = validateYemeniPhone(formData.phone);
-                            setPhoneError(v.valid ? '' : v.message || '');
-                          }
-                        }}
-                        placeholder={formPhonePlaceholder}
-                        required
-                        dir="ltr"
-                        inputMode="numeric"
-                        className={phoneError ? 'border-red-500 focus-visible:ring-red-500' : ''}
-                      />
-                      {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      {formPhone} *
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const processed = processPhoneInput(e.target.value);
+                        setFormData({ ...formData, phone: processed });
+                        if (phoneError) {
+                          const v = validateYemeniPhone(processed);
+                          setPhoneError(v.valid ? '' : v.message || '');
+                        }
+                      }}
+                      onBlur={() => {
+                        if (formData.phone) {
+                          const v = validateYemeniPhone(formData.phone);
+                          setPhoneError(v.valid ? '' : v.message || '');
+                        }
+                      }}
+                      placeholder={formPhonePlaceholder}
+                      required
+                      dir="ltr"
+                      inputMode="numeric"
+                      className={phoneError ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                    />
+                    {phoneError && <p className="text-red-500 text-xs mt-1">{phoneError}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        {formEmail}
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder={formEmailPlaceholder}
-                        dir="ltr"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      {formEmail}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder={formEmailPlaceholder}
+                      dir="ltr"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="notes">{formNotes}</Label>
-                      <Textarea
-                        id="notes"
-                        value={formData.notes}
-                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                        placeholder={formNotesPlaceholder}
-                        dir="rtl"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">{formNotes}</Label>
+                    <Textarea
+                      id="notes"
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder={formNotesPlaceholder}
+                      dir="rtl"
+                    />
+                  </div>
 
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {formRegistering}
-                        </>
-                      ) : (
-                        <span>{formSubmit}</span>
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </AnimatedCard>
-            </div>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {formRegistering}
+                      </>
+                    ) : (
+                      <span>{formSubmit}</span>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </AnimatedCard>
           </section>
         </ScrollReveal>
       )}
 
       <BackToTopButton threshold={300} />
-    </div>
+    </>
   );
 }

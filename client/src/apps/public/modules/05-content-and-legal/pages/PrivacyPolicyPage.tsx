@@ -5,15 +5,13 @@
 import { useEffect } from 'react';
 import { Shield, Phone, Mail } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
-import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
 import SectionDivider from '@/components/SectionDivider';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
-import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_TITLE, COMPANY_ARABIC_NAME, COMPANY_EMAIL, COMPANY_PHONE } from '@/const';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 type PublicPageTextContent = {
   key: string;
@@ -77,7 +75,10 @@ export default function PrivacyPolicyPage() {
         'سياسة حماية البيانات الشخصية والخصوصية وفقاً لنظام حماية البيانات في المملكة العربية السعودية'
       )}
       keywords={copy.t('meta.keywords', 'سياسة الخصوصية, حماية البيانات, PDPL')}
+      useContainer={true}
     >
+      <PageProgress color="green" />
+      <FloatingButtons showBookingButton={false} />
       <PrivacyPolicyContent copy={copy} />
     </PageLayout>
   );
@@ -215,20 +216,12 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
 
   return (
     <div className="space-y-6" dir={copy.language === 'ar' ? 'rtl' : 'ltr'}>
-      <ReadingProgressBar color="green" />
-
-      <HeroSection
+      <PublicPageHeader
         title={t('title', 'سياسة الخصوصية')}
-        subtitle={t('hero.lastUpdated', 'آخر تحديث: مارس 2026')}
-        description={t(
-          'hero.description',
-          `يلتزم ${COMPANY_ARABIC_NAME || 'BOCAM'} بحماية خصوصيتك وصون بياناتك الشخصية وفقاً لأحكام نظام حماية البيانات الشخصية في المملكة العربية السعودية (PDPL)`
-        )}
-        badge={{ text: t('badge', 'حماية البيانات'), icon: Shield }}
-        backgroundGradient="from-green-800 to-green-600"
+        backgroundImage="/sgh/doctors-banner.png"
       />
 
-      <main className="flex-1 container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-4xl">
+      <main className="flex-1 py-8 sm:py-12 max-w-4xl">
         <ScrollReveal delay={0.1}>
           <AnimatedCard
             className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-10 space-y-8 text-gray-700 leading-relaxed"
@@ -608,8 +601,6 @@ function PrivacyPolicyContent({ copy }: { copy: PrivacyCopy }) {
           </AnimatedCard>
         </ScrollReveal>
       </main>
-
-      <BackToTopButton threshold={300} />
     </div>
   );
 }

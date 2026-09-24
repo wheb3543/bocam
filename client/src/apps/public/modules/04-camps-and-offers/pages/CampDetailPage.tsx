@@ -6,8 +6,6 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
-import SEO from '@/components/SEO';
 import { getCompanyName } from '@/const';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
@@ -37,6 +35,7 @@ import {
   updatePixelUserData,
 } from '@/components/MetaPixel';
 import { toast } from 'sonner';
+import PageLayout from '@/components/layout/PageLayout';
 
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
@@ -52,6 +51,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 interface CampRegistration {
   id: number;
@@ -68,12 +68,19 @@ type PublicPageTextContent = {
 export default function CampDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const companyName = getCompanyName('ar');
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title={`تفاصيل المخيم - ${companyName}`}
+      description="معلومات تفصيلية عن المخيم الطبي الخيري"
+      keywords="مخيم طبي, خيري, تسجيل"
+      useContainer={true}
+    >
+      <PageProgress color="purple" />
+      <FloatingButtons />
       <CampDetailContent slug={slug} />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -378,24 +385,17 @@ function CampDetailContent({ slug }: { slug: string }) {
     }
   };
 
-  const companyName = getCompanyName('ar');
-  const seoTitle = camp ? `${camp.name} | ${companyName}` : `المخيمات الطبية | ${companyName}`;
-
-  const seoDescription = camp
-    ? `${(camp.description || camp.name).substring(0, 150)}... سجل الآن في مخيمنا الطبي المجاني.${COMPANY_PHONE ? ` اتصل: ${COMPANY_PHONE}` : ''}`
-    : `مخيمات طبية مجانية لخدمة المجتمع في ${companyName}`;
-
   // Loading Skeleton
   if (isLoading) {
     return (
       <div className="space-y-6" dir="rtl">
         <div className="bg-white dark:bg-card border-b">
-          <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+          <div className="py-2.5 sm:py-3">
             <Skeleton className="h-4 sm:h-5 w-48 sm:w-60" />
           </div>
         </div>
         <section className="bg-gradient-to-br from-green-600 to-blue-600 py-8 sm:py-16 md:py-24">
-          <div className="container mx-auto px-3 sm:px-4">
+          <div className="relative z-10">
             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
               <div className="space-y-3 sm:space-y-4">
                 <Skeleton className="h-6 sm:h-8 w-32 sm:w-40 bg-white/20" />
@@ -411,7 +411,7 @@ function CampDetailContent({ slug }: { slug: string }) {
             </div>
           </div>
         </section>
-        <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
+        <div className="py-6 sm:py-12">
           <Skeleton className="h-6 sm:h-8 w-40 sm:w-48 mx-auto mb-4 sm:mb-6" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
@@ -448,114 +448,65 @@ function CampDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <SEO title={seoTitle} description={seoDescription} />
-      {/* Breadcrumb */}
-      <div className="bg-white dark:bg-card border-b">
-        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
-          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-green-600 transition-colors">
-              {copy.breadcrumbHome}
-            </Link>
-            <span>/</span>
-            <Link href="/camps" className="hover:text-green-600 transition-colors">
-              {copy.breadcrumbCamps}
-            </Link>
-            <span>/</span>
-            <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
-              {camp.name}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-600 via-green-700 to-blue-600 text-white pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-16 md:pb-24 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-              backgroundSize: '30px 30px',
-            }}
-          ></div>
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader
+        title={camp.name}
+        subtitle={camp.description}
+        badge={{
+          text: copy.heroBadge,
+          icon: <Heart className="w-4 h-4 text-emerald-300" />,
+        }}
+        gradient="from-green-600 via-green-700 to-blue-600"
+        minHeight="300px"
+      >
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-emerald-200/90 flex-wrap justify-center">
+          <Link href="/" className="hover:text-white transition-colors">
+            {copy.breadcrumbHome}
+          </Link>
+          <span>/</span>
+          <Link href="/camps" className="hover:text-white transition-colors">
+            {copy.breadcrumbCamps}
+          </Link>
+          <span>/</span>
+          <span className="text-white font-medium truncate max-w-[120px] sm:max-w-[200px]">
+            {camp.name}
+          </span>
         </div>
 
-        <div className="container mx-auto px-3 sm:px-4 relative z-10">
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-12 items-center">
-            <div>
-              {/* Badge + CTA */}
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                  <img
-                    src={APP_LOGO}
-                    alt={COMPANY_ARABIC_NAME}
-                    className="h-4 w-4 object-contain"
-                  />
-                  <span className="text-sm font-semibold">{copy.heroBadge}</span>
-                </div>
-                <a href="#registration-form">
-                  <Button
-                    size="sm"
-                    className="bg-white dark:bg-card text-green-700 hover:bg-green-50 font-bold text-sm px-4 py-2 shadow-lg"
-                  >
-                    {copy.heroRegister}
-                  </Button>
-                </a>
-              </div>
-
-              <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
-                {camp.name}
-              </h1>
-
-              <p className="text-xs sm:text-base md:text-lg text-white/95 leading-relaxed mb-4 sm:mb-6">
-                {camp.description}
-              </p>
-
-              {/* Key Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {camp.startDate && camp.endDate && (
-                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-                    <Calendar className="h-5 w-5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <div className="font-semibold">{copy.heroDate}</div>
-                      <div className="text-white/90 text-xs">
-                        {formatDate(camp.startDate)} - {formatDate(camp.endDate)}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {campStats && campStats.total > 0 && (
-                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-                    <TrendingUp className="h-5 w-5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <div className="font-semibold">{copy.heroAttendance}</div>
-                      <div className="text-white/90 text-xs">{campStats.attendanceRate}%</div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-                  <Users className="h-5 w-5 flex-shrink-0" />
-                  <div className="text-sm">
-                    <div className="font-semibold">{copy.heroLimitedSeats}</div>
-                    <div className="text-white/90 text-xs">{copy.heroLimitedSeatsDescription}</div>
-                  </div>
+        {/* Key Info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto mt-6">
+          {camp.startDate && camp.endDate && (
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+              <Calendar className="h-5 w-5 flex-shrink-0" />
+              <div className="text-sm">
+                <div className="font-semibold">{copy.heroDate}</div>
+                <div className="text-white/90 text-xs">
+                  {formatDate(camp.startDate)} - {formatDate(camp.endDate)}
                 </div>
               </div>
             </div>
+          )}
 
-            {camp.imageUrl && (
-              <div className="relative">
-                <div className="rounded-2xl overflow-hidden shadow-2xl">
-                  <img src={camp.imageUrl} alt={camp.name} className="w-full h-auto object-cover" />
-                </div>
+          {campStats && campStats.total > 0 && (
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+              <TrendingUp className="h-5 w-5 flex-shrink-0" />
+              <div className="text-sm">
+                <div className="font-semibold">{copy.heroAttendance}</div>
+                <div className="text-white/90 text-xs">{campStats.attendanceRate}%</div>
               </div>
-            )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
+            <Users className="h-5 w-5 flex-shrink-0" />
+            <div className="text-sm">
+              <div className="font-semibold">{copy.heroLimitedSeats}</div>
+              <div className="text-white/90 text-xs">{copy.heroLimitedSeatsDescription}</div>
+            </div>
           </div>
         </div>
-      </section>
+      </PublicPageHeader>
 
       {/* Free Offers Section */}
       {camp.freeOffers &&
@@ -566,7 +517,7 @@ function CampDetailContent({ slug }: { slug: string }) {
 
           return (
             <section className="py-6 sm:py-10 md:py-14">
-              <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
+              <div className="max-w-5xl mx-auto px-4">
                 <div className="text-center mb-4 sm:mb-6">
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-green-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full mb-2 sm:mb-3">
                     <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600" />
@@ -631,7 +582,7 @@ function CampDetailContent({ slug }: { slug: string }) {
 
           return (
             <section className="pb-6 sm:pb-10 md:pb-14">
-              <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
+              <div className="max-w-5xl mx-auto px-4">
                 <div className="text-center mb-4 sm:mb-6">
                   <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-blue-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full mb-2 sm:mb-3">
                     <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-600" />
@@ -704,7 +655,7 @@ function CampDetailContent({ slug }: { slug: string }) {
 
           return (
             <section className="pb-6 sm:pb-10 md:pb-14">
-              <div className="container mx-auto px-3 sm:px-4 max-w-6xl">
+              <div className="max-w-6xl mx-auto px-4">
                 <h2 className="text-base sm:text-xl md:text-2xl font-bold text-center text-foreground mb-4 sm:mb-6">
                   {copy.galleryTitle}
                 </h2>
@@ -730,7 +681,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       {/* Registration Form Section */}
       {camp.isActive && camp.endDate && new Date(camp.endDate) > new Date() && (
         <section id="registration-form" className="pb-6 sm:pb-10 md:pb-14">
-          <div className="container mx-auto px-3 sm:px-4 max-w-2xl">
+          <div className="max-w-2xl mx-auto px-4">
             {/* Urgency Banner */}
             <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2.5 sm:p-3 md:p-4 rounded-xl mb-3 sm:mb-4 text-center">
               <div className="flex items-center justify-center gap-1.5 sm:gap-2">
@@ -1111,7 +1062,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       {/* Expired Camp Notice */}
       {!camp.isActive && (
         <section className="py-8 sm:py-12 md:py-16">
-          <div className="container mx-auto px-3 sm:px-4 max-w-2xl">
+          <div className="max-w-2xl mx-auto px-4">
             <div className="bg-white dark:bg-card rounded-2xl shadow-sm p-4 sm:p-6 md:p-8 text-center">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
@@ -1134,7 +1085,7 @@ function CampDetailContent({ slug }: { slug: string }) {
 
       {/* Contact Section */}
       <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
-        <div className="container mx-auto px-3 sm:px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
             {copy.contactTitle}
           </h3>

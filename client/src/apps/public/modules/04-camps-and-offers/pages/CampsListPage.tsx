@@ -2,6 +2,7 @@ import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 interface Camp {
   id: number;
@@ -42,11 +43,8 @@ import {
   Users,
 } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
-import HeroSection from '@/components/HeroSection';
 import AnimatedCard from '@/components/AnimatedCard';
 import SectionDivider from '@/components/SectionDivider';
-import ReadingProgressBar from '@/components/ReadingProgressBar';
-import BackToTopButton from '@/components/BackToTopButton';
 import ScrollReveal from '@/components/ScrollReveal';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -58,7 +56,10 @@ export default function CampsListPage() {
       title={`المخيمات الطبية الخيرية - ${companyName}`}
       description="مبادراتنا الإنسانية في إطار المسؤولية المجتمعية لخدمة المحتاجين"
       keywords="مخيمات طبية, خيرية, مجانية, مسؤولية مجتمعية"
+      useContainer={true}
     >
+      <PageProgress color="purple" />
+      <FloatingButtons />
       <CampsListContent />
     </PageLayout>
   );
@@ -392,28 +393,19 @@ function CampsListContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <ReadingProgressBar color="purple" />
-
-      {/* Hero Section */}
-      <HeroSection
-        title={title}
-        description={description}
-        badge={{ text: badgeText, icon: Heart }}
-        backgroundGradient="from-red-600 via-red-700 to-orange-600"
-      />
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader title={title} backgroundImage="/sgh/doctors-banner.png" />
 
       {/* About Section */}
       <ScrollReveal delay={0.1}>
         <section className="py-6 sm:py-8 md:py-12 bg-white dark:bg-card">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
-                {aboutTitle}
-              </h2>
-              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
-                {aboutDescription}
-              </p>
-            </div>
+          <div className="text-center">
+            <h2 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-bold text-foreground mb-3 sm:mb-4 md:mb-6">
+              {aboutTitle}
+            </h2>
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-foreground leading-relaxed text-right px-1">
+              {aboutDescription}
+            </p>
           </div>
         </section>
       </ScrollReveal>
@@ -423,8 +415,8 @@ function CampsListContent() {
       {/* Search Section */}
       <ScrollReveal delay={0.2}>
         <section className="py-4 sm:py-6 md:py-8 bg-muted/50">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="max-w-2xl mx-auto relative">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="relative">
               <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
               <Input
                 type="text"
@@ -441,14 +433,14 @@ function CampsListContent() {
       {/* Camps Tabs */}
       <ScrollReveal delay={0.3}>
         <section className="py-6 sm:py-10 md:py-16">
-          <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-7xl mx-auto px-4">
             {isLoading ? (
               <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
                 <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />
               </div>
             ) : (
               <Tabs defaultValue="active" className="w-full" dir="rtl">
-                <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
+                <TabsList className="grid w-full grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
                   <TabsTrigger
                     value="active"
                     className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
@@ -513,8 +505,6 @@ function CampsListContent() {
           </div>
         </section>
       </ScrollReveal>
-
-      <BackToTopButton threshold={300} />
     </div>
   );
 }

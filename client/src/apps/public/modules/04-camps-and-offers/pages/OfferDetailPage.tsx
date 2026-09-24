@@ -6,8 +6,6 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
-import SEO from '@/components/SEO';
 import { trpc } from '@/lib/api/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,23 +30,31 @@ import {
 import { getCompleteTrackingData } from '@/lib/tracking/tracking';
 import { trackViewContent, trackMetaLead, updatePixelUserData } from '@/components/MetaPixel';
 import { toast } from 'sonner';
+import PageLayout from '@/components/layout/PageLayout';
 
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@/const';
+import { COMPANY_PHONE } from '@/const';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 export default function OfferDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="تفاصيل العرض"
+      description="معلومات تفصيلية عن العرض الطبي"
+      keywords="عرض طبي, خصم, تسجيل"
+      useContainer={true}
+    >
+      <PageProgress />
+      <FloatingButtons />
       <OfferDetailContent slug={slug} />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -577,27 +583,20 @@ function OfferDetailContent({ slug }: { slug: string }) {
     }
   };
 
-  const seoTitle = offer
-    ? `${offer.title} | ${COMPANY_ARABIC_NAME}`
-    : `العروض الطبية | ${COMPANY_ARABIC_NAME}`;
-
   const contactPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
   const contactPhoneDigits = COMPANY_PHONE.replace(/\D/g, '');
-  const seoDescription = offer
-    ? `${(offer.description || offer.title).substring(0, 150)}... احجز الآن واستفد من عرضنا الخاص. اتصل: ${contactPhone}`
-    : `عروض طبية مميزة بأسعار تنافسية في ${COMPANY_ARABIC_NAME}`;
 
   // Loading Skeleton
   if (isLoading) {
     return (
       <div className="space-y-6" dir="rtl">
         <div className="bg-white dark:bg-card border-b">
-          <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+          <div className="py-2.5 sm:py-3">
             <Skeleton className="h-4 sm:h-5 w-48 sm:w-60" />
           </div>
         </div>
         <section className="bg-gradient-to-br from-green-600 to-blue-600 py-8 sm:py-16 md:py-24">
-          <div className="container mx-auto px-3 sm:px-4">
+          <div>
             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
               <div className="space-y-3 sm:space-y-4">
                 <Skeleton className="h-6 sm:h-8 w-32 sm:w-40 bg-white/20" />
@@ -610,7 +609,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
             </div>
           </div>
         </section>
-        <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-12">
+        <div className="py-6 sm:py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-20 sm:h-28 rounded-xl" />
@@ -651,112 +650,46 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <SEO title={seoTitle} description={seoDescription} />
-      {/* Breadcrumb */}
-      <div className="bg-white dark:bg-card border-b">
-        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
-          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-green-600 transition-colors">
-              {breadcrumbHome}
-            </Link>
-            <span>/</span>
-            <Link href="/offers" className="hover:text-green-600 transition-colors">
-              {breadcrumbOffers}
-            </Link>
-            <span>/</span>
-            <span className="text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px]">
-              {offer.title}
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader
+        title={offer.title}
+        subtitle={offer.description || undefined}
+        badge={{
+          text: heroBadge,
+          icon: <Sparkles className="w-4 h-4 text-emerald-300" />,
+        }}
+        gradient="from-green-600 via-blue-600 to-purple-600"
+        minHeight="300px"
+      >
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-emerald-200/90 flex-wrap justify-center">
+          <Link href="/" className="hover:text-white transition-colors">
+            {breadcrumbHome}
+          </Link>
+          <span>/</span>
+          <Link href="/offers" className="hover:text-white transition-colors">
+            {breadcrumbOffers}
+          </Link>
+          <span>/</span>
+          <span className="text-white font-medium truncate max-w-[120px] sm:max-w-[200px]">
+            {offer.title}
+          </span>
+        </div>
+
+        {/* Days Remaining */}
+        {daysRemaining !== null && (
+          <div className="mt-4 flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
+            <Clock className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              {heroRemaining} {daysRemaining} {daysRemaining === 1 ? heroDay : heroDays}
             </span>
           </div>
-        </div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-600 via-blue-600 to-purple-600 text-white pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-16 md:pb-24 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-              backgroundSize: '30px 30px',
-            }}
-          ></div>
-        </div>
-
-        <div className="container mx-auto px-3 sm:px-4 relative z-10">
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-12 items-center">
-            <div>
-              {/* Badge + CTA */}
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-foreground px-3 py-1.5 rounded-full shadow-lg">
-                  <Sparkles className="h-4 w-4" />
-                  <span className="text-sm font-bold">{heroBadge}</span>
-                </div>
-                <a href="#booking-form">
-                  <Button
-                    size="sm"
-                    className="bg-white dark:bg-card text-green-700 hover:bg-green-50 font-bold text-sm px-4 py-2 shadow-lg"
-                  >
-                    {heroBookNow}
-                  </Button>
-                </a>
-              </div>
-
-              <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
-                {offer.title}
-              </h1>
-
-              <p className="text-xs sm:text-base md:text-lg text-white/95 leading-relaxed mb-4 sm:mb-6">
-                {offer.description}
-              </p>
-
-              {/* Offer Details */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                {offer.startDate && offer.endDate && (
-                  <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm p-3 rounded-lg">
-                    <Calendar className="h-5 w-5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <div className="font-semibold">{heroDuration}</div>
-                      <div className="text-white/90 text-xs">
-                        {heroUntil} {formatDate(offer.endDate)}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {daysRemaining !== null && daysRemaining > 0 && (
-                  <div className="flex items-center gap-3 bg-red-500/20 backdrop-blur-sm p-3 rounded-lg border border-red-400/30">
-                    <Clock className="h-5 w-5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <div className="font-semibold">{heroRemaining}</div>
-                      <div className="text-white/90 text-xs font-bold">
-                        {daysRemaining} {daysRemaining === 1 ? heroDay : heroDays}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {offer.imageUrl && (
-              <div className="relative">
-                <div className="rounded-2xl overflow-hidden shadow-2xl">
-                  <img
-                    src={offer.imageUrl}
-                    alt={offer.title}
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+        )}
+      </PublicPageHeader>
 
       {/* What's Included Section */}
       <section className="py-6 sm:py-10 md:py-14">
-        <div className="container mx-auto px-3 sm:px-4 max-w-5xl">
+        <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground">
               {includedTitle}
@@ -834,7 +767,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
       {/* Registration Form Section */}
       {offer.isActive && offer.endDate && new Date(offer.endDate) > new Date() && (
         <section id="booking-form" className="pb-6 sm:pb-10 md:pb-14">
-          <div className="container mx-auto px-3 sm:px-4 max-w-2xl">
+          <div className="max-w-2xl mx-auto px-4">
             {/* Urgency Banner */}
             {daysRemaining !== null && daysRemaining > 0 && daysRemaining <= 7 && (
               <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2.5 sm:p-3 md:p-4 rounded-xl mb-3 sm:mb-4 text-center">
@@ -1072,7 +1005,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
       {/* Expired Offer Message */}
       {!offer.isActive && (
         <section className="py-12 md:py-16">
-          <div className="container mx-auto px-4 max-w-2xl">
+          <div className="max-w-2xl mx-auto px-4">
             <div className="bg-white dark:bg-card rounded-2xl shadow-sm p-6 md:p-8 text-center">
               <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Tag className="h-8 w-8 text-muted-foreground" />
@@ -1093,7 +1026,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
 
       {/* Contact Section */}
       <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
-        <div className="container mx-auto px-3 sm:px-4 text-center">
+        <div className="max-w-5xl mx-auto px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
             {contactTitle}
           </h3>

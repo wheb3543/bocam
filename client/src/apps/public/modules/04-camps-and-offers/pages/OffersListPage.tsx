@@ -1,10 +1,11 @@
 import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
 import { trpc } from '@/lib/api/trpc';
 import { usePublicTextContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getCompanyName } from '@/const';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 interface Offer {
   id: number;
@@ -25,15 +26,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Search, Gift, Calendar, ArrowLeft, CheckCircle2 } from 'lucide-react';
-
-import InstallPWAButton from '@/components/InstallPWAButton';
+import PageLayout from '@/components/layout/PageLayout';
 
 export default function OffersListPage() {
+  const companyName = getCompanyName('ar');
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title={`العروض الطبية - ${companyName}`}
+      description="استفد من عروضنا الطبية المميزة بأسعار تنافسية وخدمات عالية الجودة"
+      keywords="عروض طبية, خصومات, حجز عرض"
+      showInstallPWA={false}
+      useContainer={true}
+    >
+      <PageProgress />
+      <FloatingButtons />
       <OffersListContent />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -264,25 +272,13 @@ function OffersListContent() {
 
   return (
     <div className="space-y-6" dir="rtl">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-600 to-blue-600 text-white py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-3xl mx-auto text-center">
-            <Gift className="h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 mx-auto mb-3 sm:mb-5 md:mb-6" />
-            <h1 className="text-lg sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
-              {heroTitle}
-            </h1>
-            <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-white/90 px-2">
-              {heroDescription}
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Using shared component */}
+      <PublicPageHeader title={heroTitle} backgroundImage="/sgh/doctors-banner.png" />
 
       {/* Search Section */}
       <section className="py-4 sm:py-6 md:py-8 bg-white dark:bg-card shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto relative">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="relative">
             <Search className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
             <Input
               type="text"
@@ -297,14 +293,14 @@ function OffersListContent() {
 
       {/* Offers Tabs */}
       <section className="py-6 sm:py-10 md:py-16">
-        <div className="container mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-4">
           {isLoading ? (
             <div className="flex justify-center items-center min-h-[300px] sm:min-h-[400px]">
               <Loader2 className="h-8 w-8 sm:h-12 sm:w-12 animate-spin text-green-600" />
             </div>
           ) : (
             <Tabs defaultValue="active" className="w-full" dir="rtl">
-              <TabsList className="grid w-full max-w-sm sm:max-w-md mx-auto grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
+              <TabsList className="grid w-full grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
                 <TabsTrigger value="active" className="text-xs sm:text-sm md:text-base">
                   {activeTabLabel} ({filteredActiveOffers?.length || 0})
                 </TabsTrigger>
@@ -352,8 +348,6 @@ function OffersListContent() {
           )}
         </div>
       </section>
-
-      <InstallPWAButton />
     </div>
   );
 }

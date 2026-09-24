@@ -5,8 +5,6 @@
  */
 import { useState, useEffect } from 'react';
 import { useRoute, Link, useLocation } from 'wouter';
-import Navbar from '@/components/layout/Navbar';
-import SEO from '@/components/SEO';
 import {
   ArrowRight,
   Calendar,
@@ -42,23 +40,31 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageLayout from '@/components/layout/PageLayout';
 
 import { trpc } from '@/lib/api/trpc';
 import { toast } from 'sonner';
 import { usePhoneFormat } from '@/hooks/form/usePhoneFormat';
 import { usePatientStorage } from '@/hooks/data/usePatientStorage';
 import { useAbandonedFormTracking } from '@/hooks/form/useAbandonedFormTracking';
-import { COMPANY_ARABIC_NAME, COMPANY_PHONE } from '@/const';
+import { COMPANY_PHONE } from '@/const';
+import { PageProgress, FloatingButtons } from '@/apps/public/shared/components';
 
 export default function DoctorDetailPage() {
   const [, params] = useRoute('/doctors/:slug');
   const slug = params?.slug || '';
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
-      <Navbar />
+    <PageLayout
+      title="تفاصيل الطبيب"
+      description="معلومات تفصيلية عن الطبيب وحجز المواعيد"
+      keywords="طبيب, حجز موعد, موعد طبي"
+      useContainer={true}
+    >
+      <PageProgress />
+      <FloatingButtons />
       <DoctorDetailContent slug={slug} />
-    </div>
+    </PageLayout>
   );
 }
 
@@ -213,24 +219,17 @@ function DoctorDetailContent({ slug }: { slug: string }) {
     }
   };
 
-  const seoTitle = doctor
-    ? `${doctor.name} - ${doctor.specialty} | ${COMPANY_ARABIC_NAME}`
-    : `الأطباء | ${COMPANY_ARABIC_NAME}`;
-
   const contactPhone = COMPANY_PHONE || 'رقم الاتصال غير متوفر';
   const contactPhoneDigits = COMPANY_PHONE.replace(/\D/g, '');
-  const seoDescription = doctor
-    ? `احجز موعدك مع ${doctor.name}، ${doctor.specialty} في ${COMPANY_ARABIC_NAME}. ${doctor.bio || 'خدمات طبية متميزة ورعاية شاملة'}. اتصل الآن: ${contactPhone}`
-    : `احجز موعدك مع أفضل الأطباء في ${COMPANY_ARABIC_NAME}`;
 
   // Loading Skeleton
   if (isLoading) {
     return (
       <div className="space-y-6" dir="rtl">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="py-3 sm:py-4">
           <Skeleton className="h-8 sm:h-9 w-32 sm:w-40" />
         </div>
-        <div className="container mx-auto px-3 sm:px-4 pb-6 sm:pb-8">
+        <div className="pb-6 sm:pb-8">
           <div className="bg-white dark:bg-card rounded-2xl shadow-lg overflow-hidden">
             <Skeleton className="h-16 w-full" />
             <div className="p-6 md:p-8">
@@ -251,7 +250,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
             </div>
           </div>
         </div>
-        <div className="container mx-auto px-3 sm:px-4 pb-6 sm:pb-8">
+        <div className="pb-6 sm:pb-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-20 sm:h-28 rounded-xl" />
@@ -290,10 +289,9 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <SEO title={seoTitle} description={seoDescription} />
       {/* Breadcrumb Navigation */}
       <div className="bg-white dark:bg-card border-b">
-        <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+        <div className="py-2.5 sm:py-3">
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
             <Link href="/" className="hover:text-green-600 transition-colors">
               الرئيسية
@@ -312,7 +310,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       {/* Doctor Profile Section */}
       <section className="py-4 sm:py-6 md:py-10">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div>
           <div className="bg-white dark:bg-card rounded-2xl shadow-sm overflow-hidden">
             {/* Header Gradient Bar */}
             <div className="h-2 bg-gradient-to-r from-green-500 via-green-600 to-blue-500"></div>
@@ -488,7 +486,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       {/* Stats Section */}
       <section className="pb-4 sm:pb-6 md:pb-10">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 md:gap-4">
             <div className="bg-white dark:bg-card p-3 sm:p-4 md:p-5 rounded-xl text-center shadow-sm">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-lg flex items-center justify-center mx-auto mb-1.5 sm:mb-2">
@@ -532,7 +530,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       {/* Why Choose Section */}
       <section className="pb-4 sm:pb-6 md:pb-10">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div>
           <div className="bg-white dark:bg-card rounded-2xl shadow-sm p-4 sm:p-6 md:p-8">
             <h2 className="text-base sm:text-xl md:text-2xl font-bold text-foreground mb-3 sm:mb-5 text-center">
               لماذا تختار {doctor.name}؟
@@ -567,7 +565,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       {/* Clinic Schedule & Working Hours Section */}
       <section className="pb-4 sm:pb-6 md:pb-10">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div>
           <div className="bg-white dark:bg-card rounded-2xl shadow-sm border border-border/50 p-4 sm:p-6 md:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b">
               <div>
@@ -697,7 +695,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
 
       {/* Booking Form Section */}
       <section id="booking-form" className="pb-6 sm:pb-8 md:pb-12">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div>
           {/* Urgency Banner */}
           <div className="max-w-2xl mx-auto mb-3 sm:mb-4">
             <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2.5 sm:p-3 md:p-4 rounded-xl text-center">

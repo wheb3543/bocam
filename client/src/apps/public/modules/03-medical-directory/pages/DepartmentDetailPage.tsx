@@ -43,6 +43,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { trpc } from '@/lib/api/trpc';
 import { useBookingModal } from '@/hooks/booking/useBookingModal';
 import { COMPANY_ARABIC_NAME } from '@/const';
+import { PageProgress, FloatingButtons, PublicPageHeader } from '@/apps/public/shared/components';
 
 // Medical icon mapping
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -132,10 +133,11 @@ export default function DepartmentDetailPage() {
       <PageLayout
         title={`جاري التحميل... - ${COMPANY_ARABIC_NAME}`}
         description="جاري تحميل تفاصيل القسم الطبي..."
+        useContainer={true}
       >
         <div className="space-y-8 pb-16">
           <div className="bg-gradient-to-br from-emerald-800 via-teal-800 to-cyan-900 py-12 md:py-16 px-4">
-            <div className="container mx-auto max-w-5xl space-y-4">
+            <div className="max-w-5xl mx-auto space-y-4">
               <Skeleton className="h-6 w-32 bg-white/20 rounded-full" />
               <div className="flex items-center gap-4">
                 <Skeleton className="w-16 h-16 rounded-2xl bg-white/20" />
@@ -146,7 +148,7 @@ export default function DepartmentDetailPage() {
               </div>
             </div>
           </div>
-          <div className="container mx-auto max-w-5xl px-4 space-y-8">
+          <div className="max-w-5xl mx-auto space-y-8">
             <Skeleton className="h-40 w-full rounded-2xl" />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               <Skeleton className="h-64 rounded-2xl" />
@@ -165,8 +167,9 @@ export default function DepartmentDetailPage() {
       <PageLayout
         title={`القسم غير موجود - ${COMPANY_ARABIC_NAME}`}
         description="القسم الطبي المطلوب غير موجود أو تم نقله."
+        useContainer={true}
       >
-        <div className="container mx-auto max-w-xl py-20 px-4 text-center space-y-6">
+        <div className="max-w-xl mx-auto py-20 text-center space-y-6">
           <div className="w-20 h-20 rounded-3xl bg-muted flex items-center justify-center mx-auto text-muted-foreground shadow-sm">
             <Building2 className="w-10 h-10 text-muted-foreground" />
           </div>
@@ -198,76 +201,36 @@ export default function DepartmentDetailPage() {
         `تعرف على خدمات وأطباء قسم ${department.name} في ${COMPANY_ARABIC_NAME}. رعاية صحية متكاملة وأحدث التجهيزات الطبية.`
       }
       keywords={`${department.name}, عيادة ${department.name}, أطباء ${department.name}, حجز موعد`}
+      useContainer={true}
     >
+      <PageProgress />
+      <FloatingButtons />
       <div className="space-y-10 pb-20">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-emerald-800 via-teal-800 to-cyan-900 text-white py-10 sm:py-14 md:py-16 px-4 sm:px-6 lg:px-8">
-          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_30%_20%,#fff_0,transparent_50%),radial-gradient(circle_at_80%_80%,#34d399_0,transparent_50%)] pointer-events-none" />
-
-          <div className="container mx-auto max-w-5xl relative z-10 space-y-6">
-            {/* Breadcrumb Navigation */}
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-200/90 flex-wrap">
-              <Link href="/" className="hover:text-white transition-colors">
-                الرئيسية
-              </Link>
-              <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
-              <Link href="/departments" className="hover:text-white transition-colors">
-                الأقسام والعيادات
-              </Link>
-              <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
-              <span className="text-white font-medium">{department.name}</span>
-            </div>
-
-            {/* Department Identity & Hero Content */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pt-2">
-              <div className="flex items-start gap-4 sm:gap-5">
-                {/* Department Icon Box */}
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 text-emerald-200 flex items-center justify-center flex-shrink-0 shadow-lg ring-4 ring-white/5">
-                  <DepartmentIcon
-                    name={department.icon}
-                    className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-300"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-sm">
-                      {department.name}
-                    </h1>
-                    <Badge className="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-xs px-2.5 py-0.5 rounded-full font-medium">
-                      عيادة تخصصية
-                    </Badge>
-                  </div>
-                  {department.nameEn && (
-                    <p className="text-xs sm:text-sm text-emerald-200/80 font-medium tracking-wide uppercase font-sans">
-                      {department.nameEn}
-                    </p>
-                  )}
-                  <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl line-clamp-2">
-                    {department.description ||
-                      'تقديم رعاية طبية متكاملة بأحدث المعايير الصحية العالمية.'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Primary Call to Action Button */}
-              <div className="w-full md:w-auto flex-shrink-0 flex items-center gap-3">
-                <Button
-                  type="button"
-                  size="lg"
-                  onClick={() => openBookingModal({ departmentId: department.id })}
-                  className="w-full md:w-auto gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm sm:text-base py-6 px-6 rounded-2xl shadow-lg hover:shadow-xl transition-all cursor-pointer"
-                >
-                  <CalendarCheck2 className="w-5 h-5" />
-                  <span>احجز موعد في هذا القسم</span>
-                </Button>
-              </div>
-            </div>
+        {/* Hero Section - Using shared component */}
+        <PublicPageHeader
+          title={department.name}
+          subtitle={department.description || `عيادة تخصصية في ${COMPANY_ARABIC_NAME}`}
+          badge={{
+            text: 'عيادة تخصصية',
+            icon: <DepartmentIcon name={department.icon} className="w-4 h-4 text-emerald-300" />,
+          }}
+        >
+          {/* Breadcrumb Navigation */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-emerald-200/90 flex-wrap justify-center">
+            <Link href="/" className="hover:text-white transition-colors">
+              الرئيسية
+            </Link>
+            <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
+            <Link href="/departments" className="hover:text-white transition-colors">
+              الأقسام والعيادات
+            </Link>
+            <ChevronLeft className="w-3.5 h-3.5 opacity-60" />
+            <span className="text-white font-medium">{department.name}</span>
           </div>
-        </section>
+        </PublicPageHeader>
 
         {/* Clinic Overview & Features Section */}
-        <section className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <section className="max-w-5xl mx-auto px-4">
           <div className="rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex items-center gap-3 border-b border-border/60 pb-4">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -308,7 +271,7 @@ export default function DepartmentDetailPage() {
         </section>
 
         {/* Department Doctors Section */}
-        <section className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-6">
+        <section className="max-w-5xl mx-auto px-4 space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
