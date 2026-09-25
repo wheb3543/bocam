@@ -181,7 +181,7 @@ export function WhatsAppOperationsSSEProvider({ children }: { children: ReactNod
       lastLiveEvent,
       lastEventAt,
       sseStatus,
-      costSummary: createOperationalCostSummary(costsQuery.data as any),
+      costSummary: createOperationalCostSummary(costsQuery.data),
       isCostSummaryLoading: costsQuery.isLoading,
       clearLiveAlerts: () => setLiveAlerts([]),
       dismissCritical: () => setHasNewCritical(false),

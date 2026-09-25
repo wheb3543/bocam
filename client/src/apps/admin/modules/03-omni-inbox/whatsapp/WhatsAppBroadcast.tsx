@@ -48,6 +48,24 @@ import {
 } from '@/lib/broadcastContracts';
 import type { BroadcastContentSource, ContactSource } from '@/lib/broadcastContracts';
 
+type BroadcastHistoryItem = {
+  id: number;
+  name: string;
+  status: string;
+  createdAt: Date | string;
+  scheduledAt?: Date | string | null;
+  scheduleCronTaskUid?: string | null;
+  recipientCount: number;
+  sentCount: number;
+  failedCount: number;
+  heartbeat?: {
+    status: string;
+    isEnabled?: boolean | null;
+    nextExecutionAt: string | null;
+    lastExecutedAt?: string | null;
+  };
+};
+
 const CONTACT_SOURCE_LABELS: Record<(typeof CONTACT_SOURCE_KEYS)[number], string> = {
   appointments: 'مواعيد الأطباء',
   camp_registrations: 'تسجيلات المخيمات',
@@ -115,7 +133,7 @@ export function BroadcastHistoryList({
   showSchedule,
   onOpenDetails,
 }: {
-  broadcasts: any[];
+  broadcasts: BroadcastHistoryItem[];
   isLoading: boolean;
   error?: { message?: string } | null;
   emptyText: string;
@@ -169,10 +187,11 @@ export function BroadcastHistoryList({
             )}
             {showSchedule && (
               <p
-                className={`text-xs font-medium ${HEARTBEAT_STATUS_CLASSES[broadcast.heartbeat?.status] ?? HEARTBEAT_STATUS_CLASSES.unavailable}`}
+                className={`text-xs font-medium ${HEARTBEAT_STATUS_CLASSES[broadcast.heartbeat?.status ?? 'unavailable'] ?? HEARTBEAT_STATUS_CLASSES.unavailable}`}
               >
                 حالة المهمة:{' '}
-                {HEARTBEAT_STATUS_LABELS[broadcast.heartbeat?.status] ?? 'تعذّر التحقق'}
+                {HEARTBEAT_STATUS_LABELS[broadcast.heartbeat?.status ?? 'unavailable'] ??
+                  'تعذّر التحقق'}
                 {broadcast.heartbeat?.nextExecutionAt
                   ? ` · التنفيذ التالي: ${formatBroadcastDate(broadcast.heartbeat.nextExecutionAt)}`
                   : ''}
@@ -241,7 +260,7 @@ export function ContactsManagementTab() {
         link.click();
         toast.success(`تم تجهيز ${result.data.totalContacts} جهة اتصال للتنزيل`);
       } else {
-        toast.error((result as any).error ?? 'تعذر تصدير الجهات');
+        toast.error(result.error ?? 'تعذر تصدير الجهات');
       }
     },
     onError: (error) => toast.error(`تعذر تصدير الجهات: ${error.message}`),
@@ -249,17 +268,15 @@ export function ContactsManagementTab() {
 
   const syncMutation = trpc.googleSync.syncContacts.useMutation({
     onSuccess: (result) => {
-      const summary = (result as any).data;
+      const summary = result.data;
       if (summary) {
         setSyncSummary(summary);
       }
       if (result.success && (summary?.failedCount ?? 0) === 0) {
-        toast.success((result as any).message ?? 'تمت مزامنة الجهات مع Google');
+        toast.success(result.message ?? 'تمت مزامنة الجهات مع Google');
         setGoogleAccessToken('');
       } else {
-        toast.error(
-          (result as any).message ?? `اكتملت المزامنة مع ${summary?.failedCount ?? 0} أخطاء`
-        );
+        toast.error(result.message ?? `اكتملت المزامنة مع ${summary?.failedCount ?? 0} أخطاء`);
       }
     },
     onError: (error) => toast.error(`فشلت مزامنة Google: ${error.message}`),
@@ -378,7 +395,7 @@ export function ContactsManagementTab() {
                   <span>عرض أول {contacts.length} جهة</span>
                 </div>
                 <div className="max-h-[28rem] space-y-2 overflow-y-auto">
-                  {contacts.map((contact: any, index: number) => (
+                  {contacts.map((contact, index) => (
                     <div
                       key={`${contact.phoneNumber}-${index}`}
                       className="flex items-center justify-between rounded-md border p-3"
@@ -504,8 +521,8 @@ export function TemplatePickerDialog({
     }
     return templates.filter((template) =>
       [template.name, template.metaName, template.content]
-        .filter(Boolean)
-        .some((value) => value!.toLocaleLowerCase('ar').includes(term))
+        .filter((value): value is string => typeof value === 'string')
+        .some((value) => value.toLocaleLowerCase('ar').includes(term))
     );
   }, [search, templates]);
 
@@ -1534,7 +1551,7 @@ export function BroadcastsContent() {
             </CardHeader>
             <CardContent>
               <BroadcastHistoryList
-                broadcasts={reports.map((report: any) => report.broadcast)}
+                broadcasts={reports.map((report) => report.broadcast)}
                 isLoading={reportQuery.isLoading}
                 error={reportQuery.error}
                 emptyText="لا توجد بيانات تقارير بعد."
@@ -1589,7 +1606,7 @@ export function BroadcastsContent() {
                     <span>التوقيت</span>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
-                    {detailsQuery.data.recipients.map((recipient: any) => (
+                    {detailsQuery.data.recipients.map((recipient) => (
                       <div
                         key={recipient.id}
                         className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 border-b px-3 py-3 text-sm last:border-0"
@@ -1617,10 +1634,7 @@ export function BroadcastsContent() {
               {detailsQuery.data.results.length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   معرّفات رسائل Meta المسجلة:{' '}
-                  {
-                    detailsQuery.data.results.filter((result: any) => result.whatsappMessageId)
-                      .length
-                  }
+                  {detailsQuery.data.results.filter((result) => result.whatsappMessageId).length}
                 </p>
               )}
             </div>

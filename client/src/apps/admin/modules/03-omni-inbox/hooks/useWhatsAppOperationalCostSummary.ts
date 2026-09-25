@@ -12,7 +12,7 @@ export function useWhatsAppOperationalCostSummary() {
     refetchInterval: 120000,
   });
   const fallbackSummary = useMemo(
-    () => createOperationalCostSummary(fallbackQuery.data as any),
+    () => createOperationalCostSummary(fallbackQuery.data),
     [fallbackQuery.data]
   );
 

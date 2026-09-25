@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trpc } from '@/lib/api/trpc';
 import { whatsappMessageFormSchema, type WhatsAppMessageFormData } from '@/lib/validationSchemas';
@@ -23,7 +23,7 @@ export const WhatsAppMessageFormWithErrorHandler: React.FC<
 > = ({ conversationId, onSuccess, onCancel }) => {
   const utils = trpc.useUtils();
   const form = useForm<WhatsAppMessageFormData>({
-    resolver: zodResolver(whatsappMessageFormSchema) as any,
+    resolver: zodResolver(whatsappMessageFormSchema) as Resolver<WhatsAppMessageFormData>,
     mode: 'onChange',
     defaultValues: { recipientPhone: '', message: '' },
   });
@@ -35,7 +35,7 @@ export const WhatsAppMessageFormWithErrorHandler: React.FC<
       onSuccess?.();
     },
   });
-  useFormErrorHandler(sendMessageMutation.error as any, { focusFirstError: true });
+  useFormErrorHandler(sendMessageMutation.error, { focusFirstError: true });
   const fieldError = (name: keyof WhatsAppMessageFormData) => {
     const error = form.formState.errors[name];
     return typeof error?.message === 'string' ? error.message : undefined;
@@ -57,7 +57,7 @@ export const WhatsAppMessageFormWithErrorHandler: React.FC<
       <CardContent>
         <FormWrapper
           onSubmit={onSubmit}
-          error={sendMessageMutation.error as any}
+          error={sendMessageMutation.error}
           isLoading={form.formState.isSubmitting || sendMessageMutation.isPending}
           focusFirstError
         >

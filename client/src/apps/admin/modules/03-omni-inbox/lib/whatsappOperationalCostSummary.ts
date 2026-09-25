@@ -2,6 +2,7 @@ export type OperationalCostRow = {
   id?: number | string;
   phoneNumber?: string;
   conversationCost?: number | string | null;
+  totalCost?: number | string | null;
   pricingModel?: string | null;
   pricingCategory?: string | null;
   billable?: boolean | null;
@@ -26,12 +27,14 @@ export function createOperationalCostSummary(
   rows: OperationalCostRow[] | undefined | null
 ): OperationalCostSummary {
   const conversations = rows ?? [];
-  const costRows = conversations.filter(
-    (item) => item.conversationCost !== null && item.conversationCost !== undefined
-  );
-  const totalCost = costRows.reduce((total, item) => total + Number(item.conversationCost || 0), 0);
+  const getCost = (item: OperationalCostRow) => item.totalCost ?? item.conversationCost;
+  const costRows = conversations.filter((item) => {
+    const cost = getCost(item);
+    return cost !== null && cost !== undefined;
+  });
+  const totalCost = costRows.reduce((total, item) => total + Number(getCost(item) || 0), 0);
   const highCostConversations = costRows.filter(
-    (item) => Number(item.conversationCost || 0) > HIGH_COST_CONVERSATION_THRESHOLD
+    (item) => Number(getCost(item) || 0) > HIGH_COST_CONVERSATION_THRESHOLD
   );
 
   return {
@@ -42,7 +45,7 @@ export function createOperationalCostSummary(
     billableCount: conversations.filter((item) => Boolean(item.billable)).length,
     highCostCount: highCostConversations.length,
     highCostTotal: highCostConversations.reduce(
-      (total, item) => total + Number(item.conversationCost || 0),
+      (total, item) => total + Number(getCost(item) || 0),
       0
     ),
     highCostConversations,

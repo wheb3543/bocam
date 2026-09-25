@@ -1,9 +1,45 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, ExternalLink, Phone, Navigation, Layers } from 'lucide-react';
 
+type LeafletLayer = {
+  addTo: (map: LeafletMap) => LeafletLayer;
+};
+
+type LeafletMap = {
+  addLayer: (layer: LeafletLayer) => LeafletMap;
+  removeLayer: (layer: LeafletLayer) => LeafletMap;
+  remove: () => void;
+  flyTo: (
+    center: [number, number],
+    options: { zoom: number; duration: number; easeLinearity: number }
+  ) => LeafletMap;
+};
+
+type LeafletMarker = {
+  addTo: (map: LeafletMap) => LeafletMarker;
+  bindPopup: (content: string, options?: { maxWidth?: number }) => LeafletMarker;
+  on: (event: string, handler: () => void) => LeafletMarker;
+  setIcon: (icon: LeafletIcon) => LeafletMarker;
+  openPopup: () => LeafletMarker;
+};
+
+type LeafletIcon = {
+  addTo: (map: LeafletMap) => LeafletLayer;
+};
+
+type LeafletApi = {
+  map: (container: HTMLElement, options: Record<string, unknown>) => LeafletMap;
+  tileLayer: (url: string, options: Record<string, unknown>) => LeafletLayer;
+  marker: (position: [number, number], options: { icon: LeafletIcon }) => LeafletMarker;
+  divIcon: (options: Record<string, unknown>) => LeafletIcon;
+  control: {
+    zoom: (options: { position: string }) => LeafletLayer;
+  };
+};
+
 declare global {
   interface Window {
-    L?: any;
+    L?: LeafletApi;
   }
 }
 
@@ -138,9 +174,9 @@ export default function SghBranchesMap() {
   const [mapReady, setMapReady] = useState(false);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<{ [key: string]: any }>({});
-  const layersRef = useRef<{ roadmap?: any; satellite?: any }>({});
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markersRef = useRef<Record<string, LeafletMarker>>({});
+  const layersRef = useRef<{ roadmap?: LeafletLayer; satellite?: LeafletLayer }>({});
 
   const filteredBranches = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -195,12 +231,13 @@ export default function SghBranchesMap() {
 
   // Initialize Map with Google Maps Tiles via Leaflet
   const initMap = useCallback(() => {
-    if (!mapContainerRef.current || !window.L || mapInstanceRef.current) {
+    const leaflet = window.L;
+    if (!mapContainerRef.current || !leaflet || mapInstanceRef.current) {
       return;
     }
 
     try {
-      const map = window.L.map(mapContainerRef.current, {
+      const map = leaflet.map(mapContainerRef.current, {
         center: [15.3694, 44.191],
         zoom: 7,
         zoomControl: false,
@@ -208,14 +245,14 @@ export default function SghBranchesMap() {
       });
 
       // Add Zoom Control at bottom left (RTL friendly)
-      window.L.control
+      leaflet.control
         .zoom({
           position: 'bottomleft',
         })
         .addTo(map);
 
       // Google Maps Roadmap Tiles Layer (High-res, in Arabic)
-      const roadmapLayer = window.L.tileLayer(
+      const roadmapLayer = leaflet.tileLayer(
         'https://mt{s}.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}',
         {
           subdomains: ['0', '1', '2', '3'],
@@ -224,7 +261,7 @@ export default function SghBranchesMap() {
       );
 
       // Google Maps Satellite / Hybrid Layer
-      const satelliteLayer = window.L.tileLayer(
+      const satelliteLayer = leaflet.tileLayer(
         'https://mt{s}.google.com/vt/lyrs=y&hl=ar&x={x}&y={y}&z={z}',
         {
           subdomains: ['0', '1', '2', '3'],
@@ -239,14 +276,14 @@ export default function SghBranchesMap() {
       // Add Markers
       BRANCHES.forEach((branch) => {
         const isSelected = branch.id === 'sanaa';
-        const icon = window.L.divIcon({
+        const icon = leaflet.divIcon({
           className: 'custom-sgh-pin',
           html: createPinHtml(isSelected),
           iconSize: [34, 46],
           iconAnchor: [17, 46],
         });
 
-        const marker = window.L.marker([branch.lat, branch.lng], { icon }).addTo(map);
+        const marker = leaflet.marker([branch.lat, branch.lng], { icon }).addTo(map);
 
         // Custom InfoWindow Popup
         const popupContent = `
@@ -329,7 +366,8 @@ export default function SghBranchesMap() {
     (branchId: string, zoomIn: boolean = true) => {
       setSelectedId(branchId);
       const branch = BRANCHES.find((b) => b.id === branchId);
-      if (!branch || !window.L) {
+      const leaflet = window.L;
+      if (!branch || !leaflet) {
         return;
       }
 
@@ -337,7 +375,7 @@ export default function SghBranchesMap() {
       Object.entries(markersRef.current).forEach(([id, marker]) => {
         if (marker) {
           const isSelected = id === branchId;
-          const newIcon = window.L.divIcon({
+          const newIcon = leaflet.divIcon({
             className: 'custom-sgh-pin',
             html: createPinHtml(isSelected),
             iconSize: [34, 46],

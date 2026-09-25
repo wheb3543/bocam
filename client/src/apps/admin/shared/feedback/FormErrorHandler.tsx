@@ -1,10 +1,33 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { TRPCClientError } from '@trpc/client';
 import { ValidationErrorAlert } from './ValidationErrorAlert';
 import { FieldError } from './FieldError';
 
+type TRPCErrorPayload = {
+  code?: string;
+  zodError?: unknown;
+};
+
+type ZodIssue = {
+  path: Array<string | number>;
+  message: string;
+};
+
+function isZodIssue(value: unknown): value is ZodIssue {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const issue = value as { path?: unknown; message?: unknown };
+  return Array.isArray(issue.path) && typeof issue.message === 'string';
+}
+
+type FormError = {
+  data?: unknown;
+  message: string;
+} | null;
+
 export interface FormErrorHandlerProps {
-  error: TRPCClientError<any> | null;
+  error: FormError;
   isLoading?: boolean;
   onErrorsChange?: (errors: Record<string, string[]> | null) => void;
   focusFirstError?: boolean;
@@ -14,17 +37,17 @@ export interface FormErrors {
   [key: string]: string[];
 }
 
-export function extractTRPCErrors(error: TRPCClientError<any> | null): FormErrors | null {
+export function extractTRPCErrors(error: FormError): FormErrors | null {
   if (!error) {
     return null;
   }
 
   try {
-    const data = error.data as any;
+    const data = error.data as unknown as TRPCErrorPayload;
 
-    if (data?.code === 'BAD_REQUEST' && data?.zodError) {
+    if (data.code === 'BAD_REQUEST' && Array.isArray(data.zodError)) {
       const errors: FormErrors = {};
-      data.zodError.forEach((err: any) => {
+      data.zodError.filter(isZodIssue).forEach((err) => {
         const path = err.path.join('.');
         if (!errors[path]) {
           errors[path] = [];
@@ -94,7 +117,7 @@ export const FormErrorHandler: React.FC<FormErrorHandlerProps> = ({
 };
 
 export function useFormErrorHandler(
-  error: TRPCClientError<any> | null,
+  error: FormError,
   options?: {
     onErrorsChange?: (errors: FormErrors | null) => void;
     focusFirstError?: boolean;
@@ -120,7 +143,7 @@ export function useFormErrorHandler(
 
 export interface FormWrapperProps {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-  error?: TRPCClientError<any> | null;
+  error?: FormError;
   isLoading?: boolean;
   children: React.ReactNode;
   className?: string;

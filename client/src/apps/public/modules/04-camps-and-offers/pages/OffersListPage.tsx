@@ -59,6 +59,11 @@ function OffersListContent() {
     section: 'offers',
     type: 'title',
   });
+  const { data: heroDescriptionData } = usePublicTextContent({
+    key: `offers.list.hero.description.${language}`,
+    section: 'offers',
+    type: 'description',
+  });
   const { data: searchPlaceholderData } = usePublicTextContent({
     key: `offers.list.search.placeholder.${language}`,
     section: 'offers',
@@ -122,6 +127,7 @@ function OffersListContent() {
 
   // Extract content from data
   const heroTitle = heroTitleData?.data?.[0]?.content || 'عروضنا الطبية المميزة';
+  const heroDescription = heroDescriptionData?.data?.[0]?.content || '';
   const searchPlaceholder = searchPlaceholderData?.data?.[0]?.content || 'ابحث عن عرض...';
   const activeTabLabel = activeTabLabelData?.data?.[0]?.content || 'العروض الجارية';
   const expiredTabLabel = expiredTabLabelData?.data?.[0]?.content || 'المنتهية';
@@ -265,7 +271,11 @@ function OffersListContent() {
   return (
     <div className="space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
-      <PublicPageHeader title={heroTitle} backgroundImage="/sgh/doctors-banner.png" />
+      <PublicPageHeader
+        title={heroTitle}
+        subtitle={heroDescription}
+        backgroundImage="/sgh/doctors-banner.png"
+      />
 
       {/* Search Section */}
       <section className="py-4 sm:py-6 md:py-8 bg-white dark:bg-card shadow-sm">
