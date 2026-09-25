@@ -11,6 +11,17 @@ import { useState, useCallback } from 'react';
  *
  * @returns {object} - حالة الشريط ودوال التحكم
  */
+const SIDEBAR_STORAGE_KEY = 'bocam_sidebar_expanded';
+
+function writeSidebarStorage(value: boolean): boolean {
+  try {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function useSidebarState() {
   const [isExpanded, setIsExpanded] = useState<boolean>(() => {
     try {
@@ -26,16 +37,10 @@ export function useSidebarState() {
   const toggleExpanded = useCallback(() => {
     setIsExpanded((prev) => {
       const next = !prev;
-      try {
-        localStorage.setItem('bocam_sidebar_expanded', JSON.stringify(next));
-      } catch {}
+      writeSidebarStorage(next);
       return next;
     });
   }, []);
-
-  // دوال الـ hover أصبحت no-op للتوافق العكسي
-  const handleMouseEnter = useCallback(() => {}, []);
-  const handleMouseLeave = useCallback(() => {}, []);
 
   const toggleMobile = useCallback(() => {
     setIsMobileOpen((prev) => !prev);
@@ -55,8 +60,6 @@ export function useSidebarState() {
     shouldShowText,
     isHomePage: false,
     toggleExpanded,
-    handleMouseEnter,
-    handleMouseLeave,
     toggleMobile,
     closeMobile,
   };

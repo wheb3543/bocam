@@ -48,6 +48,33 @@ interface DesktopSidebarProps {
 
 const STORAGE_OPEN_GROUPS_KEY = 'bocam_sidebar_open_groups';
 
+const DEFAULT_OPEN_GROUPS: Record<string, boolean> = {
+  'إدارة الحجوزات': true,
+  التواصل: true,
+};
+
+function readOpenGroups(): Record<string, boolean> {
+  try {
+    const saved = localStorage.getItem(STORAGE_OPEN_GROUPS_KEY);
+    if (saved) {
+      return JSON.parse(saved) as Record<string, boolean>;
+    }
+  } catch {
+    return DEFAULT_OPEN_GROUPS;
+  }
+
+  return DEFAULT_OPEN_GROUPS;
+}
+
+function writeOpenGroups(value: Record<string, boolean>): boolean {
+  try {
+    localStorage.setItem(STORAGE_OPEN_GROUPS_KEY, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Quick access pinned favorites
 const quickAccessConfig = [
   { id: 'home', title: 'الرئيسية', href: '/system/dashboard', icon: Home },
@@ -80,26 +107,12 @@ export default function DesktopSidebar({
   const [searchQuery, setSearchQuery] = useState('');
 
   // Accordion open/close state with localStorage persistence
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_OPEN_GROUPS_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch {}
-    // Default open groups
-    return {
-      'إدارة الحجوزات': true,
-      التواصل: true,
-    };
-  });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(readOpenGroups);
 
   const toggleGroup = useCallback((label: string) => {
     setOpenGroups((prev) => {
       const next = { ...prev, [label]: !prev[label] };
-      try {
-        localStorage.setItem(STORAGE_OPEN_GROUPS_KEY, JSON.stringify(next));
-      } catch {}
+      writeOpenGroups(next);
       return next;
     });
   }, []);
@@ -112,9 +125,7 @@ export default function DesktopSidebar({
     if (activeGroup && !openGroups[activeGroup.label]) {
       setOpenGroups((prev) => {
         const next = { ...prev, [activeGroup.label]: true };
-        try {
-          localStorage.setItem(STORAGE_OPEN_GROUPS_KEY, JSON.stringify(next));
-        } catch {}
+        writeOpenGroups(next);
         return next;
       });
     }
