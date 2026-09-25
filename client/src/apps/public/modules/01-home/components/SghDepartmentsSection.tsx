@@ -1,58 +1,15 @@
 import { Link } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { resolveDepartmentImage } from '../../03-medical-directory/utils/departmentMedia';
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface DepartmentItem {
-  id: string;
-  title: string;
-  image: string;
-  href: string;
-}
+const MAX_DEPARTMENTS = 7;
 
 export default function SghDepartmentsSection() {
-  // Ordered exactly as displayed in SGH Hail reference site (Row 1: Pediatrics, Internal, Surgery | Row 2: ObGyn, Cardiology, Orthopedics | Row 3: Urology)
-  const departments: DepartmentItem[] = [
-    {
-      id: 'pediatrics',
-      title: 'طب الأطفال وحديثي الولادة',
-      image: '/sgh/departments/pediatrics.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'internal',
-      title: 'الطب الباطني',
-      image: '/sgh/departments/internal.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'surgery',
-      title: 'الجراحة العامة والتخصصية',
-      image: '/sgh/departments/surgery.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'obgyn',
-      title: 'قسم أمراض النساء والتوليد',
-      image: '/sgh/departments/obgyn.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'cardiology',
-      title: 'طب القلب وجراحة القلب والصدر',
-      image: '/sgh/departments/cardiology.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'orthopedics',
-      title: 'طب العظام ورعاية الإصابات',
-      image: '/sgh/departments/orthopedics.jpg',
-      href: '/departments',
-    },
-    {
-      id: 'urology',
-      title: 'قسم المسالك البولية',
-      image: '/sgh/departments/urology.jpg',
-      href: '/departments',
-    },
-  ];
+  const { data: departments, isLoading, isError } = trpc.departments.list.useQuery();
+
+  // Keep the department order defined in the admin database, and show only the first seven.
+  const visibleDepartments = (departments ?? []).slice(0, MAX_DEPARTMENTS);
 
   return (
     <section
@@ -107,15 +64,34 @@ export default function SghDepartmentsSection() {
 
             {/* Department Cards Mosaic Grid (3 Columns, 110% aspect ratio, 30px rounded corners) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {departments.map((dept) => (
-                <div key={dept.id} className="department-item w-full">
-                  <Link href={dept.href}>
+              {isLoading &&
+                [...Array(MAX_DEPARTMENTS)].map((_, index) => (
+                  <div key={`department-skeleton-${index}`} className="w-full">
+                    <Skeleton className="w-full pt-[60%] sm:pt-[110%] rounded-[10px] sm:rounded-[30px]" />
+                  </div>
+                ))}
+
+              {isError && (
+                <p className="col-span-full py-10 text-center text-sm text-[#667085]">
+                  تعذر تحميل الأقسام الطبية حالياً.
+                </p>
+              )}
+
+              {!isLoading && !isError && visibleDepartments.length === 0 && (
+                <p className="col-span-full py-10 text-center text-sm text-[#667085]">
+                  لا توجد أقسام طبية متاحة حالياً.
+                </p>
+              )}
+
+              {visibleDepartments.map((department) => (
+                <div key={department.id} className="department-item w-full">
+                  <Link href={`/departments/${department.slug}`}>
                     <div className="node-title block cursor-pointer">
                       {/* Card with 60% height padding on mobile and 110% on desktop, 10px radius on mobile and 30px on desktop */}
                       <span
                         className="relative block w-full pt-[60%] sm:pt-[110%] rounded-[10px] sm:rounded-[30px] overflow-hidden shadow-[0_0_20px_rgba(0,0,0,0.19)] transition-transform duration-500 hover:scale-[1.03] bg-cover bg-center bg-no-repeat"
                         style={{
-                          backgroundImage: `url(${dept.image})`,
+                          backgroundImage: `url(${resolveDepartmentImage(department)})`,
                         }}
                       >
                         {/* Title Pill Tab anchored to the RIGHT edge with rounded-l-[20px] on mobile, rounded-l-[30px] on desktop */}
@@ -126,7 +102,7 @@ export default function SghDepartmentsSection() {
                               'linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.42) 100%)',
                           }}
                         >
-                          {dept.title}
+                          {department.name}
                         </h3>
                       </span>
                     </div>
