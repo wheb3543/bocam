@@ -8,11 +8,9 @@ import { router } from '../../../_core/trpc';
 import { getDb } from '../../../database/db';
 import { auditLogs } from '../../../../drizzle/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
-import { createLogger } from '../../../_core/logger';
 import { permissionProcedure } from '../../07-users-rbac/routers/permissionProcedures';
 import { createAuditLog } from '../services/auditLogService';
 
-const logger = createLogger('auditLogs');
 const auditViewProcedure = permissionProcedure('audit.view', 'عرض سجل التدقيق');
 
 export { createAuditLog };

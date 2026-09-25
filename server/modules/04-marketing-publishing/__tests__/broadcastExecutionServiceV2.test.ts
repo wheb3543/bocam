@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 import {
   buildMetaTemplateComponents,
   buildMetaTemplateMessagePayload,
@@ -126,7 +126,7 @@ describe("getInsertedBroadcastId", () => {
     const requestSpy = vi.spyOn(axios, "get").mockResolvedValue({
       headers: { "content-type": "image/jpeg" },
       data: { destroy: vi.fn() },
-    } as any);
+    } as unknown as AxiosResponse);
 
     await expect(validatePublicHeaderImageUrl("https://cdn.example.com/doctor.jpg")).resolves.toBe(
       "https://cdn.example.com/doctor.jpg"

@@ -100,6 +100,10 @@ function resolveSessionToken(cookieHeader?: string): string {
   return parsed[COOKIE_NAME] || parsed['admin_session'] || '';
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
 export const broadcastSchedulingRouter = router({
   createScheduledBroadcast: protectedProcedure
     .input(
@@ -135,10 +139,10 @@ export const broadcastSchedulingRouter = router({
           },
           sessionToken
         );
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: error.message || 'Failed to create scheduled broadcast',
+          message: getErrorMessage(error, 'Failed to create scheduled broadcast'),
         });
       }
     }),
@@ -162,10 +166,10 @@ export const broadcastSchedulingRouter = router({
           input.scheduledTime
         );
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: error.message || 'Failed to schedule broadcast',
+          message: getErrorMessage(error, 'Failed to schedule broadcast'),
         });
       }
     }),
@@ -189,10 +193,10 @@ export const broadcastSchedulingRouter = router({
           input.scheduledTime
         );
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: error.message || 'Failed to update scheduled broadcast',
+          message: getErrorMessage(error, 'Failed to update scheduled broadcast'),
         });
       }
     }),
@@ -206,10 +210,10 @@ export const broadcastSchedulingRouter = router({
       try {
         const result = await broadcastSchedulerService.cancelScheduledBroadcast(input.broadcastId);
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
-          message: error.message || 'Failed to cancel scheduled broadcast',
+          message: getErrorMessage(error, 'Failed to cancel scheduled broadcast'),
         });
       }
     }),
@@ -228,10 +232,10 @@ export const broadcastSchedulingRouter = router({
       const broadcasts = await broadcastSchedulerService.getScheduledBroadcasts();
       const sessionToken = resolveSessionToken(ctx.req.headers.cookie);
       return attachHeartbeatStatus(broadcasts, sessionToken);
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
-        message: error.message || 'Failed to fetch scheduled broadcasts',
+        message: getErrorMessage(error, 'Failed to fetch scheduled broadcasts'),
       });
     }
   }),

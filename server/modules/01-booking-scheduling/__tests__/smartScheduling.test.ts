@@ -10,6 +10,7 @@ import {
   ensurePatientAccount,
 } from '../../../services/schedulingService';
 import * as databaseGuard from '../../../_core/databaseGuard';
+import type { Database } from '../../../database/db/connection';
 
 vi.mock('../../../_core/databaseGuard');
 vi.mock('../../../_core/logger', () => ({
@@ -21,8 +22,16 @@ vi.mock('../../../_core/logger', () => ({
 }));
 
 describe('Smart Scheduling Service (خدمة الجدولة الذكية)', () => {
-  let mockDb: any;
-  let resultsQueue: any[];
+  type MockQueryBuilder = {
+    from: ReturnType<typeof vi.fn>;
+    where: ReturnType<typeof vi.fn>;
+    orderBy: ReturnType<typeof vi.fn>;
+    limit: ReturnType<typeof vi.fn>;
+    then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) => Promise<unknown>;
+  };
+
+  let mockDb: Database;
+  let resultsQueue: unknown[];
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -30,19 +39,22 @@ describe('Smart Scheduling Service (خدمة الجدولة الذكية)', () =
 
     mockDb = {
       select: vi.fn().mockImplementation(() => {
-        const qb: any = {
-          from: vi.fn().mockImplementation(() => qb),
-          where: vi.fn().mockImplementation(() => qb),
-          orderBy: vi.fn().mockImplementation(() => qb),
+        const qb: MockQueryBuilder = {
+          from: vi.fn(),
+          where: vi.fn(),
+          orderBy: vi.fn(),
           limit: vi.fn().mockImplementation(() => {
             const res = resultsQueue.shift() ?? [];
             return Promise.resolve(res);
           }),
-          then: (resolve: any, reject: any) => {
+          then: (resolve: (value: unknown) => unknown, reject: (reason?: unknown) => unknown) => {
             const res = resultsQueue.shift() ?? [];
             return Promise.resolve(res).then(resolve, reject);
           },
         };
+        qb.from.mockImplementation(() => qb);
+        qb.where.mockImplementation(() => qb);
+        qb.orderBy.mockImplementation(() => qb);
         return qb;
       }),
       insert: vi.fn().mockImplementation(() => ({
@@ -57,7 +69,7 @@ describe('Smart Scheduling Service (خدمة الجدولة الذكية)', () =
           return Promise.resolve(res);
         }),
       })),
-    };
+    } as unknown as Database;
 
     vi.spyOn(databaseGuard, 'ensureDatabaseAvailable').mockResolvedValue(mockDb);
   });

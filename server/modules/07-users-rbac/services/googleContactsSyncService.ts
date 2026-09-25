@@ -3,7 +3,9 @@
  * خدمة مزامنة جهات الاتصال مع Google Contacts
  */
 
+import type { ContactSyncLog } from '../../../../drizzle/schema';
 import { getDb, normalizePhoneNumber } from '../../../database/db';
+import type { Database } from '../../../database/db/connection';
 import {
   contactSyncLogs,
   appointments,
@@ -16,7 +18,7 @@ import { eq, inArray, desc } from 'drizzle-orm';
 interface GoogleContact {
   id?: string;
   name: string;
-  email?: string;
+  email?: string | null;
   phone?: string;
   notes?: string;
 }
@@ -73,7 +75,8 @@ export class GoogleContactsSyncService {
       });
 
       const syncLogHeader = Array.isArray(syncLog) ? syncLog[0] : syncLog;
-      const syncLogId = Number((syncLogHeader as any)?.insertId) || 0;
+      const syncLogId =
+        Number((syncLogHeader as { insertId?: unknown } | undefined)?.insertId) || 0;
 
       // مزامنة الجهات مع Google
       let syncedCount = 0;
@@ -125,14 +128,14 @@ export class GoogleContactsSyncService {
    * جلب الجهات من المصادر المختلفة
    */
   private static async getContactsFromSources(
-    db: any,
+    db: Database,
     filterCriteria?: {
       recipientSources?: ('appointments' | 'camp_registrations' | 'offer_leads' | 'leads')[];
       statuses?: string[];
     }
   ): Promise<GoogleContact[]> {
     const contacts: GoogleContact[] = [];
-    const statuses = filterCriteria?.statuses as any[] | undefined;
+    const statuses = filterCriteria?.statuses;
     const sources = filterCriteria?.recipientSources || [
       'appointments',
       'camp_registrations',
@@ -140,15 +143,21 @@ export class GoogleContactsSyncService {
       'leads',
     ];
 
-    // جلب من حجوزات الأطباء
+    const appointmentsQuery = statuses?.length
+      ? db
+          .select()
+          .from(appointments)
+          .where(
+            inArray(
+              appointments.status,
+              statuses as Array<(typeof appointments.status.enumValues)[number]>
+            )
+          )
+      : db.select().from(appointments);
     if (sources.includes('appointments')) {
-      let appointmentsQuery = db.select().from(appointments);
-      if (filterCriteria?.statuses?.length) {
-        appointmentsQuery = appointmentsQuery.where(inArray(appointments.status, statuses as any));
-      }
       const appointmentsList = await appointmentsQuery;
       contacts.push(
-        ...appointmentsList.map((a: any) => ({
+        ...appointmentsList.map((a) => ({
           name: a.fullName,
           email: a.email,
           phone: normalizePhoneNumber(a.phone),
@@ -157,17 +166,21 @@ export class GoogleContactsSyncService {
       );
     }
 
-    // جلب من تسجيلات المخيمات
+    const campRegistrationsQuery = statuses?.length
+      ? db
+          .select()
+          .from(campRegistrations)
+          .where(
+            inArray(
+              campRegistrations.status,
+              statuses as Array<(typeof campRegistrations.status.enumValues)[number]>
+            )
+          )
+      : db.select().from(campRegistrations);
     if (sources.includes('camp_registrations')) {
-      let campRegistrationsQuery = db.select().from(campRegistrations);
-      if (filterCriteria?.statuses?.length) {
-        campRegistrationsQuery = campRegistrationsQuery.where(
-          inArray(campRegistrations.status, statuses as any)
-        );
-      }
       const campRegsList = await campRegistrationsQuery;
       contacts.push(
-        ...campRegsList.map((c: any) => ({
+        ...campRegsList.map((c) => ({
           name: c.fullName,
           email: c.email,
           phone: normalizePhoneNumber(c.phone),
@@ -176,15 +189,21 @@ export class GoogleContactsSyncService {
       );
     }
 
-    // جلب من طلبات العروض
+    const offerLeadsQuery = statuses?.length
+      ? db
+          .select()
+          .from(offerLeads)
+          .where(
+            inArray(
+              offerLeads.status,
+              statuses as Array<(typeof offerLeads.status.enumValues)[number]>
+            )
+          )
+      : db.select().from(offerLeads);
     if (sources.includes('offer_leads')) {
-      let offerLeadsQuery = db.select().from(offerLeads);
-      if (filterCriteria?.statuses?.length) {
-        offerLeadsQuery = offerLeadsQuery.where(inArray(offerLeads.status, statuses as any));
-      }
       const offerLeadsList = await offerLeadsQuery;
       contacts.push(
-        ...offerLeadsList.map((o: any) => ({
+        ...offerLeadsList.map((o) => ({
           name: o.fullName,
           email: o.email,
           phone: normalizePhoneNumber(o.phone),
@@ -193,15 +212,16 @@ export class GoogleContactsSyncService {
       );
     }
 
-    // جلب من العملاء المحتملين
+    const leadsQuery = statuses?.length
+      ? db
+          .select()
+          .from(leads)
+          .where(inArray(leads.status, statuses as Array<(typeof leads.status.enumValues)[number]>))
+      : db.select().from(leads);
     if (sources.includes('leads')) {
-      let leadsQuery = db.select().from(leads);
-      if (filterCriteria?.statuses?.length) {
-        leadsQuery = leadsQuery.where(inArray(leads.status, statuses as any));
-      }
       const leadsList = await leadsQuery;
       contacts.push(
-        ...leadsList.map((l: any) => ({
+        ...leadsList.map((l) => ({
           name: l.fullName,
           email: l.email,
           phone: normalizePhoneNumber(l.phone),
@@ -289,7 +309,7 @@ export class GoogleContactsSyncService {
   /**
    * جلب سجلات المزامنة
    */
-  static async getSyncLogs(limit: number = 20): Promise<any[]> {
+  static async getSyncLogs(limit: number = 20): Promise<ContactSyncLog[]> {
     const db = await getDb();
     if (!db) {
       return [];
@@ -318,7 +338,7 @@ export class GoogleContactsSyncService {
   /**
    * الحصول على حالة المزامنة
    */
-  static async getSyncStatus(syncLogId: number): Promise<any> {
+  static async getSyncStatus(syncLogId: number): Promise<ContactSyncLog | null> {
     const db = await getDb();
     if (!db) {
       return null;

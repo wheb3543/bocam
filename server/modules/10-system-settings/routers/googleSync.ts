@@ -70,7 +70,7 @@ export const googleSyncRouter = router({
         const logs = await GoogleContactsSyncService.getSyncLogs(input.limit);
         return {
           success: true,
-          data: logs.map((log: any) => ({
+          data: logs.map((log) => ({
             id: log.id,
             syncType: log.syncType,
             totalContacts: log.totalContacts,

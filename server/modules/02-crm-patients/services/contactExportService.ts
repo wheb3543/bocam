@@ -5,10 +5,12 @@
 
 import { getDb, normalizePhoneNumber } from '../../../database/db';
 import { contactExports } from '../../../../drizzle/schema';
+import type { ContactExport } from '../../../../drizzle/schema';
 import type { RecipientInfo } from '../../../services/broadcastRecipientService';
 import { buildRecipientList } from '../../../services/broadcastRecipientService';
 import type { BroadcastFilterCriteria } from '../../../_core/broadcastValidation';
 import { eq, and, desc } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 
 /**
  * تصدير الجهات إلى VCF
@@ -144,7 +146,7 @@ export async function logExport(
   });
 
   const resultHeader = Array.isArray(result) ? result[0] : result;
-  const insertId = Number((resultHeader as any)?.insertId);
+  const insertId = Number((resultHeader as { insertId?: unknown } | undefined)?.insertId);
   return Number.isSafeInteger(insertId) ? insertId : 0;
 }
 
@@ -157,7 +159,7 @@ export async function getExportLogs(
   exportType?: 'vcf' | 'csv' | 'google_sync',
   status?: 'pending' | 'processing' | 'completed' | 'failed'
 ): Promise<{
-  logs: any[];
+  logs: ContactExport[];
   total: number;
   page: number;
   limit: number;
@@ -167,7 +169,7 @@ export async function getExportLogs(
     throw new Error('قاعدة البيانات غير متاحة');
   }
 
-  const conditions = [];
+  const conditions: SQL[] = [];
   if (exportType) {
     conditions.push(eq(contactExports.exportType, exportType));
   }
@@ -175,17 +177,11 @@ export async function getExportLogs(
     conditions.push(eq(contactExports.status, status));
   }
 
-  let query = db.select().from(contactExports);
-
-  if (conditions.length > 0) {
-    query = (query as any).where(and(...conditions));
-  }
+  const baseQuery = db.select().from(contactExports);
+  const query = conditions.length > 0 ? baseQuery.where(and(...conditions)) : baseQuery;
 
   const offset = (page - 1) * limit;
-  const logs = await (query as any)
-    .orderBy(desc(contactExports.createdAt))
-    .limit(limit)
-    .offset(offset);
+  const logs = await query.orderBy(desc(contactExports.createdAt)).limit(limit).offset(offset);
 
   const countResult = await db.select({ count: contactExports.id }).from(contactExports);
   const total = countResult.length || 0;

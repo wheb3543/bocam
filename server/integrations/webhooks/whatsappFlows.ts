@@ -1,15 +1,29 @@
 import crypto from 'crypto';
 
-export function extractWhatsAppFlowStatus(value: Record<string, any>) {
-  const error = value.error ?? value.errors?.[0];
-  const latency = value.latency_ms ?? value.latency ?? value.metrics?.latency_ms;
+type JsonRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is JsonRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function toNullableString(value: unknown): string | null {
+  return value === null || value === undefined ? null : String(value);
+}
+
+export function extractWhatsAppFlowStatus(value: unknown) {
+  const data = isRecord(value) ? value : {};
+  const errorValue = data.error ?? (Array.isArray(data.errors) ? data.errors[0] : undefined);
+  const error = isRecord(errorValue) ? errorValue : undefined;
+  const metrics = isRecord(data.metrics) ? data.metrics : {};
+  const latency = data.latency_ms ?? data.latency ?? metrics.latency_ms;
+
   return {
-    flowId: value.flow_id ?? value.flow?.id ?? null,
-    eventName: String(value.event ?? value.event_type ?? 'FLOW_STATUS_CHANGE'),
-    status: value.flow_status ?? value.status ?? null,
-    availability: value.availability ?? value.availability_status ?? null,
+    flowId: toNullableString(data.flow_id ?? (isRecord(data.flow) ? data.flow.id : undefined)),
+    eventName: String(data.event ?? data.event_type ?? 'FLOW_STATUS_CHANGE'),
+    status: toNullableString(data.flow_status ?? data.status),
+    availability: toNullableString(data.availability ?? data.availability_status),
     latencyMs: Number.isFinite(Number(latency)) ? Number(latency) : null,
-    errorCode: error?.code ? String(error.code) : null,
+    errorCode: toNullableString(error?.code),
     errorMessage: error?.message ? String(error.message).slice(0, 1000) : null,
   };
 }
@@ -18,12 +32,10 @@ export function extractWhatsAppFlowStatus(value: Record<string, any>) {
  * يستخرج معلومات تشغيلية من nfm_reply من دون حفظ قيم النموذج التي قد تكون حساسة،
  * بل يحتفظ فقط بمفاتيح الحقول وبصمة التوكن.
  */
-export function extractWhatsAppFlowReply(
-  interactive: Record<string, any>,
-  contextMessageId?: string | null
-) {
-  const reply = interactive.nfm_reply;
-  if (interactive.type !== 'nfm_reply' || !reply) {
+export function extractWhatsAppFlowReply(interactive: unknown, contextMessageId?: string | null) {
+  const interactiveData = isRecord(interactive) ? interactive : {};
+  const reply = isRecord(interactiveData.nfm_reply) ? interactiveData.nfm_reply : undefined;
+  if (interactiveData.type !== 'nfm_reply' || !reply) {
     return null;
   }
   let responseKeys: string[] = [];

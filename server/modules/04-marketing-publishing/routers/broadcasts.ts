@@ -87,7 +87,7 @@ export const broadcastRouter = router({
    */
   sendBroadcast: protectedProcedure.input(SendBroadcastSchema).mutation(async ({ input, ctx }) => {
     try {
-      const recipientResult = await buildRecipientList(input.filterCriteria as any);
+      const recipientResult = await buildRecipientList(input.filterCriteria);
 
       if (recipientResult.recipients.length === 0) {
         return {

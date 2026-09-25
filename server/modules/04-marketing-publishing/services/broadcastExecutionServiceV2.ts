@@ -12,7 +12,7 @@ import {
   doctors,
 } from '../../../../drizzle/schema';
 import { eq } from 'drizzle-orm';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 export function getInsertedBroadcastId(insertResult: unknown): number {
   const resultHeader = Array.isArray(insertResult) ? insertResult[0] : insertResult;
@@ -366,9 +366,10 @@ export class BroadcastExecutionServiceV2 {
               errorMessage,
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failedCount++;
-          const errorMessage = error?.message || 'Unexpected Meta send error';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unexpected Meta send error';
           await db
             .update(broadcastRecipients)
             .set({ status: 'failed', errorInfo: errorMessage })
@@ -456,14 +457,20 @@ export class BroadcastExecutionServiceV2 {
           error: response.data?.error?.message || 'Unknown error',
         };
       }
-    } catch (error: any) {
-      console.error(
-        '[BroadcastExecutionService] Meta API error:',
-        error.response?.data || error.message
-      );
+    } catch (error: unknown) {
+      const responseData = isAxiosError(error) ? error.response?.data : undefined;
+      const responseMessage =
+        typeof responseData === 'object' && responseData !== null && 'error' in responseData
+          ? String(
+              (responseData as { error?: { message?: unknown } }).error?.message ?? 'Unknown error'
+            )
+          : error instanceof Error
+            ? error.message
+            : 'Unknown error';
+      console.error('[BroadcastExecutionService] Meta API error:', responseData ?? responseMessage);
       return {
         success: false,
-        error: error.response?.data?.error?.message || error.message,
+        error: responseMessage,
       };
     }
   }
@@ -557,7 +564,10 @@ export class BroadcastExecutionServiceV2 {
         ...template,
         languageCode: template.languageCode || 'ar',
         variables: parseJson<string[]>(template.variables, []),
-        buttons: parseJson<any[]>(template.buttons, []),
+        buttons: parseJson<Array<{ type?: string; url?: string; example?: string[] }>>(
+          template.buttons,
+          []
+        ),
       };
     } catch (error) {
       console.error('[BroadcastExecutionService] Error fetching template:', error);

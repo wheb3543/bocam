@@ -11,6 +11,7 @@ import {
 } from '../../../../drizzle/schema';
 import type { RecipientInfo } from './broadcastRecipientService';
 import { eq, and, desc } from 'drizzle-orm';
+import type { BroadcastFilterCriteria } from '../../../_core/broadcastValidation';
 
 /**
  * معلومات البث
@@ -22,7 +23,7 @@ export interface BroadcastInfo {
   templateVariables?: Record<string, string>;
   mediaUrl?: string;
   mediaType?: 'image' | 'video' | 'document' | 'audio';
-  filterCriteria?: any;
+  filterCriteria?: BroadcastFilterCriteria;
   createdBy: number;
 }
 
@@ -67,7 +68,7 @@ export async function createBroadcast(broadcastInfo: BroadcastInfo): Promise<num
   });
 
   const resultHeader = Array.isArray(result) ? result[0] : result;
-  const insertId = Number((resultHeader as any)?.insertId);
+  const insertId = Number((resultHeader as { insertId?: unknown } | undefined)?.insertId);
   return Number.isSafeInteger(insertId) ? insertId : 0;
 }
 
@@ -149,7 +150,7 @@ export async function executeBroadcast(broadcastId: number): Promise<BroadcastEx
 
   for (const recipient of recipients) {
     try {
-      const result = await sendToRecipient(broadcast[0], recipient);
+      const result = await sendToRecipient();
 
       if (result.success) {
         sentCount++;
@@ -219,10 +220,7 @@ export async function executeBroadcast(broadcastId: number): Promise<BroadcastEx
   };
 }
 
-async function sendToRecipient(
-  broadcast: any,
-  recipient: any
-): Promise<{
+async function sendToRecipient(): Promise<{
   success: boolean;
   messageId?: string;
   error?: string;
@@ -314,9 +312,9 @@ export async function getBroadcastRecipients(
   broadcastId: number,
   page: number = 1,
   limit: number = 20,
-  status?: string
+  status?: (typeof broadcastRecipients.status.enumValues)[number]
 ): Promise<{
-  recipients: any[];
+  recipients: Array<typeof broadcastRecipients.$inferSelect>;
   total: number;
   page: number;
   limit: number;
@@ -328,7 +326,7 @@ export async function getBroadcastRecipients(
 
   const conditions = [eq(broadcastRecipients.broadcastId, broadcastId)];
   if (status) {
-    conditions.push(eq(broadcastRecipients.status, status as any));
+    conditions.push(eq(broadcastRecipients.status, status));
   }
 
   const offset = (page - 1) * limit;

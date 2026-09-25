@@ -4,8 +4,10 @@
  */
 
 import { getDb, normalizePhoneNumber } from '../../../database/db';
+import type { Database } from '../../../database/db/connection';
 import { appointments, campRegistrations, offerLeads, leads } from '../../../../drizzle/schema';
 import { inArray, and } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import type { BroadcastFilterCriteria } from '../../../_core/broadcastValidation';
 
 /**
@@ -14,7 +16,7 @@ import type { BroadcastFilterCriteria } from '../../../_core/broadcastValidation
 export interface RecipientInfo {
   phoneNumber: string;
   fullName?: string;
-  email?: string;
+  email?: string | null;
   recipientType: 'appointment' | 'camp_registration' | 'offer_lead' | 'lead';
   recipientId: number;
   sourceId: number;
@@ -181,8 +183,11 @@ export async function buildRecipientList(
 /**
  * جلب المستقبلين من حجوزات الأطباء
  */
-async function getAppointmentRecipients(db: any, filter?: any): Promise<RecipientInfo[]> {
-  let query = db
+async function getAppointmentRecipients(
+  db: Database,
+  filter?: BroadcastFilterCriteria['appointmentFilter']
+): Promise<RecipientInfo[]> {
+  const baseQuery = db
     .select({
       phoneNumber: appointments.phone,
       fullName: appointments.fullName,
@@ -191,28 +196,23 @@ async function getAppointmentRecipients(db: any, filter?: any): Promise<Recipien
       sourceId: appointments.id,
     })
     .from(appointments);
+  const conditions: SQL[] = [];
 
-  // تطبيق الفلاتر
-  if (filter) {
-    const conditions = [];
-
-    // فلتر الحالات
-    if (filter.statuses && filter.statuses.length > 0) {
-      conditions.push(inArray(appointments.status, filter.statuses));
-    }
-
-    // فلتر الأطباء
-    if (!filter.allDoctors && filter.doctorIds && filter.doctorIds.length > 0) {
-      conditions.push(inArray(appointments.doctorId, filter.doctorIds));
-    }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+  if (filter?.statuses?.length) {
+    conditions.push(
+      inArray(
+        appointments.status,
+        filter.statuses as Array<(typeof appointments.status.enumValues)[number]>
+      )
+    );
+  }
+  if (filter && !filter.allDoctors && filter.doctorIds?.length) {
+    conditions.push(inArray(appointments.doctorId, filter.doctorIds));
   }
 
+  const query = conditions.length ? baseQuery.where(and(...conditions)) : baseQuery;
   const results = await query;
-  return results.map((r: any) => ({
+  return results.map((r) => ({
     ...r,
     recipientType: 'appointment' as const,
     sourceType: 'appointment' as const,
@@ -222,8 +222,11 @@ async function getAppointmentRecipients(db: any, filter?: any): Promise<Recipien
 /**
  * جلب المستقبلين من تسجيلات المخيمات
  */
-async function getCampRegistrationRecipients(db: any, filter?: any): Promise<RecipientInfo[]> {
-  let query = db
+async function getCampRegistrationRecipients(
+  db: Database,
+  filter?: BroadcastFilterCriteria['campFilter']
+): Promise<RecipientInfo[]> {
+  const baseQuery = db
     .select({
       phoneNumber: campRegistrations.phone,
       fullName: campRegistrations.fullName,
@@ -232,28 +235,23 @@ async function getCampRegistrationRecipients(db: any, filter?: any): Promise<Rec
       sourceId: campRegistrations.campId,
     })
     .from(campRegistrations);
+  const conditions: SQL[] = [];
 
-  // تطبيق الفلاتر
-  if (filter) {
-    const conditions = [];
-
-    // فلتر الحالات
-    if (filter.statuses && filter.statuses.length > 0) {
-      conditions.push(inArray(campRegistrations.status, filter.statuses));
-    }
-
-    // فلتر المخيمات
-    if (!filter.allCamps && filter.campIds && filter.campIds.length > 0) {
-      conditions.push(inArray(campRegistrations.campId, filter.campIds));
-    }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+  if (filter?.statuses?.length) {
+    conditions.push(
+      inArray(
+        campRegistrations.status,
+        filter.statuses as Array<(typeof campRegistrations.status.enumValues)[number]>
+      )
+    );
+  }
+  if (filter && !filter.allCamps && filter.campIds?.length) {
+    conditions.push(inArray(campRegistrations.campId, filter.campIds));
   }
 
+  const query = conditions.length ? baseQuery.where(and(...conditions)) : baseQuery;
   const results = await query;
-  return results.map((r: any) => ({
+  return results.map((r) => ({
     ...r,
     recipientType: 'camp_registration' as const,
     sourceType: 'camp_registration' as const,
@@ -263,8 +261,11 @@ async function getCampRegistrationRecipients(db: any, filter?: any): Promise<Rec
 /**
  * جلب المستقبلين من طلبات العروض
  */
-async function getOfferLeadRecipients(db: any, filter?: any): Promise<RecipientInfo[]> {
-  let query = db
+async function getOfferLeadRecipients(
+  db: Database,
+  filter?: BroadcastFilterCriteria['offerFilter']
+): Promise<RecipientInfo[]> {
+  const baseQuery = db
     .select({
       phoneNumber: offerLeads.phone,
       fullName: offerLeads.fullName,
@@ -273,28 +274,23 @@ async function getOfferLeadRecipients(db: any, filter?: any): Promise<RecipientI
       sourceId: offerLeads.offerId,
     })
     .from(offerLeads);
+  const conditions: SQL[] = [];
 
-  // تطبيق الفلاتر
-  if (filter) {
-    const conditions = [];
-
-    // فلتر الحالات
-    if (filter.statuses && filter.statuses.length > 0) {
-      conditions.push(inArray(offerLeads.status, filter.statuses));
-    }
-
-    // فلتر العروض
-    if (!filter.allOffers && filter.offerIds && filter.offerIds.length > 0) {
-      conditions.push(inArray(offerLeads.offerId, filter.offerIds));
-    }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+  if (filter?.statuses?.length) {
+    conditions.push(
+      inArray(
+        offerLeads.status,
+        filter.statuses as Array<(typeof offerLeads.status.enumValues)[number]>
+      )
+    );
+  }
+  if (filter && !filter.allOffers && filter.offerIds?.length) {
+    conditions.push(inArray(offerLeads.offerId, filter.offerIds));
   }
 
+  const query = conditions.length ? baseQuery.where(and(...conditions)) : baseQuery;
   const results = await query;
-  return results.map((r: any) => ({
+  return results.map((r) => ({
     ...r,
     recipientType: 'offer_lead' as const,
     sourceType: 'offer_lead' as const,
@@ -304,8 +300,11 @@ async function getOfferLeadRecipients(db: any, filter?: any): Promise<RecipientI
 /**
  * جلب المستقبلين من العملاء المحتملين
  */
-async function getLeadRecipients(db: any, filter?: any): Promise<RecipientInfo[]> {
-  let query = db
+async function getLeadRecipients(
+  db: Database,
+  filter?: BroadcastFilterCriteria['leadFilter']
+): Promise<RecipientInfo[]> {
+  const baseQuery = db
     .select({
       phoneNumber: leads.phone,
       fullName: leads.fullName,
@@ -314,28 +313,20 @@ async function getLeadRecipients(db: any, filter?: any): Promise<RecipientInfo[]
       sourceId: leads.id,
     })
     .from(leads);
+  const conditions: SQL[] = [];
 
-  // تطبيق الفلاتر
-  if (filter) {
-    const conditions = [];
-
-    // فلتر الحالات
-    if (filter.statuses && filter.statuses.length > 0) {
-      conditions.push(inArray(leads.status, filter.statuses));
-    }
-
-    // فلتر الحملات
-    if (filter.campaignIds && filter.campaignIds.length > 0) {
-      conditions.push(inArray(leads.campaignId, filter.campaignIds));
-    }
-
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
+  if (filter?.statuses?.length) {
+    conditions.push(
+      inArray(leads.status, filter.statuses as Array<(typeof leads.status.enumValues)[number]>)
+    );
+  }
+  if (filter?.campaignIds?.length) {
+    conditions.push(inArray(leads.campaignId, filter.campaignIds));
   }
 
+  const query = conditions.length ? baseQuery.where(and(...conditions)) : baseQuery;
   const results = await query;
-  return results.map((r: any) => ({
+  return results.map((r) => ({
     ...r,
     recipientType: 'lead' as const,
     sourceType: 'lead' as const,

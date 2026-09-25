@@ -97,11 +97,12 @@ export const broadcastExecuteRouter = router({
           sentCount: result.sentCount,
           failureCount: result.failedCount,
         };
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Failed to send broadcast';
         console.error('[broadcastExecuteRouter] Error:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: error.message || 'Failed to send broadcast',
+          message,
         });
       }
     }),

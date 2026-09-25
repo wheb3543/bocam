@@ -84,8 +84,9 @@ export async function readCachedIncomingWhatsAppMedia(
     return null;
   }
 
-  if (localMemoryFallback.has(cacheKey)) {
-    return localMemoryFallback.get(cacheKey)!;
+  const cachedMedia = localMemoryFallback.get(cacheKey);
+  if (cachedMedia) {
+    return cachedMedia;
   }
 
   try {
