@@ -11,15 +11,21 @@ import { WhatsAppOperationsSSEProvider } from '@/hooks/useWhatsAppOperationsSSE'
 import { WhatsAppSSEMonitor } from '@/components/WhatsAppSSEMonitor';
 
 /** مركز العمليات الفنية؛ يجمع الجاهزية والتنبيهات والجودة والتشخيص في سياق واحد. */
+const operationsTabs = ['connection', 'health', 'quality', 'webhooks'] as const;
+type OperationsTab = (typeof operationsTabs)[number];
+
+function isOperationsTab(value: string | null): value is OperationsTab {
+  return operationsTabs.some((tab) => tab === value);
+}
+
+function getTabFromSearch(searchValue: string): OperationsTab {
+  const tab = new URLSearchParams(searchValue).get('tab');
+  return isOperationsTab(tab) ? tab : 'connection';
+}
+
 export default function WhatsAppOperationsCenter() {
   const [, navigate] = useLocation();
   const search = useSearch();
-  const getTabFromSearch = (searchValue: string) => {
-    const tab = new URLSearchParams(searchValue).get('tab');
-    return ['connection', 'health', 'quality', 'webhooks'].includes(tab || '')
-      ? tab!
-      : 'connection';
-  };
   const [activeTab, setActiveTab] = useState(() => getTabFromSearch(search));
 
   useEffect(() => {
@@ -28,7 +34,7 @@ export default function WhatsAppOperationsCenter() {
 
   const handleTabChange = (nextTab: string) => {
     const category = new URLSearchParams(search).get('category');
-    setActiveTab(nextTab);
+    setActiveTab(isOperationsTab(nextTab) ? nextTab : 'connection');
     navigate(
       nextTab === 'webhooks' && category
         ? `/admin/whatsapp/operations?tab=webhooks&category=${encodeURIComponent(category)}`

@@ -61,6 +61,12 @@ const webhookCategories = [
   'flows',
 ] as const;
 
+type WebhookCategory = (typeof webhookCategories)[number];
+
+function isWebhookCategory(value: string | null): value is WebhookCategory {
+  return webhookCategories.some((category) => category === value);
+}
+
 export default function WhatsAppWebhookInspectorPage() {
   const { can, isLoading: arePermissionsLoading } = useRolePermissions();
   const canViewWebhookLogs = can('integrations.logs.view');
@@ -68,10 +74,8 @@ export default function WhatsAppWebhookInspectorPage() {
   const operationsSse = useWhatsAppOperationsSSE();
   const search = useSearch();
   const categoryFromLocation = new URLSearchParams(search).get('category');
-  const initialCategory = webhookCategories.includes(
-    categoryFromLocation as (typeof webhookCategories)[number]
-  )
-    ? categoryFromLocation!
+  const initialCategory: 'all' | WebhookCategory = isWebhookCategory(categoryFromLocation)
+    ? categoryFromLocation
     : 'all';
   const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
@@ -534,7 +538,7 @@ export default function WhatsAppWebhookInspectorPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {statsByType!
+              {(statsByType ?? [])
                 .slice()
                 .sort((a, b) => (b.count || 0) - (a.count || 0))
                 .slice(0, 10)
@@ -570,7 +574,7 @@ export default function WhatsAppWebhookInspectorPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {statsByType!.map((type) => (
+              {(statsByType ?? []).map((type) => (
                 <Badge
                   key={type.eventType}
                   variant="outline"
