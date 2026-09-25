@@ -27,7 +27,7 @@ function getActionButtonClasses(style: SectionButton['style']) {
       return `${baseClasses} bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-800`;
     case 'primary':
     default:
-      return `${baseClasses} bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 focus-visible:ring-blue-500 shadow-blue-200 dark:shadow-blue-900/20`;
+      return `${baseClasses} bg-[#1ca8e5] text-white hover:bg-[#168fca] focus-visible:ring-[#1ca8e5] shadow-sm`;
   }
 }
 
@@ -130,8 +130,8 @@ export default function DynamicPage() {
       <>
         <SEO {...seoProps} />
         <Navbar />
-        <div className="min-h-screen flex flex-col">
-          <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="public-page-shell public-content-frame min-h-screen flex flex-col">
+          <section className="py-20 px-4 bg-[#eef9f0]">
             <div className="max-w-7xl mx-auto text-center">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
                 {title}
@@ -221,10 +221,7 @@ export default function DynamicPage() {
       case 'hero': {
         const heroButtons = getSectionButtons(section.id);
         return (
-          <section
-            key={section.id}
-            className="py-14 px-4 sm:py-20 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800"
-          >
+          <section key={section.id} className="py-14 px-4 sm:py-20 sm:px-6 lg:px-8 bg-[#eef9f0]">
             <div className="max-w-7xl mx-auto text-center">
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
                 {getTextContent(section.name, 'title')}
@@ -261,7 +258,7 @@ export default function DynamicPage() {
                   <Button
                     type="button"
                     size="lg"
-                    className="w-full sm:w-auto min-h-[48px] text-sm sm:text-base px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm hover:from-blue-700 hover:to-indigo-700"
+                    className="w-full sm:w-auto min-h-[48px] text-sm sm:text-base px-5 sm:px-7 py-3 sm:py-4 rounded-xl font-semibold bg-[#1ca8e5] hover:bg-[#168fca] text-white shadow-sm"
                   >
                     {getTextContent(section.name, 'button')}
                   </Button>
@@ -834,10 +831,10 @@ export default function DynamicPage() {
     <>
       <SEO {...seoProps} />
       <Navbar />
-      <div className="min-h-screen flex flex-col">
+      <div className="public-page-shell public-content-frame min-h-screen flex flex-col">
         {/* Hero Section */}
         {getTextContent('hero', 'title') && (
-          <section className="py-20 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+          <section className="py-20 px-4 bg-[#eef9f0]">
             <div className="max-w-7xl mx-auto text-center">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
                 {getTextContent('hero', 'title') || title}

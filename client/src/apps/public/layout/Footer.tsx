@@ -85,7 +85,7 @@ export default function Footer() {
     <footer
       className="relative w-full overflow-hidden text-white pt-14 pb-8 select-none"
       style={{
-        background: '#40ad56',
+        background: '#007438',
         backgroundImage: 'linear-gradient(270deg, #40ad56 0%, #007438 100%)',
         minHeight: '480px',
       }}
@@ -105,7 +105,7 @@ export default function Footer() {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 container mx-auto px-4 lg:px-12 max-w-6xl space-y-12">
+      <div className="relative z-10 container mx-auto px-4 max-w-[1380px] space-y-12">
         {/* Top Tier: Newsletter & PWA Download */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 border-b border-white/20 items-center">
           {/* Newsletter Box */}

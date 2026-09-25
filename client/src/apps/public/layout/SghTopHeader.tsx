@@ -71,7 +71,7 @@ export default function SghTopHeader() {
 
   return (
     <div
-      className="bg-[#f8f8f8] border-b border-[#eee] text-[#333333] select-none font-['Diodrum_Arabic','Cairo',sans-serif] pt-[1px]"
+      className="bg-white border-b border-[#eeeeee] text-[#333333] select-none font-['Diodrum_Arabic','Cairo',sans-serif] pt-[1px]"
       dir="rtl"
     >
       <div className="container mx-auto px-0 xl:px-[15px] max-w-[1380px]">

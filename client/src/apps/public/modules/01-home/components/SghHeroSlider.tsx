@@ -107,7 +107,10 @@ export default function SghHeroSlider() {
   const strokeDashoffset = CIRCUMFERENCE - (progress / 100) * CIRCUMFERENCE;
 
   return (
-    <section className="layout slider-layout w-full bg-white py-0 overflow-hidden" dir="rtl">
+    <section
+      className="sgh-hero-surface layout slider-layout w-full bg-white py-0 overflow-hidden"
+      dir="rtl"
+    >
       {/* Responsive slider container matching SGH Hail height: 45% ratio on all screen sizes */}
       <div className="relative w-full h-[195px] sm:h-[310px] md:h-[450px] lg:h-[607px] overflow-hidden bg-black select-none group">
         {/* Slides List */}
@@ -162,7 +165,7 @@ export default function SghHeroSlider() {
                         rel={
                           slide.button.href.startsWith('http') ? 'noopener noreferrer' : undefined
                         }
-                        className="inline-block bg-[#1ca8e5] hover:bg-[#1896cd] text-white text-[11px] sm:text-[13px] md:text-[16px] font-normal px-2.5 py-0.5 sm:px-4 sm:py-1 md:px-[22.4px] md:py-[6px] rounded-[30px] transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg leading-tight"
+                        className="inline-flex h-[38px] items-center justify-center bg-[#1ca8e5] hover:bg-[#1896cd] text-white text-[11px] sm:text-[13px] md:text-[16px] font-normal px-2.5 sm:px-4 sm:py-1 md:px-[22.4px] md:py-[6px] rounded-[30px] transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg leading-tight"
                       >
                         {slide.button.label}
                       </a>

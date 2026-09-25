@@ -280,14 +280,14 @@ function OffersPageContent() {
 
       {/* Offers Grid */}
       <ScrollReveal delay={0.1}>
-        <section className="py-6 sm:py-8 bg-gradient-to-b from-blue-50 to-white">
+        <section className="py-6 sm:py-8 bg-[#f8f8f8]">
           {offers && offers.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {offers.map((offer, index) => (
                 <AnimatedCard
                   key={offer.id}
                   className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedOffer === offer.id ? 'ring-2 ring-blue-500' : ''
+                    selectedOffer === offer.id ? 'ring-2 ring-[#2eb34b]' : ''
                   }`}
                   delay={index * 0.1}
                   onClick={() => setSelectedOffer(offer.id)}
@@ -336,7 +336,7 @@ function OffersPageContent() {
         </section>
       </ScrollReveal>
 
-      <SectionDivider color="blue" />
+      <SectionDivider color="green" />
 
       {/* Registration Form */}
       {selectedOffer && (

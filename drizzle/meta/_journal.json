@@ -757,6 +757,13 @@
       "when": 1790299424604,
       "tag": "0111_add_department_image",
       "breakpoints": true
+    },
+    {
+      "idx": 112,
+      "version": "5",
+      "when": 1790315988372,
+      "tag": "0112_add_department_detail_content",
+      "breakpoints": true
     }
   ]
 }

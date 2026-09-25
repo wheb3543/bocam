@@ -58,7 +58,7 @@ export default function CampsListPage() {
       keywords="مخيمات طبية, خيرية, مجانية, مسؤولية مجتمعية"
       useContainer={true}
     >
-      <PageProgress color="purple" />
+      <PageProgress />
       <FloatingButtons />
       <CampsListContent />
     </PageLayout>
@@ -287,7 +287,7 @@ function CampsListContent() {
               </div>
             </div>
           ) : (
-            <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
+            <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-[#2eb34b] to-[#1ca8e5] flex items-center justify-center">
               <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
                 <div
                   className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
@@ -361,7 +361,7 @@ function CampsListContent() {
             )}
 
             <Button
-              className={`w-full text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 ${isExpired ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700'}`}
+              className={`w-full text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11 ${isExpired ? 'bg-gray-600 hover:bg-gray-700' : 'bg-[#1ca8e5] hover:bg-[#168fca]'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setLocation(`/camps/${camp.slug || camp.id}`);
@@ -377,7 +377,7 @@ function CampsListContent() {
   };
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
       <PublicPageHeader title={title} backgroundImage="/sgh/doctors-banner.png" />
 
@@ -395,7 +395,7 @@ function CampsListContent() {
         </section>
       </ScrollReveal>
 
-      <SectionDivider color="gray" />
+      <SectionDivider color="green" />
 
       {/* Search Section */}
       <ScrollReveal delay={0.2}>
@@ -428,7 +428,7 @@ function CampsListContent() {
                 <TabsList className="grid w-full grid-cols-2 mb-5 sm:mb-8 h-9 sm:h-10">
                   <TabsTrigger
                     value="active"
-                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-sm"
                   >
                     <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>
@@ -437,7 +437,7 @@ function CampsListContent() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="expired"
-                    className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs md:text-sm"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-sm"
                   >
                     <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
                     <span>

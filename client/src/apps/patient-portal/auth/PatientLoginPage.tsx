@@ -199,6 +199,7 @@ export default function PatientPortalLogin() {
         title="بوابة المريض"
         description="سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك"
         keywords="بوابة المريض, تسجيل دخول, تسجيل جديد"
+        usePublicContentFrame={false}
       >
         <div className="min-h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
@@ -213,6 +214,7 @@ export default function PatientPortalLogin() {
       description="سجّل دخولك لإدارة حجوزاتك ومواعيدك واستلام نتائجك"
       keywords="بوابة المريض, تسجيل دخول, تسجيل جديد"
       showInstallPWA={false}
+      usePublicContentFrame={false}
     >
       <HeroSection
         title="بوابة المريض"

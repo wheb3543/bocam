@@ -229,7 +229,7 @@ function VisitingDoctorsContent() {
   }, [visitingDoctors, selectedSpecialty, searchTerm]);
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
       <PublicPageHeader title={title} backgroundImage="/sgh/doctors-banner.png" />
 

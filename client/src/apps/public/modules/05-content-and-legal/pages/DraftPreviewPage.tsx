@@ -76,7 +76,7 @@ export default function DraftPreviewPage() {
         key={section.id}
         className={
           section.type === 'hero'
-            ? 'relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-primary/5 px-5 py-20 text-center'
+            ? 'relative overflow-hidden bg-[#eef9f0] px-5 py-20 text-center'
             : 'border-b bg-background px-5 py-14'
         }
       >

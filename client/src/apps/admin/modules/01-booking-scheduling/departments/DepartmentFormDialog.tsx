@@ -51,12 +51,41 @@ import { trpc } from '@/lib/api/trpc';
 import { generateSlugFromText } from '@/hooks/data/useSlugGenerator';
 import ImageUpload from '@/apps/admin/shared/form/ImageUpload';
 
+const parseDepartmentList = (value?: string | null): string[] => {
+  if (!value?.trim()) {
+    return [];
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item).trim()).filter(Boolean);
+    }
+  } catch {
+    // قد تأتي البيانات القديمة كنص مفصول بالأسطر.
+  }
+
+  return value
+    .split('\n')
+    .map((item) => item.replace(/^[-•]\s*/, '').trim())
+    .filter(Boolean);
+};
+
+const serializeDepartmentList = (value: string): string | null => {
+  const items = parseDepartmentList(value);
+  return items.length > 0 ? JSON.stringify(items) : null;
+};
+
 export interface DepartmentFormData {
   id?: number;
   name: string;
   nameEn?: string | null;
   slug: string;
   description?: string | null;
+  tagline?: string | null;
+  fullDescription?: string | null;
+  services?: string | null;
+  advancedTechniques?: string | null;
   icon?: string | null;
   image?: string | null;
   sortOrder: number;
@@ -109,6 +138,10 @@ export function DepartmentFormDialog({
   const [sortOrder, setSortOrder] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [description, setDescription] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [fullDescription, setFullDescription] = useState('');
+  const [services, setServices] = useState('');
+  const [advancedTechniques, setAdvancedTechniques] = useState('');
   const [image, setImage] = useState('');
   const [manuallyEditedSlug, setManuallyEditedSlug] = useState(false);
 
@@ -133,11 +166,19 @@ export function DepartmentFormDialog({
         setManuallyEditedSlug(true);
         setIsActive(department.isActive ?? true);
         setDescription(department.description || '');
+        setTagline(department.tagline || '');
+        setFullDescription(department.fullDescription || department.description || '');
+        setServices(parseDepartmentList(department.services).join('\n'));
+        setAdvancedTechniques(parseDepartmentList(department.advancedTechniques).join('\n'));
       } else {
         setName('');
         setNameEn('');
         setSlug('');
         setDescription('');
+        setTagline('');
+        setFullDescription('');
+        setServices('');
+        setAdvancedTechniques('');
         setImage('');
         setManuallyEditedSlug(false);
         setIcon('Stethoscope');
@@ -203,11 +244,19 @@ export function DepartmentFormDialog({
 
     const finalIcon = icon === 'custom' ? customIcon.trim() || 'Building2' : icon;
 
+    const taglineValue = tagline.trim() || 'رعاية متخصصة';
+    const descriptionValue = description.trim();
+    const fullDescriptionValue = fullDescription.trim() || descriptionValue;
+
     const payload = {
       name: trimmedName,
       nameEn: nameEn.trim() || undefined,
       slug: trimmedSlug,
-      description: description.trim() || undefined,
+      description: descriptionValue || null,
+      tagline: taglineValue || null,
+      fullDescription: fullDescriptionValue || null,
+      services: serializeDepartmentList(services),
+      advancedTechniques: serializeDepartmentList(advancedTechniques),
       icon: finalIcon || undefined,
       // نرسل null عند الإزالة حتى تُمسح الصورة القديمة من قاعدة البيانات.
       image: image.trim() || null,
@@ -375,22 +424,93 @@ export function DepartmentFormDialog({
             </div>
           </div>
 
-          {/* Description Row */}
-          <div className="space-y-1.5 pt-1">
-            <Label htmlFor="dept-desc" className="text-xs font-semibold text-foreground">
-              نبذة عن العيادة والخدمات
-            </Label>
-            <Textarea
-              id="dept-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="وصف مختصر للخدمات المقدمة والأجهزة الطبية المتوفرة في هذا القسم..."
-              rows={3}
-              className="resize-none"
-            />
+          {/* Department detail content */}
+          <div className="space-y-4 pt-1">
+            <div className="space-y-1.5">
+              <Label htmlFor="dept-tagline" className="text-xs font-semibold text-foreground">
+                العنوان الفرعي
+              </Label>
+              <Input
+                id="dept-tagline"
+                value={tagline}
+                onChange={(e) => setTagline(e.target.value)}
+                placeholder="مثال: دقة ورعاية يمكنك الوثوق بها"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                يظهر مباشرة أسفل اسم القسم في صفحة التفاصيل.
+              </p>
+            </div>
 
-            {/* Department Image */}
-            <div className="space-y-1.5 pt-1">
+            <div className="space-y-1.5">
+              <Label htmlFor="dept-desc" className="text-xs font-semibold text-foreground">
+                الوصف المختصر
+              </Label>
+              <Textarea
+                id="dept-desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="وصف موجز يظهر في بطاقة القسم وبيانات SEO..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="dept-full-description"
+                className="text-xs font-semibold text-foreground"
+              >
+                الوصف التفصيلي
+              </Label>
+              <Textarea
+                id="dept-full-description"
+                value={fullDescription}
+                onChange={(e) => setFullDescription(e.target.value)}
+                placeholder="اشرح تجربة المريض في القسم، الخبرة، المنهج المتبع، وتجهيزات الرعاية..."
+                rows={5}
+                className="resize-y"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="dept-services" className="text-xs font-semibold text-foreground">
+                  علاج الحالات والخدمات
+                </Label>
+                <Textarea
+                  id="dept-services"
+                  value={services}
+                  onChange={(e) => setServices(e.target.value)}
+                  placeholder={'اكتب خدمة أو حالة في كل سطر\nمثال: السمنة\nالفتق'}
+                  rows={8}
+                  className="resize-y leading-7"
+                  dir="rtl"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  عنصر واحد في كل سطر. إذا تركته فارغاً لن يظهر القسم.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="dept-techniques" className="text-xs font-semibold text-foreground">
+                  تقنيات الرعاية المتقدمة
+                </Label>
+                <Textarea
+                  id="dept-techniques"
+                  value={advancedTechniques}
+                  onChange={(e) => setAdvancedTechniques(e.target.value)}
+                  placeholder={'اكتب تقنية في كل سطر\nمثال: جراحة المنظار\nالعلاج بالليزر'}
+                  rows={8}
+                  className="resize-y leading-7"
+                  dir="rtl"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  عنصر واحد في كل سطر. إذا تركته فارغاً لن يظهر القسم.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-foreground">صورة القسم</Label>
               <ImageUpload
                 value={image}
@@ -400,8 +520,7 @@ export function DepartmentFormDialog({
                 previewHeight="h-48"
               />
               <p className="text-[11px] text-muted-foreground">
-                ستظهر هذه الصورة في بطاقة القسم وصفحة الأقسام العامة. يمكن اختيار صورة من مكتبة
-                الوسائط أو رفع صورة جديدة.
+                ستظهر في بطاقة القسم، وأعلى صفحة تفاصيله، وفي قسم المزيد من الأقسام.
               </p>
             </div>
           </div>

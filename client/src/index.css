@@ -1345,3 +1345,178 @@ img {
   animation: none !important;
   transition: none !important;
 }
+/* ============================================
+   Saudi German Health — Public Portal Identity
+   ============================================ */
+@layer components {
+  .public-page-shell {
+    --sgh-primary: #2eb34b;
+    --sgh-primary-dark: #007242;
+    --sgh-primary-soft: #eef9f0;
+    --sgh-secondary: #1ca8e5;
+    --sgh-secondary-dark: #168fca;
+    --sgh-surface: #ffffff;
+    --sgh-surface-muted: #f8f8f8;
+    --sgh-text: #212529;
+    --sgh-text-muted: #667085;
+    --sgh-border: #e7ece8;
+    --sgh-shadow: 0 8px 24px rgba(0, 114, 66, 0.08);
+
+    /* Keep shared shadcn components and semantic public colors on-brand. */
+    --primary: var(--sgh-primary);
+    --primary-foreground: #ffffff;
+    --secondary: var(--sgh-secondary);
+    --secondary-foreground: #ffffff;
+    --background: var(--sgh-surface);
+    --foreground: var(--sgh-text);
+    --card: var(--sgh-surface);
+    --card-foreground: var(--sgh-text);
+    --popover: var(--sgh-surface);
+    --popover-foreground: var(--sgh-text);
+    --muted: var(--sgh-surface-muted);
+    --muted-foreground: var(--sgh-text-muted);
+    --accent: var(--sgh-primary-soft);
+    --accent-foreground: var(--sgh-primary-dark);
+    --border: var(--sgh-border);
+    --input: var(--sgh-border);
+    --ring: var(--sgh-primary);
+    background: var(--sgh-surface);
+    color: var(--sgh-text);
+  }
+
+  .public-page-shell h1,
+  .public-page-shell h2,
+  .public-page-shell h3,
+  .public-page-shell h4 {
+    color: var(--sgh-text);
+  }
+
+  .sgh-public-page-header {
+    min-height: 240px;
+  }
+
+  @media (min-width: 768px) {
+    .sgh-public-page-header {
+      min-height: 461px;
+    }
+  }
+
+  .public-page-shell main .container.max-w-\[1380px\],
+  .public-page-shell main .container.max-w-\[1350px\] {
+    max-width: none !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  .public-page-shell main .inner-section {
+    max-width: none !important;
+  }
+
+  @media (max-width: 639px) {
+    .public-page-shell {
+      overflow-x: hidden;
+    }
+
+    .public-page-shell main {
+      width: 100%;
+      max-width: 100%;
+      padding-right: 15px;
+      padding-left: 15px;
+    }
+
+    .public-page-shell main .container,
+    .public-page-shell main .max-w-7xl,
+    .public-page-shell main .max-w-6xl,
+    .public-page-shell main .max-w-5xl,
+    .public-page-shell main .max-w-4xl,
+    .public-page-shell main .max-w-3xl {
+      max-width: 100% !important;
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    .public-page-shell main section {
+      min-width: 0;
+    }
+
+    .public-page-shell main img,
+    .public-page-shell main video,
+    .public-page-shell main iframe {
+      max-width: 100%;
+    }
+
+    .public-page-shell main input,
+    .public-page-shell main select,
+    .public-page-shell main textarea {
+      min-width: 0;
+      max-width: 100%;
+      font-size: 16px;
+    }
+
+    .public-page-shell main button,
+    .public-page-shell main a {
+      touch-action: manipulation;
+    }
+
+    .public-page-shell main .public-mobile-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .public-page-shell main .public-mobile-full {
+      width: 100%;
+    }
+  }
+
+  .public-page-shell .sgh-primary-link {
+    color: var(--sgh-secondary);
+    transition: color 160ms ease;
+  }
+
+  .public-page-shell .sgh-primary-link:hover {
+    color: var(--sgh-secondary-dark);
+  }
+
+  .public-page-shell .sgh-surface-card {
+    background: var(--sgh-surface);
+    border: 1px solid var(--sgh-border);
+    box-shadow: var(--sgh-shadow);
+  }
+
+  .public-page-shell .sgh-muted-surface {
+    background: var(--sgh-surface-muted);
+  }
+
+  .public-page-shell .sgh-primary-pill {
+    background: var(--sgh-primary);
+    color: #fff;
+    border-radius: 999px;
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .public-content-frame {
+    width: 100%;
+    max-width: 1380px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .public-page-shell .sgh-primary-pill:hover {
+    background: var(--sgh-primary-dark);
+    box-shadow: 0 6px 16px rgba(0, 114, 66, 0.18);
+    transform: translateY(-1px);
+  }
+}
+
+.sgh-hero-surface {
+  width: 100% !important;
+  max-width: none !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}

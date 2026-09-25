@@ -32,9 +32,9 @@ export default function ReadingProgressBar({
   }, []);
 
   const colorClasses = {
-    green: 'from-green-600 to-blue-600',
-    blue: 'from-blue-600 to-purple-600',
-    purple: 'from-purple-600 to-pink-600',
+    green: 'from-[#2eb34b] to-[#1ca8e5]',
+    blue: 'from-[#1ca8e5] to-[#2eb34b]',
+    purple: 'from-[#007242] to-[#1ca8e5]',
   };
 
   return (

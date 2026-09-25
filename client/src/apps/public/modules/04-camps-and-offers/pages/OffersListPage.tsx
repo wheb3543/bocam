@@ -212,7 +212,7 @@ function OffersListContent() {
             </div>
           </div>
         ) : (
-          <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-green-600 to-blue-600 flex flex-col items-center justify-center text-white p-4 sm:p-6">
+          <div className="relative h-44 sm:h-56 md:h-64 bg-gradient-to-br from-[#2eb34b] to-[#1ca8e5] flex flex-col items-center justify-center text-white p-4 sm:p-6">
             <div className="absolute top-2.5 sm:top-4 right-2.5 sm:right-4">
               <div
                 className={`${isExpired ? 'bg-gray-500' : 'bg-red-500'} text-white px-2.5 sm:px-4 py-1 sm:py-2 rounded-full font-bold text-[10px] sm:text-sm flex items-center gap-1 sm:gap-2`}
@@ -254,7 +254,7 @@ function OffersListContent() {
           )}
 
           <Button
-            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11"
+            className="w-full bg-[#1ca8e5] hover:bg-[#168fca] text-white text-xs sm:text-sm md:text-base h-9 sm:h-10 md:h-11"
             onClick={(e) => {
               e.stopPropagation();
               setLocation(`/offers/${offer.slug || offer.id}`);
@@ -269,7 +269,7 @@ function OffersListContent() {
   );
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
       <PublicPageHeader
         title={heroTitle}

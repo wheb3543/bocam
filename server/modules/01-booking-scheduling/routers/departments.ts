@@ -68,7 +68,7 @@ export const departmentsRouter = router({
       const [dept] = await db
         .select()
         .from(departments)
-        .where(eq(departments.slug, input.slug))
+        .where(and(eq(departments.slug, input.slug), eq(departments.isActive, true)))
         .limit(1);
 
       if (!dept) {
@@ -79,7 +79,13 @@ export const departmentsRouter = router({
       const deptDoctors = await db
         .select()
         .from(doctors)
-        .where(and(eq(doctors.departmentId, dept.id), eq(doctors.available, 'yes')));
+        .where(
+          and(
+            eq(doctors.departmentId, dept.id),
+            eq(doctors.available, 'yes'),
+            eq(doctors.isVisiting, 'no')
+          )
+        );
 
       return {
         ...dept,
@@ -96,7 +102,11 @@ export const departmentsRouter = router({
         name: z.string().min(1, 'اسم القسم مطلوب'),
         nameEn: z.string().optional(),
         slug: z.string().min(1, 'الرابط التعريفي مطلوب'),
-        description: z.string().optional(),
+        description: z.string().max(5000).nullable().optional(),
+        tagline: z.string().max(500).nullable().optional(),
+        fullDescription: z.string().max(20000).nullable().optional(),
+        services: z.string().max(30000).nullable().optional(),
+        advancedTechniques: z.string().max(30000).nullable().optional(),
         image: z.string().max(500).nullable().optional(),
         icon: z.string().optional(),
         sortOrder: z.number().default(0),
@@ -121,6 +131,10 @@ export const departmentsRouter = router({
         nameEn: input.nameEn,
         slug: input.slug,
         description: input.description,
+        tagline: input.tagline,
+        fullDescription: input.fullDescription,
+        services: input.services,
+        advancedTechniques: input.advancedTechniques,
         image: input.image,
         icon: input.icon,
         sortOrder: input.sortOrder,
@@ -141,7 +155,11 @@ export const departmentsRouter = router({
         name: z.string().min(1, 'اسم القسم مطلوب'),
         nameEn: z.string().optional(),
         slug: z.string().min(1, 'الرابط التعريفي مطلوب'),
-        description: z.string().optional(),
+        description: z.string().max(5000).nullable().optional(),
+        tagline: z.string().max(500).nullable().optional(),
+        fullDescription: z.string().max(20000).nullable().optional(),
+        services: z.string().max(30000).nullable().optional(),
+        advancedTechniques: z.string().max(30000).nullable().optional(),
         image: z.string().max(500).nullable().optional(),
         icon: z.string().optional(),
         sortOrder: z.number().default(0),

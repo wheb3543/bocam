@@ -18,6 +18,7 @@ import { usePublicPageContent } from '@/hooks/usePublicContent';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { APP_LOGO, COMPANY_ARABIC_NAME } from '@/const';
 import { FloatingButtons } from '@/apps/public/shared/components';
+import PageLayout from '@/components/layout/PageLayout';
 
 interface BookingInfo {
   type: string;
@@ -133,13 +134,18 @@ export default function ThankYou() {
   const IconComponent = typeInfo.icon;
 
   return (
-    <>
+    <PageLayout
+      title={copy.title}
+      description={copy.subtitle}
+      keywords="تأكيد الحجز, نجاح الطلب, حجز موعد"
+      showInstallPWA={false}
+    >
       <FloatingButtons showBookingButton={false} />
       <div
-        className="min-h-screen bg-gradient-to-b from-white to-blue-50 flex items-center justify-center p-3 sm:p-4"
+        className="public-mobile-stack min-h-[calc(100vh-112px)] bg-[#f8f8f8] flex items-center justify-center p-3 sm:p-4"
         dir={language === 'ar' ? 'rtl' : 'ltr'}
       >
-        <Card className="max-w-2xl w-full shadow-2xl border-2 border-primary/20">
+        <Card className="max-w-2xl w-full shadow-xl border border-[#e7ece8] bg-white">
           <CardContent className="pt-6 sm:pt-8 md:pt-12 pb-4 sm:pb-6 md:pb-8 px-3 sm:px-6 text-center">
             <div
               className={`w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 md:mb-6`}
@@ -282,6 +288,6 @@ export default function ThankYou() {
           </CardContent>
         </Card>
       </div>
-    </>
+    </PageLayout>
   );
 }

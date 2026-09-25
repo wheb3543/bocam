@@ -291,7 +291,7 @@ export default function DepartmentsPage() {
 
       {/* ===== 1) صورة العرض المدمجة مع عنوان الصفحة (Compact Featured Image) ===== */}
       <section
-        className="relative w-full overflow-hidden bg-[#0f6d95] bg-cover bg-center bg-no-repeat"
+        className="sgh-hero-surface relative w-full overflow-hidden bg-[#0f6d95] bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${DEPARTMENTS_BANNER_IMAGE})` }}
       >
         <div
@@ -299,11 +299,11 @@ export default function DepartmentsPage() {
           aria-hidden="true"
         />
 
-        <div className="w-full pt-[45%] sm:pt-[26%] lg:pt-[20%]" aria-hidden="true" />
+        <div className="w-full pt-[45%] sm:pt-[32%]" aria-hidden="true" />
 
         <div className="absolute inset-0 flex items-center">
           <div className="relative z-10 mx-auto w-full max-w-[1380px] px-[15px]">
-            <div className="max-w-[80%] text-right text-white">
+            <div className="max-w-full text-right text-white sm:max-w-[80%]">
               {/* مسار التنقل */}
               <nav
                 className="mb-2 flex items-center gap-2 text-[0.75rem] text-white/85 sm:text-[0.85rem]"
@@ -316,7 +316,7 @@ export default function DepartmentsPage() {
                 <span className="font-medium text-white">الأقسام</span>
               </nav>
 
-              <h1 className="text-[28px] font-bold leading-tight [text-shadow:0_0_10px_rgba(0,0,0,0.6)] sm:text-[40px] lg:text-[48px]">
+              <h1 className="text-[28px] font-medium leading-tight [text-shadow:0_0_10px_rgba(0,0,0,0.6)] sm:text-[40px]">
                 الأقسام
               </h1>
 

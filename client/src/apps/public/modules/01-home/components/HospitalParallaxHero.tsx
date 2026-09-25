@@ -76,7 +76,7 @@ export default function HospitalParallaxHero({
   return (
     <section
       ref={containerRef}
-      className="relative h-[100vh] min-h-[600px] max-h-[900px] overflow-hidden"
+      className="sgh-hero-surface relative h-[100vh] min-h-[600px] max-h-[900px] overflow-hidden"
       aria-label="قسم الترحيب الرئيسي"
     >
       {/* ══════════════════════════════════════════════════
@@ -103,7 +103,7 @@ export default function HospitalParallaxHero({
         style={{ y: overlayY, opacity: overlayOpacity }}
       >
         {/* تدرج من أسفل (داكن) للأعلى (شفاف) + لون العلامة التجارية */}
-        <div className="absolute inset-0 bg-gradient-to-t from-green-950/90 via-green-900/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#003d2a]/90 via-[#005b38]/45 to-transparent" />
         {/* تدرج جانبي أيمن بلون أزرق خفيف */}
         <div className="absolute inset-0 bg-gradient-to-l from-blue-900/30 via-transparent to-transparent" />
         {/* طبقة شبكة ناعمة تُعطي إحساساً احترافياً */}

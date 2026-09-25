@@ -17,6 +17,144 @@ const departmentImages = {
   'vascular-surgery': '/sgh/departments/vascular.jpg',
 };
 
+const departmentDetails = {
+  'dermatology-and-cosmetics': {
+    tagline: 'خبرة عالمية لبشرة مثالية',
+    fullDescription:
+      'نقدم تشخيصاً وعلاجاً متخصصاً للأمراض الجلدية مع خطط تجميل مصممة حسب احتياجات البشرة الفردية، تحت إشراف أطباء معتمدين دولياً.',
+    services: [
+      'الأمراض الجلدية الشائعة والمزمنة',
+      'حب الشباب وآثاره',
+      'الأكزيما والتهاب الجلد',
+      'التصبغات وآثارها',
+      'علاج الشعر والأظافر',
+    ],
+    advancedTechniques: [
+      'الليزر الموجه للآفات الجلدية',
+      'حقن البوتوكس والفيلر',
+      'الميكرونيدلينج لتحسين نسيج البشرة',
+    ],
+  },
+  'anesthesia-pain-management': {
+    tagline: 'رحلة آمنة نحو التعافي',
+    fullDescription:
+      'نقدم رعاية متخصصة للتخدير وإدارة الألم قبل العمليات وبعدها، بهدف تحسين التعافي وفق أعلى معايير السلامة.',
+    services: ['تخدير العمليات الجراحية', 'إدارة الألم الحاد والمزمن', 'تقييم ما قبل التخدير'],
+    advancedTechniques: [
+      'مراقبة الحساسية القلبية والتنفسية',
+      'تسكين متقدم للألم بعد الجراحة',
+      'خطط تسكين مخصصة لكل حالة',
+    ],
+  },
+  'general-surgery': {
+    tagline: 'دقة ورعاية يمكنك الوثوق بها',
+    fullDescription:
+      'نقدم تجربة جراحية متكاملة يرافقك فيها فريق خبرائنا من الاستعداد وفق بروتوكولات عالمية حتى التعافي.',
+    services: [
+      'السمنة',
+      'الفتق',
+      'البواسير',
+      'الدوالي',
+      'الغدة الدرقية',
+      'المرارة',
+      'القولون والمستقيم',
+      'الحروق',
+      'الارتجاع المريئي',
+    ],
+    advancedTechniques: [
+      'جراحة المنظار المتقدمة',
+      'جراحة المنظار داخل البطن',
+      'استئصال الزائدة الدودية',
+      'استئصال المرارة',
+      'إصلاح الفتق بالمنظار',
+      'علاجات البواسير بالليزر',
+    ],
+  },
+  'internal-medicine': {
+    tagline: 'رعاية شاملة لصحة وعافية',
+    fullDescription:
+      'نجمع بين الرعاية الشاملة والخطط الوقائية لتشخيص الأمراض الباطنية وإدارتها وفق أحدث الممارسات الطبية.',
+    services: ['الأمراض المزمنة', 'أمراض الجهاز الهضمي والكبد', 'الغدد الصماء', 'الفحوصات الدورية'],
+    advancedTechniques: [
+      'متابعة الأمراض المزمنة',
+      'التقييم الشامل',
+      'برامج الوقاية وطب نمط الحياة',
+    ],
+  },
+  'psychiatry-behavioral-health': {
+    tagline: 'دعم صحتك النفسية، هدفنا',
+    fullDescription: 'نقدم رعاية نفسية شاملة في بيئة آمنة تحترم الخصوصية وتدعم المريض في كل مرحلة.',
+    services: [
+      'الاكتئاب والقلق',
+      'اضطرابات النوم',
+      'استشارات الأطفال والمراهقين',
+      'الدعم بعد الصدمات',
+    ],
+    advancedTechniques: ['العلاج المعرفي السلوكي', 'العلاج الأسري', 'خطط علاج فردية متخصصة'],
+  },
+  'pediatrics-neonatology': {
+    tagline: 'رعاية شاملة لجميع احتياجات طفلك',
+    fullDescription: 'وحدات مجهزة للأطفال وحديثي الولادة تقدم رعاية دقيقة على مدار الساعة.',
+    services: ['فحص صحة الطفل', 'التطعيمات ومتابعة النمو', 'رعاية حديثي الولادة', 'طوارئ الأطفال'],
+    advancedTechniques: [
+      'العناية المركزة لحديثي الولادة',
+      'دعم التنفس غير التداخلي',
+      'مراقبة النمو والتطور',
+    ],
+  },
+  'orthopedics-trauma': {
+    tagline: 'رعاية متخصصة لحركة أفضل',
+    fullDescription:
+      'نقدم علاجاً متخصصاً للمفاصل والعمود الفقري والإصابات لاستعادة الحركة وتحسين جودة الحياة.',
+    services: ['إصابات المفاصل', 'آلام العمود الفقري', 'الكسور', 'جراحات العظام'],
+    advancedTechniques: [
+      'المناظير العلاجية',
+      'جراحات المفاصل',
+      'إعادة بناء الرباط',
+      'التأهيل الحركي',
+    ],
+  },
+  'cardiology-cardiothoracic': {
+    tagline: 'رعاية قلبية متخصصة',
+    fullDescription: 'نقدم رعاية متكاملة لمرضى القلب والصدر عبر فريق وأجهزة متخصصة.',
+    services: ['قصور القلب', 'الذبحة الصدرية', 'اضطرابات نظم القلب', 'جراحة القلب والصدر'],
+    advancedTechniques: ['قسطرة القلب', 'أجهزة القلب التداخلية', 'مراقبة القلب المستمرة'],
+  },
+  'obstetrics-gynecology': {
+    tagline: 'رعاية استثنائية في كل الأوقات',
+    fullDescription: 'ندعم المرأة عبر خدمات نسائية وتوليد متكاملة يهتم بالأم والطفل.',
+    services: ['متابعة الحمل والولادة', 'أمراض النساء', 'العقم', 'اضطرابات الدورة'],
+    advancedTechniques: ['السونار المتقدم', 'جراحات المناظير', 'رعاية الحمل عالي الخطورة'],
+  },
+  'emergency-department': {
+    tagline: 'صحتك أولويتنا على مدار الساعة',
+    fullDescription: 'نوفر استقبالاً سريعاً وتقييماً فورياً للحالات العاجلة على مدار الساعة.',
+    services: [
+      'الإسعافات الأولية',
+      'تقييم الحالات العاجلة',
+      'أمراض القلب الحادة',
+      'الإصابات والحوادث',
+    ],
+    advancedTechniques: [
+      'الإنعاش القلبي الرئوي',
+      'مراقبة العلامات الحيوية',
+      'التصوير المقطعي والأشعة',
+    ],
+  },
+  urology: {
+    tagline: 'حلول متخصصة لصحة الجهاز البولي',
+    fullDescription: 'نقدم تشخيصاً وعلاجاً متكاملاً لأمراض الكلى والمثانة والبروستات.',
+    services: ['حصوات الكلى', 'أمراض البروستات', 'قصور الكلى', 'التهابات المسالك البولية'],
+    advancedTechniques: ['المناظير البولية', 'إزالة الحصى بالليزر', 'متابعة وظائف الكلى'],
+  },
+  'vascular-surgery': {
+    tagline: 'رعاية متطورة للشرايين والأوردة',
+    fullDescription: 'نقدم تشخيصاً وعلاجاً لأمراض الشرايين والأوردة والدوالي بتقنيات حديثة.',
+    services: ['تضيق الشرايين', 'التمددات الشريانية', 'الدوالي', 'مضاعفات القدم السكري'],
+    advancedTechniques: ['القسطرة التداخلية', 'جراحة الأوعية', 'التقييم غير التداخلي'],
+  },
+};
+
 const depts = [
   {
     name: 'الأمراض الجلدية والتجميل',
@@ -134,6 +272,18 @@ async function main() {
 
   for (const dept of depts) {
     const bundledImage = departmentImages[dept.slug] ?? null;
+    const details = departmentDetails[dept.slug] ?? {
+      tagline: 'رعاية متخصصة',
+      fullDescription: dept.description,
+      services: ['التشخيص الطبي المتخصص', 'خطط علاج مخصصة', 'متابعة طبية مستمرة'],
+      advancedTechniques: ['أحدث الأجهزة الطبية', 'خبرة الكادر الطبي', 'متابعة متخصصة'],
+    };
+    const detailsJson = {
+      tagline: details.tagline,
+      fullDescription: details.fullDescription,
+      services: JSON.stringify(details.services),
+      advancedTechniques: JSON.stringify(details.advancedTechniques),
+    };
     const [existing] = await conn.execute('SELECT id FROM departments WHERE slug = ? OR name = ?', [
       dept.slug,
       dept.name,
@@ -142,7 +292,7 @@ async function main() {
     if (Array.isArray(existing) && existing.length > 0) {
       const id = existing[0].id;
       await conn.execute(
-        'UPDATE departments SET name = ?, nameEn = ?, slug = ?, description = ?, icon = ?, sortOrder = ?, isActive = 1, image = COALESCE(image, ?) WHERE id = ?',
+        "UPDATE departments SET name = ?, nameEn = ?, slug = ?, description = ?, icon = ?, sortOrder = ?, isActive = 1, image = COALESCE(image, ?), tagline = COALESCE(NULLIF(tagline, ''), ?), fullDescription = COALESCE(NULLIF(fullDescription, ''), ?), services = COALESCE(NULLIF(services, ''), ?), advancedTechniques = COALESCE(NULLIF(advancedTechniques, ''), ?) WHERE id = ?",
         [
           dept.name,
           dept.nameEn,
@@ -151,18 +301,26 @@ async function main() {
           dept.icon,
           dept.sortOrder,
           bundledImage,
+          detailsJson.tagline,
+          detailsJson.fullDescription,
+          detailsJson.services,
+          detailsJson.advancedTechniques,
           id,
         ]
       );
       console.log('Updated:', dept.name);
     } else {
       await conn.execute(
-        'INSERT INTO departments (name, nameEn, slug, description, icon, sortOrder, isActive, image) VALUES (?, ?, ?, ?, ?, ?, 1, ?)',
+        'INSERT INTO departments (name, nameEn, slug, description, tagline, fullDescription, services, advancedTechniques, icon, sortOrder, isActive, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)',
         [
           dept.name,
           dept.nameEn,
           dept.slug,
           dept.description,
+          detailsJson.tagline,
+          detailsJson.fullDescription,
+          detailsJson.services,
+          detailsJson.advancedTechniques,
           dept.icon,
           dept.sortOrder,
           bundledImage,

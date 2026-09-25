@@ -21,7 +21,8 @@ interface PageLayoutProps {
   showInstallPWA?: boolean;
   showBackToTop?: boolean;
   className?: string;
-  useContainer?: boolean; // استخدام الحاوية الموحدة مع الهوامش الجانبية
+  useContainer?: boolean; // محفوظ للتوافق مع الاستخدامات القديمة
+  usePublicContentFrame?: boolean; // إطار الهوامش الموحد لصفحات الموقع العام
 }
 
 export default function PageLayout({
@@ -33,11 +34,11 @@ export default function PageLayout({
   showInstallPWA = true,
   showBackToTop: _showBackToTop = true,
   className = '',
-  useContainer = false,
+  usePublicContentFrame = true,
 }: PageLayoutProps) {
   return (
     <div
-      className={`min-h-screen flex flex-col bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 relative overflow-hidden ${className}`}
+      className={`public-page-shell min-h-screen flex flex-col bg-white text-[#212529] relative overflow-hidden ${className}`}
       dir="rtl"
     >
       {/* SEO */}
@@ -54,13 +55,12 @@ export default function PageLayout({
       {/* Navbar */}
       <Navbar />
 
-      {/* Main Content */}
-      <main id="main-content" className="flex-1">
-        {useContainer ? (
-          <div className="container mx-auto px-[15px] max-w-[1380px]">{children}</div>
-        ) : (
-          children
-        )}
+      {/* Main Content: pages keep ownership of their internal containers. */}
+      <main
+        id="main-content"
+        className={`flex-1 min-w-0 ${usePublicContentFrame ? 'w-full max-w-[1380px] mx-auto px-[15px]' : ''}`}
+      >
+        {children}
       </main>
 
       {/* Install PWA Button */}

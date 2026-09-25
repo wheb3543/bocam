@@ -568,13 +568,13 @@ function OfferDetailContent({ slug }: { slug: string }) {
   // Loading Skeleton
   if (isLoading) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="bg-white dark:bg-card border-b">
           <div className="py-2.5 sm:py-3">
             <Skeleton className="h-4 sm:h-5 w-48 sm:w-60" />
           </div>
         </div>
-        <section className="bg-gradient-to-br from-green-600 to-blue-600 py-8 sm:py-16 md:py-24">
+        <section className="bg-gradient-to-br from-[#2eb34b] to-[#1ca8e5] py-8 sm:py-16 md:py-24">
           <div>
             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
               <div className="space-y-3 sm:space-y-4">
@@ -589,7 +589,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
           </div>
         </section>
         <div className="py-6 sm:py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-4 sm:gap-4">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-20 sm:h-28 rounded-xl" />
             ))}
@@ -602,7 +602,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
   // Not Found State
   if (!offer) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="flex-1 flex items-center justify-center py-20 px-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
@@ -628,7 +628,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
     : null;
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
       <PublicPageHeader
         title={offer.title}
@@ -637,7 +637,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
           text: heroBadge,
           icon: <Sparkles className="w-4 h-4 text-emerald-300" />,
         }}
-        gradient="from-green-600 via-blue-600 to-purple-600"
+        gradient="from-[#2eb34b] via-[#007242] to-[#1ca8e5]"
         minHeight="300px"
       >
         {/* Breadcrumb */}
@@ -761,7 +761,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
             )}
 
             <Card className="shadow-sm border-0 rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 sm:p-5 md:p-6">
+              <CardHeader className="bg-gradient-to-r from-[#007242] to-[#1ca8e5] text-white p-4 sm:p-5 md:p-6">
                 <CardTitle className="text-base sm:text-lg md:text-xl flex items-center gap-1.5 sm:gap-2">
                   <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
                   {formTitle}
@@ -1004,7 +1004,7 @@ function OfferDetailContent({ slug }: { slug: string }) {
       )}
 
       {/* Contact Section */}
-      <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
+      <section className="bg-gradient-to-r from-[#007242] to-[#1ca8e5] text-white py-6 sm:py-8 md:py-10">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
             {contactTitle}

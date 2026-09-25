@@ -10,7 +10,7 @@ export default function SghPatientFeedback() {
       className="section section-html-content feedback with-image my-6 select-none relative overflow-hidden"
       dir="rtl"
     >
-      <div className="container max-w-[1350px] mx-auto px-[15px]">
+      <div className="container max-w-[1380px] mx-auto px-[15px]">
         <div className="inner-section relative min-h-[340px] sm:min-h-[390px] overflow-hidden rounded-none sm:rounded-sm flex items-center p-8 sm:p-14 lg:p-16 shadow-xs border border-slate-100">
           {/* Authentic Background Photo */}
           <div

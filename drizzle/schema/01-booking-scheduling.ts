@@ -18,6 +18,10 @@ export const departments = mysqlTable('departments', {
   nameEn: varchar('nameEn', { length: 255 }),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   description: text('description'),
+  tagline: varchar('tagline', { length: 500 }),
+  fullDescription: text('fullDescription'),
+  services: text('services'), // JSON array of conditions and services
+  advancedTechniques: text('advancedTechniques'), // JSON array of advanced care techniques
   image: varchar('image', { length: 500 }),
   icon: varchar('icon', { length: 100 }),
   sortOrder: int('sortOrder').default(0).notNull(),

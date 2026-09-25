@@ -7,7 +7,7 @@ interface PageProgressProps {
 }
 
 export default function PageProgress({
-  color = '#1ea74d',
+  color = '#2eb34b',
   height = '4px',
   zIndex = 60,
 }: PageProgressProps) {

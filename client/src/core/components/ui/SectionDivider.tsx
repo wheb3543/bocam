@@ -11,9 +11,9 @@ interface SectionDividerProps {
 
 export default function SectionDivider({ className = '', color = 'gray' }: SectionDividerProps) {
   const colorClasses = {
-    gray: 'from-transparent via-gray-300 dark:via-gray-700 to-transparent',
-    green: 'from-transparent via-green-300 dark:via-green-700 to-transparent',
-    blue: 'from-transparent via-blue-300 dark:via-blue-700 to-transparent',
+    gray: 'from-transparent via-[#d8e0db] to-transparent',
+    green: 'from-transparent via-[#2eb34b] to-transparent',
+    blue: 'from-transparent via-[#1ca8e5] to-transparent',
   };
 
   return (

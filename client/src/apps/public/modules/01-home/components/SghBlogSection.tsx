@@ -80,73 +80,75 @@ export default function SghBlogSection() {
       dir="rtl"
     >
       {/* SGH Hail: .inner-section with authentic #f8f8f8 background card and 3rem padding */}
-      <div className="inner-section w-full bg-[#f8f8f8] py-10 sm:py-12 px-4 sm:px-12 rounded-none sm:rounded-2xl">
-        {/* Inner Content Grid: .col-md-10.offset-md-1 (max-w-[1140px] mx-auto) */}
-        <div className="max-w-[1140px] mx-auto">
-          {/* Header with CTA Button */}
-          <div className="section-header with-cta flex items-center justify-between mb-8 sm:mb-10">
-            <h2 className="text-[28px] sm:text-[32px] font-bold text-[#212529] tracking-tight m-0">
-              أحدث المقالات
-            </h2>
-            <a
-              href="/#blog"
-              className="btn btn-primary bg-[#1ca8e5] hover:bg-[#1694cc] text-white text-[15px] sm:text-[16px] font-normal px-[22.4px] py-[6px] rounded-[30px] transition-colors shadow-xs inline-flex items-center justify-center cursor-pointer"
-            >
-              عرض المزيد
-            </a>
-          </div>
-
-          {/* Slider Row with authentic SGH card layout */}
-          <div className="slider-row relative bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-xs overflow-hidden border border-slate-100/80">
-            <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-12 min-h-[320px]">
-              {/* Image Column (In RTL: on the right) with authentic 80% aspect ratio */}
-              <div className="w-full md:w-[385px] shrink-0">
-                <a
-                  href="/#blog"
-                  className="block w-full h-[260px] sm:h-[308px] overflow-hidden rounded-xl shadow-xs relative group cursor-pointer"
-                >
-                  <img
-                    key={currentPost.id}
-                    src={currentPost.image}
-                    alt={currentPost.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 animate-in fade-in duration-300"
-                  />
-                </a>
-              </div>
-
-              {/* Content Column (In RTL: on the left) */}
-              <div className="flex-1 text-right flex flex-col justify-start">
-                <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-bold leading-[1.25] text-[#212529] mb-2 hover:text-[#1ca8e5] transition-colors cursor-pointer">
-                  <a href="/#blog">{currentPost.title}</a>
-                </h3>
-
-                <div className="inline-date flex items-center gap-1.5 text-[13.6px] text-[#8ca4b8] mb-4 sm:mb-6">
-                  <Calendar className="w-3.5 h-3.5 text-[#8ca4b8]" />
-                  <span>{currentPost.date}</span>
-                </div>
-
-                <div className="description text-[14.5px] sm:text-[15.2px] leading-[24px] text-[#333333] font-normal line-clamp-4">
-                  {currentPost.excerpt}
-                </div>
-              </div>
+      <div className="container max-w-[1380px] mx-auto px-[15px]">
+        <div className="inner-section w-full bg-[#f8f8f8] py-10 sm:py-12 px-4 sm:px-12 rounded-none sm:rounded-2xl">
+          {/* Inner Content Grid: .col-md-10.offset-md-1 (max-w-[1140px] mx-auto) */}
+          <div className="max-w-[1140px] mx-auto">
+            {/* Header with CTA Button */}
+            <div className="section-header with-cta flex items-center justify-between mb-8 sm:mb-10">
+              <h2 className="text-[28px] sm:text-[32px] font-bold text-[#212529] tracking-tight m-0">
+                أحدث المقالات
+              </h2>
+              <a
+                href="/#blog"
+                className="btn btn-primary inline-flex h-[38px] items-center justify-center bg-[#1ca8e5] hover:bg-[#1694cc] text-white text-[15px] sm:text-[16px] font-normal px-[22.4px] py-[6px] rounded-[30px] transition-colors shadow-xs cursor-pointer"
+              >
+                عرض المزيد
+              </a>
             </div>
 
-            {/* Navigator (Slider Navigation Buttons) */}
-            <div className="navigator flex items-center justify-start gap-2 pt-6">
-              <button
-                onClick={handlePrev}
-                className="na-slider-actions prev w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
-                aria-label="السابق"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={handleNext}
-                className="na-slider-actions next w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
-                aria-label="التالي"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+            {/* Slider Row with authentic SGH card layout */}
+            <div className="slider-row relative bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-xs overflow-hidden border border-slate-100/80">
+              <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-12 min-h-[320px]">
+                {/* Image Column (In RTL: on the right) with authentic 80% aspect ratio */}
+                <div className="w-full md:w-[385px] shrink-0">
+                  <a
+                    href="/#blog"
+                    className="block w-full h-[260px] sm:h-[308px] overflow-hidden rounded-xl shadow-xs relative group cursor-pointer"
+                  >
+                    <img
+                      key={currentPost.id}
+                      src={currentPost.image}
+                      alt={currentPost.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 animate-in fade-in duration-300"
+                    />
+                  </a>
+                </div>
+
+                {/* Content Column (In RTL: on the left) */}
+                <div className="flex-1 text-right flex flex-col justify-start">
+                  <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-bold leading-[1.25] text-[#212529] mb-2 hover:text-[#1ca8e5] transition-colors cursor-pointer">
+                    <a href="/#blog">{currentPost.title}</a>
+                  </h3>
+
+                  <div className="inline-date flex items-center gap-1.5 text-[13.6px] text-[#8ca4b8] mb-4 sm:mb-6">
+                    <Calendar className="w-3.5 h-3.5 text-[#8ca4b8]" />
+                    <span>{currentPost.date}</span>
+                  </div>
+
+                  <div className="description text-[14.5px] sm:text-[15.2px] leading-[24px] text-[#333333] font-normal line-clamp-4">
+                    {currentPost.excerpt}
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigator (Slider Navigation Buttons) */}
+              <div className="navigator flex items-center justify-start gap-2 pt-6">
+                <button
+                  onClick={handlePrev}
+                  className="na-slider-actions prev w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
+                  aria-label="السابق"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="na-slider-actions next w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
+                  aria-label="التالي"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

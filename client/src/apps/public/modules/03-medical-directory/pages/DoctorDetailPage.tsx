@@ -225,7 +225,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   // Loading Skeleton
   if (isLoading) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="py-3 sm:py-4">
           <Skeleton className="h-8 sm:h-9 w-32 sm:w-40" />
         </div>
@@ -264,7 +264,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   // Not Found State
   if (!doctor) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="flex-1 flex items-center justify-center py-20 px-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
@@ -288,7 +288,7 @@ function DoctorDetailContent({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Breadcrumb Navigation */}
       <div className="bg-white dark:bg-card border-b">
         <div className="py-2.5 sm:py-3">

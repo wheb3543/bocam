@@ -22,12 +22,12 @@ export default function NotFound() {
         subtitle="صفحة غير موجودة"
         description="عذراً، الصفحة التي تبحث عنها غير موجودة. قد تم نقلها أو حذفها."
         badge={{ text: 'خطأ', icon: AlertCircle }}
-        backgroundGradient="from-red-600 via-red-700 to-orange-600"
+        backgroundGradient="from-[#2eb34b] via-[#007242] to-[#1ca8e5]"
       >
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
           <Button
             onClick={handleGoHome}
-            className="bg-white hover:bg-gray-100 text-red-600 px-6 py-2.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+            className="bg-[#1ca8e5] hover:bg-[#168fca] text-white px-6 py-2.5 rounded-full transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Home className="w-4 h-4 mr-2" />
             العودة للرئيسية

@@ -77,7 +77,7 @@ export default function PrivacyPolicyPage() {
       keywords={copy.t('meta.keywords', 'سياسة الخصوصية, حماية البيانات, PDPL')}
       useContainer={true}
     >
-      <PageProgress color="green" />
+      <PageProgress />
       <FloatingButtons showBookingButton={false} />
       <PrivacyPolicyContent copy={copy} />
     </PageLayout>

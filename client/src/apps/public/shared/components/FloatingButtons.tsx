@@ -38,7 +38,7 @@ export default function FloatingButtons({
       {showBookingButton && (
         <button
           onClick={() => openBookingModal()}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-[#00a3e0] hover:bg-[#008fc5] text-white px-3 py-4 rounded-r-2xl shadow-2xl flex flex-col items-center gap-2 cursor-pointer transition-all hover:pl-4 group select-none"
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-40 bg-[#1ca8e5] hover:bg-[#168fca] text-white px-3 py-4 rounded-r-2xl shadow-[0_8px_24px_rgba(0,114,145,0.22)] flex flex-col items-center gap-2 cursor-pointer transition-all hover:pl-4 group select-none"
           aria-label="احجز الآن"
         >
           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
@@ -67,7 +67,7 @@ export default function FloatingButtons({
       {showBackToTop && showBackToTopState && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 left-6 z-40 w-10 h-10 rounded-full bg-slate-800/80 hover:bg-[#1ea74d] text-white shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center cursor-pointer active:scale-95 border border-white/20"
+          className="fixed bottom-6 left-6 z-40 w-10 h-10 rounded-full bg-[#007242] hover:bg-[#2eb34b] text-white shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center cursor-pointer active:scale-95 border border-white/20"
           aria-label="العودة للأعلى"
         >
           <ArrowUp className="w-4 h-4" />

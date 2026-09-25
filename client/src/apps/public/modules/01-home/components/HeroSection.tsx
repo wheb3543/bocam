@@ -27,14 +27,14 @@ export default function HeroSection({
   subtitle,
   description,
   badge,
-  backgroundGradient = 'from-green-600 via-green-700 to-blue-600',
+  backgroundGradient = 'from-[#2eb34b] via-[#007242] to-[#1ca8e5]',
   textColor = 'text-white',
   minHeight = 'min-h-[700px]',
   children,
 }: HeroSectionProps) {
   return (
     <section
-      className={`py-12 sm:py-16 md:py-24 bg-gradient-to-br ${backgroundGradient} ${textColor} overflow-hidden relative ${minHeight}`}
+      className={`sgh-hero-surface py-12 sm:py-16 md:py-24 bg-gradient-to-br ${backgroundGradient} ${textColor} overflow-hidden relative ${minHeight}`}
     >
       {/* Animated Background Particles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -47,7 +47,7 @@ export default function HeroSection({
               height: Math.random() * 8 + 4 + 'px',
               left: Math.random() * 100 + '%',
               top: Math.random() * 100 + '%',
-              background: i % 2 === 0 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.3)',
+              background: i % 2 === 0 ? 'rgba(46,179,75,0.3)' : 'rgba(28,168,229,0.3)',
               animation: `particle ${Math.random() * 20 + 20}s linear infinite`,
               animationDelay: Math.random() * 5 + 's',
             }}
@@ -57,23 +57,23 @@ export default function HeroSection({
 
       <div className="text-center relative z-10">
         {badge && (
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 animate-card-appear">
+          <div className="inline-flex items-center gap-2 bg-white/95 text-[#007242] px-4 py-2 rounded-full mb-6 animate-card-appear shadow-sm">
             <badge.icon className="w-5 h-5" />
             <span className="text-sm font-medium">{badge.text}</span>
           </div>
         )}
 
-        <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 animate-text-shimmer bg-clip-text text-transparent bg-[length:200%_auto] bg-gradient-to-r from-white via-green-100 to-white">
+        <h1 className="text-2xl sm:text-4xl md:text-[40px] lg:text-[48px] font-medium mb-4 text-white drop-shadow-sm">
           {title}
         </h1>
 
         {subtitle && (
-          <p className="text-base sm:text-xl md:text-3xl mb-2 sm:mb-3 text-green-100 font-semibold">
+          <p className="text-base sm:text-xl md:text-2xl mb-2 sm:mb-3 text-white/90 font-medium">
             {subtitle}
           </p>
         )}
 
-        <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95 bg-black/20 rounded-lg p-4">
+        <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 md:mb-10 leading-relaxed max-w-3xl mx-auto px-2 text-white/95">
           {description}
         </p>
 

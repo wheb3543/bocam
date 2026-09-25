@@ -371,7 +371,7 @@ export default function HospitalGeometric3D({
               onClick={() => setViewMode('exterior')}
               className={`px-3 py-1 rounded-lg transition-all font-medium flex items-center gap-1.5 ${
                 viewMode === 'exterior'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-[#1ca8e5] hover:bg-[#168fca] text-white shadow-lg'
                   : 'text-slate-300 hover:bg-white/5'
               }`}
             >

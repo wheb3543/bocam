@@ -59,7 +59,10 @@ export default function SghQuickMenu() {
   ];
 
   return (
-    <section className="section section-menuinline w-full py-0 mb-4 select-none" dir="rtl">
+    <section
+      className="sgh-hero-surface section section-menuinline w-full py-0 mb-4 select-none"
+      dir="rtl"
+    >
       {/* SGH Hail: .inner-section with exact linear-gradient(90deg, #2ab24b 0%, #007242 100%) */}
       <div
         className="inner-section w-full overflow-hidden"

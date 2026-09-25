@@ -77,7 +77,7 @@ export default function CampDetailPage() {
       keywords="مخيم طبي, خيري, تسجيل"
       useContainer={true}
     >
-      <PageProgress color="purple" />
+      <PageProgress />
       <FloatingButtons />
       <CampDetailContent slug={slug} />
     </PageLayout>
@@ -388,13 +388,13 @@ function CampDetailContent({ slug }: { slug: string }) {
   // Loading Skeleton
   if (isLoading) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="bg-white dark:bg-card border-b">
           <div className="py-2.5 sm:py-3">
             <Skeleton className="h-4 sm:h-5 w-48 sm:w-60" />
           </div>
         </div>
-        <section className="bg-gradient-to-br from-green-600 to-blue-600 py-8 sm:py-16 md:py-24">
+        <section className="bg-gradient-to-br from-[#2eb34b] to-[#1ca8e5] py-8 sm:py-16 md:py-24">
           <div className="relative z-10">
             <div className="grid md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 items-center">
               <div className="space-y-3 sm:space-y-4">
@@ -402,7 +402,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                 <Skeleton className="h-10 sm:h-14 w-full bg-white/20" />
                 <Skeleton className="h-10 sm:h-14 w-3/4 bg-white/20" />
                 <Skeleton className="h-5 sm:h-6 w-full bg-white/20" />
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <Skeleton className="h-12 sm:h-16 rounded-lg bg-white/20" />
                   <Skeleton className="h-12 sm:h-16 rounded-lg bg-white/20" />
                 </div>
@@ -426,7 +426,7 @@ function CampDetailContent({ slug }: { slug: string }) {
   // Not Found State
   if (!camp) {
     return (
-      <div className="space-y-6" dir="rtl">
+      <div className="public-mobile-stack space-y-6" dir="rtl">
         <div className="flex-1 flex items-center justify-center py-20 px-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
@@ -447,7 +447,7 @@ function CampDetailContent({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="public-mobile-stack space-y-6" dir="rtl">
       {/* Hero Section - Using shared component */}
       <PublicPageHeader
         title={camp.name}
@@ -456,7 +456,7 @@ function CampDetailContent({ slug }: { slug: string }) {
           text: copy.heroBadge,
           icon: <Heart className="w-4 h-4 text-emerald-300" />,
         }}
-        gradient="from-green-600 via-green-700 to-blue-600"
+        gradient="from-[#2eb34b] via-[#007242] to-[#1ca8e5]"
         minHeight="300px"
       >
         {/* Breadcrumb */}
@@ -659,7 +659,7 @@ function CampDetailContent({ slug }: { slug: string }) {
                 <h2 className="text-base sm:text-xl md:text-2xl font-bold text-center text-foreground mb-4 sm:mb-6">
                   {copy.galleryTitle}
                 </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3 sm:gap-3 md:gap-4">
                   {images.map((imageUrl: string, index: number) => (
                     <div
                       key={index}
@@ -1084,7 +1084,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       )}
 
       {/* Contact Section */}
-      <section className="bg-gradient-to-r from-green-600 to-blue-600 text-white py-6 sm:py-8 md:py-10">
+      <section className="bg-gradient-to-r from-[#007242] to-[#1ca8e5] text-white py-6 sm:py-8 md:py-10">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <h3 className="text-base sm:text-lg md:text-xl font-bold mb-1.5 sm:mb-2">
             {copy.contactTitle}
