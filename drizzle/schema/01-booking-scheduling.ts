@@ -22,6 +22,7 @@ export const departments = mysqlTable('departments', {
   nameEn: varchar('nameEn', { length: 255 }),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   description: text('description'),
+  image: varchar('image', { length: 500 }),
   icon: varchar('icon', { length: 100 }),
   sortOrder: int('sortOrder').default(0).notNull(),
   isActive: boolean('isActive').default(true).notNull(),

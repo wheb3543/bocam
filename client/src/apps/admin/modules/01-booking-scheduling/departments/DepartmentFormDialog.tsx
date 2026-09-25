@@ -49,6 +49,7 @@ import {
 import { toast } from 'sonner';
 import { trpc } from '@/lib/api/trpc';
 import { generateSlugFromText } from '@/hooks/data/useSlugGenerator';
+import ImageUpload from '@/apps/admin/shared/form/ImageUpload';
 
 export interface DepartmentFormData {
   id?: number;
@@ -57,6 +58,7 @@ export interface DepartmentFormData {
   slug: string;
   description?: string | null;
   icon?: string | null;
+  image?: string | null;
   sortOrder: number;
   isActive: boolean;
   doctorCount?: number;
@@ -107,6 +109,7 @@ export function DepartmentFormDialog({
   const [sortOrder, setSortOrder] = useState<number>(0);
   const [isActive, setIsActive] = useState<boolean>(true);
   const [description, setDescription] = useState('');
+  const [image, setImage] = useState('');
   const [manuallyEditedSlug, setManuallyEditedSlug] = useState(false);
 
   // Sync form state on open or department change
@@ -126,19 +129,21 @@ export function DepartmentFormDialog({
           setCustomIcon(currentIcon);
         }
         setSortOrder(department.sortOrder ?? 0);
+        setImage(department.image || '');
+        setManuallyEditedSlug(true);
         setIsActive(department.isActive ?? true);
         setDescription(department.description || '');
-        setManuallyEditedSlug(true);
       } else {
         setName('');
         setNameEn('');
         setSlug('');
+        setDescription('');
+        setImage('');
+        setManuallyEditedSlug(false);
         setIcon('Stethoscope');
         setCustomIcon('');
         setSortOrder(0);
         setIsActive(true);
-        setDescription('');
-        setManuallyEditedSlug(false);
       }
     }
   }, [open, department]);
@@ -204,6 +209,8 @@ export function DepartmentFormDialog({
       slug: trimmedSlug,
       description: description.trim() || undefined,
       icon: finalIcon || undefined,
+      // نرسل null عند الإزالة حتى تُمسح الصورة القديمة من قاعدة البيانات.
+      image: image.trim() || null,
       sortOrder: Number(sortOrder) || 0,
       isActive,
     };
@@ -381,6 +388,22 @@ export function DepartmentFormDialog({
               rows={3}
               className="resize-none"
             />
+
+            {/* Department Image */}
+            <div className="space-y-1.5 pt-1">
+              <Label className="text-xs font-semibold text-foreground">صورة القسم</Label>
+              <ImageUpload
+                value={image}
+                onChange={setImage}
+                folder="departments"
+                placeholder="اسحب صورة القسم هنا أو اضغط للاختيار"
+                previewHeight="h-48"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                ستظهر هذه الصورة في بطاقة القسم وصفحة الأقسام العامة. يمكن اختيار صورة من مكتبة
+                الوسائط أو رفع صورة جديدة.
+              </p>
+            </div>
           </div>
 
           <DialogFooter className="pt-4 gap-2 sm:gap-0">

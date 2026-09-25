@@ -16,9 +16,9 @@ try {
 // 2. أكبر المكتبات
 console.log('\n📊 أكبر المكتبات:');
 try {
-  const largeLibs = execSync('du -sh node_modules/* 2>/dev/null | sort -hr | head -20', { 
+  const largeLibs = execSync('du -sh node_modules/* 2>/dev/null | sort -hr | head -20', {
     encoding: 'utf8',
-    cwd: process.cwd()
+    cwd: process.cwd(),
   });
   console.log(largeLibs);
 } catch (error) {
@@ -37,7 +37,7 @@ console.log('  - Tailwind: مفعل');
 console.log('\n⚠️  المكتبات الثقيلة المكتشفة:');
 const heavyLibs = [
   'puppeteer',
-  'whatsapp-web.js', 
+  'whatsapp-web.js',
   '@aws-sdk',
   'framer-motion',
   'recharts',
@@ -45,10 +45,10 @@ const heavyLibs = [
   'pdfkit',
   'bullmq',
   'ioredis',
-  'redis'
+  'redis',
 ];
 
-heavyLibs.forEach(lib => {
+heavyLibs.forEach((lib) => {
   try {
     const libPath = `node_modules/${lib}`;
     if (fs.existsSync(libPath)) {
@@ -62,8 +62,8 @@ heavyLibs.forEach(lib => {
 
 // 5. عدد مكونات Radix UI
 console.log('\n🎨 مكونات Radix UI:');
-const radixLibs = execSync('ls node_modules/@radix-ui 2>/dev/null | wc -l', { 
-  encoding: 'utf8' 
+const radixLibs = execSync('ls node_modules/@radix-ui 2>/dev/null | wc -l', {
+  encoding: 'utf8',
 });
 console.log(`  - عدد مكونات Radix UI: ${radixLibs.trim()}`);
 

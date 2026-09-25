@@ -88,10 +88,18 @@ function schemaTables() {
 function referencesFromSql(sql, file) {
   const references = [];
   const add = (table, columns, index) => references.push({ file, table, columns, index });
-  for (const match of sql.matchAll(/CREATE\s+(?:UNIQUE\s+)?INDEX\s+`?[^\s`]+`?\s+ON\s+`?([A-Za-z0-9_]+)`?\s*\(([^)]+)\)/gi)) {
-    add(match[1], match[2].split(',').map((column) => column.trim().replaceAll('`', '')), match.index);
+  for (const match of sql.matchAll(
+    /CREATE\s+(?:UNIQUE\s+)?INDEX\s+`?[^\s`]+`?\s+ON\s+`?([A-Za-z0-9_]+)`?\s*\(([^)]+)\)/gi
+  )) {
+    add(
+      match[1],
+      match[2].split(',').map((column) => column.trim().replaceAll('`', '')),
+      match.index
+    );
   }
-  for (const match of sql.matchAll(/ALTER\s+TABLE\s+`?([A-Za-z0-9_]+)`?\s+(?:ADD|MODIFY|CHANGE)\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([A-Za-z0-9_]+)`?/gi)) {
+  for (const match of sql.matchAll(
+    /ALTER\s+TABLE\s+`?([A-Za-z0-9_]+)`?\s+(?:ADD|MODIFY|CHANGE)\s+COLUMN\s+(?:IF\s+NOT\s+EXISTS\s+)?`?([A-Za-z0-9_]+)`?/gi
+  )) {
     add(match[1], [match[2]], match.index);
   }
   return references;
@@ -109,7 +117,12 @@ for (const file of migrationRoots.flatMap(collectSqlFiles)) {
       continue;
     }
     for (const column of reference.columns) {
-      if (!columns.has(column)) violations.push({ ...reference, column, reason: 'column does not exist in drizzle/schema.ts' });
+      if (!columns.has(column))
+        violations.push({
+          ...reference,
+          column,
+          reason: 'column does not exist in drizzle/schema.ts',
+        });
     }
   }
 }

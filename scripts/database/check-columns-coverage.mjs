@@ -101,10 +101,10 @@ async function checkColumnsCoverage() {
       try {
         // Get table structure
         const [columns] = await connection.execute(`DESCRIBE ${table}`);
-        
+
         // Get sample data to check which columns are filled
         const [rows] = await connection.execute(`SELECT * FROM ${table} LIMIT 1`);
-        
+
         if (rows.length === 0) {
           console.log(`⚠️  ${table}: لا توجد بيانات للتحقق`);
           continue;
@@ -119,7 +119,7 @@ async function checkColumnsCoverage() {
           totalColumns++;
           const columnName = column.Field;
           const value = row[columnName];
-          
+
           // Check if column is filled (not null and not empty string)
           if (value !== null && value !== '' && value !== 0) {
             filledColumns++;
@@ -132,19 +132,18 @@ async function checkColumnsCoverage() {
         }
 
         const coverage = ((tableFilled / columns.length) * 100).toFixed(1);
-        
+
         if (coverage < 100) {
           tablesWithMissingData.push({
             table,
             coverage,
             missing: missingColumns.length,
-            total: columns.length
+            total: columns.length,
           });
           console.log(`⚠️  ${table}: ${coverage}% مغطى (${tableFilled}/${columns.length} أعمدة)`);
         } else {
           console.log(`✅ ${table}: ${coverage}% مغطى (${tableFilled}/${columns.length} أعمدة)`);
         }
-
       } catch (error) {
         console.log(`❌ ${table}: خطأ - ${error.message}`);
       }
@@ -158,13 +157,14 @@ async function checkColumnsCoverage() {
 
     if (tablesWithMissingData.length > 0) {
       console.log('\n⚠️  الجداول التي تحتوي على أعمدة فارغة:');
-      tablesWithMissingData.forEach(item => {
-        console.log(`  - ${item.table}: ${item.coverage}% (${item.missing}/${item.total} أعمدة فارغة)`);
+      tablesWithMissingData.forEach((item) => {
+        console.log(
+          `  - ${item.table}: ${item.coverage}% (${item.missing}/${item.total} أعمدة فارغة)`
+        );
       });
     } else {
       console.log('\n🎉 جميع الأعمدة في جميع الجداول مملوءة بنسبة 100%!');
     }
-
   } catch (error) {
     console.error('❌ خطأ:', error.message);
     throw error;

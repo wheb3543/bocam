@@ -26,7 +26,13 @@ const user = args.user || 'root';
 
 function parseSchemaTs(filePath) {
   const src = fs.readFileSync(filePath, 'utf8');
-  const sourceFile = ts.createSourceFile(filePath, src, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    src,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS
+  );
   const tables = {};
   const columnCall = (initializer) => {
     let current = initializer;
@@ -59,9 +65,16 @@ function parseSchemaTs(filePath) {
         const text = property.initializer.getText(sourceFile);
         const argsText = call.arguments.map((argument) => argument.getText(sourceFile)).join(',');
         let expectedType = fn;
-        if (fn === 'varchar') expectedType = `varchar(${argsText.match(/length\s*:\s*(\d+)/)?.[1] || '255'})`;
+        if (fn === 'varchar')
+          expectedType = `varchar(${argsText.match(/length\s*:\s*(\d+)/)?.[1] || '255'})`;
         if (fn === 'boolean') expectedType = 'tinyint(1)';
-        if (fn === 'decimal') expectedType = `decimal(${argsText.match(/precision\s*:\s*(\d+).*scale\s*:\s*(\d+)/)?.slice(1).join(',') || ''})`;
+        if (fn === 'decimal')
+          expectedType = `decimal(${
+            argsText
+              .match(/precision\s*:\s*(\d+).*scale\s*:\s*(\d+)/)
+              ?.slice(1)
+              .join(',') || ''
+          })`;
         if (fn === 'mysqlEnum') expectedType = 'enum';
         cols[property.name.getText(sourceFile).replace(/["']/g, '')] = {
           expectedType,
@@ -86,7 +99,14 @@ async function getActualColumns(db, host, port, user, password, uri) {
   await connection.end();
   const res = {};
   for (const r of rows) {
-    const { table_name: table, column_name: col, column_type: colType, is_nullable: isNullable, column_default: colDefault, extra } = r;
+    const {
+      table_name: table,
+      column_name: col,
+      column_type: colType,
+      is_nullable: isNullable,
+      column_default: colDefault,
+      extra,
+    } = r;
     res[table] = res[table] || {};
     res[table][col] = { columnType: colType, isNullable, columnDefault: colDefault, extra };
   }
@@ -159,7 +179,14 @@ function compare(expected, actual) {
   const expected = parseSchemaTs(schemaPath);
   let actual;
   try {
-    actual = await getActualColumns(db, host, port, user, args.password, args.url || process.env.DATABASE_URL);
+    actual = await getActualColumns(
+      db,
+      host,
+      port,
+      user,
+      args.password,
+      args.url || process.env.DATABASE_URL
+    );
   } catch (err) {
     console.error('Failed to query information_schema:', err.message);
     process.exit(1);

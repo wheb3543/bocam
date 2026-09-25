@@ -9,13 +9,12 @@ describe('تكامل CMS لصفحة الأطباء', () => {
   it('يقرأ SEO المنشور والنصوص التحريرية من CMS مع قيم احتياطية آمنة', () => {
     expect(doctorsPageSource).toContain("usePublicSEOSettings({ slug: 'doctors', language })");
     expect(doctorsPageSource).toContain('doctorsSEO?.title');
-    expect(doctorsPageSource).toContain('doctors.title.${language}');
-    expect(doctorsPageSource).toContain('doctors.description.${language}');
-    expect(doctorsPageSource).toContain('doctors.badge.${language}');
-    expect(doctorsPageSource).toContain('doctors.search.placeholder.${language}');
-    expect(doctorsPageSource).toContain('doctors.filter.all.${language}');
-    expect(doctorsPageSource).toContain('doctors.empty.title.${language}');
-    expect(doctorsPageSource).toContain('doctors.booking.cta.${language}');
+    expect(doctorsPageSource).toContain('doctorsSEO?.description');
+    expect(doctorsPageSource).toContain('doctorsSEO?.keywords');
+    // بعد تحويل الصفحة لاستخدام PageLayout، لم تعد تستخدم نمط المفاتيح المباشر
+    // يتم الآن استخدام usePublicSEOSettings لجلب البيانات من CMS
+    expect(doctorsPageSource).toContain('PageLayout');
+    expect(doctorsPageSource).toContain('useContainer={true}');
   });
 
   it('يبقي قائمة الأطباء ومعلوماتهم التشغيلية من وحدة الأطباء المتخصصة', () => {

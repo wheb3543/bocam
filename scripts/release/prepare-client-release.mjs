@@ -43,7 +43,10 @@ for (const directory of ['tenants']) {
       !/^\.env(?:\.|$)/.test(path.basename(source)),
   });
 }
-fs.cpSync(path.join(root, 'license-keys/public-key.pem'), path.join(releaseDir, 'license-keys/public-key.pem'));
+fs.cpSync(
+  path.join(root, 'license-keys/public-key.pem'),
+  path.join(releaseDir, 'license-keys/public-key.pem')
+);
 fs.writeFileSync(
   path.join(releaseDir, 'package.json'),
   JSON.stringify(
@@ -53,7 +56,8 @@ fs.writeFileSync(
       type: 'module',
       engines: { node: '>=22.13.0' },
       scripts: { start: 'NODE_ENV=production node dist/index.js' },
-      dependencies: JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).dependencies,
+      dependencies: JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
+        .dependencies,
     },
     null,
     2

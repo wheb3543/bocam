@@ -23,10 +23,10 @@ async function cleanupCareersPage() {
     console.log('\n🗑️ حذف المحتوى القديم...');
     await connection.execute('DELETE FROM textContent WHERE pageId = 2');
     console.log('✅ تم حذف المحتوى النصي القديم');
-    
+
     await connection.execute('DELETE FROM sections WHERE pageId = 2');
     console.log('✅ تم حذف الأقسام القديمة');
-    
+
     await connection.execute('DELETE FROM pages WHERE id = 2');
     console.log('✅ تم حذف الصفحة القديمة');
 

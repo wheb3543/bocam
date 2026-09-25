@@ -2,7 +2,8 @@ import { chromium } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
-const outDir = '/Users/applestore/.gemini/antigravity-ide/brain/d31d491c-ea49-4fe2-b45f-2206f20a9595/scratch/screenshots';
+const outDir =
+  '/Users/applestore/.gemini/antigravity-ide/brain/d31d491c-ea49-4fe2-b45f-2206f20a9595/scratch/screenshots';
 fs.mkdirSync(outDir, { recursive: true });
 
 async function capture() {
@@ -10,14 +11,18 @@ async function capture() {
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    userAgent:
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   });
 
   if (!fs.existsSync(path.join(outDir, 'ref_top.png'))) {
     console.log('Capturing reference site https://hail.saudigermanhealth.com/ar ...');
     try {
       const refPage = await context.newPage();
-      await refPage.goto('https://hail.saudigermanhealth.com/ar', { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await refPage.goto('https://hail.saudigermanhealth.com/ar', {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      });
       await refPage.waitForTimeout(4000);
       await refPage.screenshot({ path: path.join(outDir, 'ref_top.png') });
       await refPage.screenshot({ path: path.join(outDir, 'ref_full.png'), fullPage: true });
@@ -39,11 +44,23 @@ async function capture() {
       );
       window.localStorage.setItem('sgh_cookie_consent', 'true');
     });
-    await localPage.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await localPage.goto('http://localhost:3000/', {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000,
+    });
     await localPage.waitForSelector('#main-content', { timeout: 15000 });
     await localPage.waitForTimeout(1000);
-    await localPage.screenshot({ path: path.join(outDir, 'local_top.png'), animations: 'disabled', timeout: 15000 });
-    await localPage.screenshot({ path: path.join(outDir, 'local_full.png'), fullPage: true, animations: 'disabled', timeout: 20000 });
+    await localPage.screenshot({
+      path: path.join(outDir, 'local_top.png'),
+      animations: 'disabled',
+      timeout: 15000,
+    });
+    await localPage.screenshot({
+      path: path.join(outDir, 'local_full.png'),
+      fullPage: true,
+      animations: 'disabled',
+      timeout: 20000,
+    });
     console.log('Local site captured successfully!');
   } catch (err) {
     console.error('Error capturing local page:', err.message);

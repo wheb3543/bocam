@@ -23,7 +23,9 @@ describe('تهيئة محتوى الصفحة الرئيسية', () => {
     expect(textRouterSource).toContain("status: 'published'");
     expect(textRouterSource).toContain('publishedAt: new Date()');
     expect(textRouterSource).toContain('await invalidateAdminTextContentCache()');
-    expect(homePageSource).toContain('key: `hero.button.${language}`');
-    expect(homePageSource).not.toContain('hero.button.text.${language}');
+    // بعد تحويل الصفحة الرئيسية لاستخدام PageLayout، لم تعد تستخدم نمط المفاتيح المباشر
+    // يتم الآن استخدام usePublicSEOSettings لجلب البيانات من CMS
+    expect(homePageSource).toContain('usePublicSEOSettings');
+    expect(homePageSource).toContain('PageLayout');
   });
 });

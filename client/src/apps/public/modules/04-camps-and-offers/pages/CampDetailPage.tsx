@@ -451,7 +451,7 @@ function CampDetailContent({ slug }: { slug: string }) {
       {/* Hero Section - Using shared component */}
       <PublicPageHeader
         title={camp.name}
-        subtitle={camp.description}
+        subtitle={camp.description ?? undefined}
         badge={{
           text: copy.heroBadge,
           icon: <Heart className="w-4 h-4 text-emerald-300" />,
