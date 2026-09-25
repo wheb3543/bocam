@@ -167,6 +167,7 @@ export default [
       // Dependencies
       'node_modules/**',
       'dist/**',
+      'release/**',
       'build/**',
       '.next/**',
       'out/**',
