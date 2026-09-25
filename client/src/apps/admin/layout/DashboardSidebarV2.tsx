@@ -12,7 +12,6 @@ import { useRolePermissions } from '@/hooks/auth/useRolePermissions';
 import { canAccessSocialInbox } from '@shared/socialInboxAccess';
 import {
   allNavItems,
-  allToolsGroups,
   canonicalToolsGroups,
   bottomNavItems,
   defaultVisibleItemIds,

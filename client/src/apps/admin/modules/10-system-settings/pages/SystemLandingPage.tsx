@@ -183,7 +183,7 @@ export default function SystemLandingPage({ onOpenTab }: SystemLandingPageProps 
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {bocamModules.map(
-              ({ code, title, titleEn, desc, href, Icon, gradient, ring, badge, glow }) => (
+              ({ code, title, titleEn, desc, href, Icon, gradient, badge, glow }) => (
                 <button
                   key={code}
                   type="button"

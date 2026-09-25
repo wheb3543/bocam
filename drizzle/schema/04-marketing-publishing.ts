@@ -10,7 +10,6 @@ import {
   decimal,
   foreignKey,
   uniqueIndex,
-  json,
 } from 'drizzle-orm/mysql-core';
 
 import { media } from './05-cms-portal';

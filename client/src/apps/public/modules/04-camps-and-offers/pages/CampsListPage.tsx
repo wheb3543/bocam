@@ -80,17 +80,6 @@ function CampsListContent() {
     section: 'camps',
     type: 'title',
   });
-  const { data: campsDescription } = usePublicTextContent({
-    key: `camps.description.${language}`,
-    section: 'camps',
-    type: 'description',
-  });
-  const { data: campsBadge } = usePublicTextContent({
-    key: `camps.badge.${language}`,
-    section: 'camps',
-    type: 'text',
-  });
-
   const { data: campsAboutTitle } = usePublicTextContent({
     key: `camps.about.title.${language}`,
     section: 'camps',

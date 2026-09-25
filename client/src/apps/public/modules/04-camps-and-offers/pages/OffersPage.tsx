@@ -72,16 +72,6 @@ function OffersPageContent() {
     section: 'offers',
     type: 'title',
   });
-  const { data: offersDescription } = usePublicTextContent({
-    key: `offers.description.${language}`,
-    section: 'offers',
-    type: 'description',
-  });
-  const { data: offersBadge } = usePublicTextContent({
-    key: `offers.badge.${language}`,
-    section: 'offers',
-    type: 'text',
-  });
   const { data: emptyTitleData } = usePublicTextContent({
     key: `offers.page.empty.title.${language}`,
     section: 'offers',

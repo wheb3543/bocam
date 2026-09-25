@@ -7,10 +7,8 @@ import {
   varchar,
   boolean,
   index,
-  decimal,
   foreignKey,
   uniqueIndex,
-  json,
 } from 'drizzle-orm/mysql-core';
 
 import { socialPublishDestinations } from './04-marketing-publishing';

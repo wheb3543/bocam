@@ -3,7 +3,6 @@
  *
  * Individual offer page with details and registration form
  */
-import { useFormatDate } from '@/hooks/export/useFormatDate';
 import { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'wouter';
 import { trpc } from '@/lib/api/trpc';
@@ -77,21 +76,6 @@ function OfferDetailContent({ slug }: { slug: string }) {
   });
   const { data: heroBadgeData } = usePublicTextContent({
     key: `offers.detail.hero.badge.${language}`,
-    section: 'offers',
-    type: 'text',
-  });
-  const { data: heroBookNowData } = usePublicTextContent({
-    key: `offers.detail.hero.book.now.${language}`,
-    section: 'offers',
-    type: 'button',
-  });
-  const { data: heroDurationData } = usePublicTextContent({
-    key: `offers.detail.hero.duration.${language}`,
-    section: 'offers',
-    type: 'text',
-  });
-  const { data: heroUntilData } = usePublicTextContent({
-    key: `offers.detail.hero.until.${language}`,
     section: 'offers',
     type: 'text',
   });

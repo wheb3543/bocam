@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, GripVertical } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useLocation } from 'wouter';
 import type { AdminTab } from '@/hooks/layout/useAdminTabs';
 import { cn } from '@/lib/utils';

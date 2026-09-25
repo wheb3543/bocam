@@ -7,10 +7,7 @@ import {
   varchar,
   boolean,
   index,
-  decimal,
-  foreignKey,
   uniqueIndex,
-  json,
 } from 'drizzle-orm/mysql-core';
 
 import { users } from './07-users-rbac';

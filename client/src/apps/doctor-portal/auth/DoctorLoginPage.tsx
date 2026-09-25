@@ -3,7 +3,6 @@
  * بوابة مخصصة للكوادر الطبية للوصول إلى العيادة وكشوفات المواعيد
  */
 import { useState } from 'react';
-import { useLocation } from 'wouter';
 import {
   Card,
   CardContent,
@@ -19,7 +18,6 @@ import { toast } from 'sonner';
 import { APP_TITLE, COMPANY_ARABIC_NAME } from '@/const';
 
 export default function DoctorLoginPage() {
-  const [, navigate] = useLocation();
   const [emailOrId, setEmailOrId] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

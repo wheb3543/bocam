@@ -59,11 +59,6 @@ function OffersListContent() {
     section: 'offers',
     type: 'title',
   });
-  const { data: heroDescriptionData } = usePublicTextContent({
-    key: `offers.list.hero.description.${language}`,
-    section: 'offers',
-    type: 'description',
-  });
   const { data: searchPlaceholderData } = usePublicTextContent({
     key: `offers.list.search.placeholder.${language}`,
     section: 'offers',

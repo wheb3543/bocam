@@ -3,7 +3,6 @@ import { useAuth } from '@/_core/hooks/useAuth';
 import { APP_LOGO, APP_TITLE, getLocalLoginUrl } from '@/const';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
-import AdminContentSkeleton from './AdminContentSkeleton';
 import AdminTabs from './AdminTabs';
 import DashboardSidebarV2 from './DashboardSidebarV2';
 import AdminWorkspace from './AdminWorkspace';
