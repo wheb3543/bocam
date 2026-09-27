@@ -78,6 +78,7 @@ import { systemRouter } from './system';
 import { notificationsRouter } from './notifications';
 import { webhooksRouter } from './webhooks';
 import { publicContentRouter } from './public/content';
+import { publicBlogRouter } from './public/blog';
 
 import { getCombinedSocialMediaStats } from '../api/metaGraphAPI';
 import { runDeactivationJobs } from '../tasks/cron/deactivateExpired';
@@ -114,6 +115,7 @@ export const appRouter = router({
   queue: queueRouter,
   content: contentRouter,
   publicContent: publicContentRouter,
+  blog: publicBlogRouter,
   notifications: notificationsRouter,
 
   // User Preferences

@@ -1,5 +1,6 @@
 import {
   int,
+  mediumtext,
   mysqlEnum,
   mysqlTable,
   text,
@@ -292,6 +293,8 @@ export const contentAuditLog = mysqlTable('contentAuditLog', {
     'page',
     'section',
     'sectionButton',
+    'blogPost',
+    'blogCategory',
     'operation',
   ]),
   entityId: int('entityId'),
@@ -365,6 +368,8 @@ export const contentVersions = mysqlTable('contentVersions', {
     'page',
     'section',
     'sectionButton',
+    'blogPost',
+    'blogCategory',
   ]).notNull(),
   entityId: int('entityId').notNull(),
   versionNumber: int('versionNumber').notNull(),
@@ -628,6 +633,105 @@ export const contentApprovals = mysqlTable(
 
 export type ContentApproval = typeof contentApprovals.$inferSelect;
 export type InsertContentApproval = typeof contentApprovals.$inferInsert;
+
+/**
+ * Blog Categories Table - جدول تصنيفات المدونة الطبية
+ *
+ * تصنيفات تثقيفية يديرها فريق المحتوى (أمراض معدية، صحة النوم، العظام...) وتُستخدم
+ * للتصفية في صفحة المدونة وربط المقالات ببعضها في صفحة "المزيد من المقالات".
+ */
+export const blogCategories = mysqlTable(
+  'blogCategories',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    name: varchar('name', { length: 255 }).notNull(), // اسم التصنيف بالعربية
+    nameEn: varchar('nameEn', { length: 255 }), // اسم التصنيف بالإنجليزية
+    slug: varchar('slug', { length: 255 }).notNull().unique(), // الرابط المختصر للتصنيف
+    description: text('description'), // وصف مختصر للتصنيف
+    icon: varchar('icon', { length: 100 }), // اسم أيقونة من مكتبة lucide
+    color: varchar('color', { length: 20 }), // لون التمييز البصري (hex)
+    sortOrder: int('sortOrder').default(0).notNull(), // ترتيب العرض اليدوي
+    isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(),
+    deletedAt: timestamp('deletedAt'), // الحذف الناعم
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    slugIdx: index('blogCategories_slug_idx').on(table.slug),
+    isActiveIdx: index('blogCategories_isActive_idx').on(table.isActive),
+    sortOrderIdx: index('blogCategories_sortOrder_idx').on(table.sortOrder),
+    deletedAtIdx: index('blogCategories_deletedAt_idx').on(table.deletedAt),
+    isActiveSortIdx: index('blogCategories_isActiveSort_idx').on(table.isActive, table.sortOrder),
+  })
+);
+
+export type BlogCategory = typeof blogCategories.$inferSelect;
+export type InsertBlogCategory = typeof blogCategories.$inferInsert;
+
+/**
+ * Blog Posts Table - جدول مقالات المدونة الطبية
+ *
+ * المصدر الوحيد للحقيقة لمحتوى `/blog` و `/blog/:slug`. يتبع دورة حياة النشر
+ * المعتمدة في النظام (draft/published/archived) مع حذف ناعم، وجدولة نشر مؤجلة،
+ * وبوابة جودة نشر موحّدة مع بقية كيانات CMS.
+ */
+export const blogPosts = mysqlTable(
+  'blogPosts',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    title: varchar('title', { length: 255 }).notNull(), // عنوان المقال بالعربية
+    titleEn: varchar('titleEn', { length: 255 }), // عنوان المقال بالإنجليزية
+    slug: varchar('slug', { length: 255 }).notNull().unique(), // رابط المقال العام
+    excerpt: text('excerpt'), // مقتطف يظهر في بطاقة القائمة
+    excerptEn: text('excerptEn'),
+    content: mediumtext('content').notNull(), // جسم المقال المنسق (HTML مُعقَّم)
+    contentEn: mediumtext('contentEn'),
+    coverImage: varchar('coverImage', { length: 500 }), // صورة الغلاف
+    coverImageAlt: varchar('coverImageAlt', { length: 255 }), // النص البديل للصورة (إلزامي للنشر)
+    categoryId: int('categoryId').references(() => blogCategories.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }), // التصنيف الطبي المرتبط
+    authorId: int('authorId').references(() => users.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }), // كاتب المقال
+    reviewerName: varchar('reviewerName', { length: 255 }), // اسم المراجع الطبي
+    reviewDate: timestamp('reviewDate'), // تاريخ المراجعة الطبية
+    tags: text('tags'), // مصفوفة JSON من الوسوم
+    readingTime: int('readingTime').default(0).notNull(), // وقت القراءة بالدقائق (محسوب)
+    status: mysqlEnum('status', ['draft', 'published', 'archived']).default('draft').notNull(),
+    isActive: mysqlEnum('isActive', ['yes', 'no']).default('yes').notNull(),
+    isFeatured: mysqlEnum('isFeatured', ['yes', 'no']).default('no').notNull(), // يظهر في قسم المدونة بالصفحة الرئيسية
+    sortOrder: int('sortOrder').default(0).notNull(), // ترتيب يدوي للثبات
+    viewsCount: int('viewsCount').default(0).notNull(), // عدّاد المشاهدات العامة
+    metaTitle: varchar('metaTitle', { length: 255 }), // عنوان SEO المخصص
+    metaDescription: text('metaDescription'),
+    keywords: text('keywords'),
+    ogImage: varchar('ogImage', { length: 500 }),
+    scheduledFor: timestamp('scheduledFor'), // موعد النشر المؤجل (تلتقطه مهمة Heartbeat)
+    publishedAt: timestamp('publishedAt'),
+    deletedAt: timestamp('deletedAt'), // الحذف الناعم
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => ({
+    slugIdx: index('blogPosts_slug_idx').on(table.slug),
+    categoryIdIdx: index('blogPosts_categoryId_idx').on(table.categoryId),
+    statusIdx: index('blogPosts_status_idx').on(table.status),
+    isActiveIdx: index('blogPosts_isActive_idx').on(table.isActive),
+    isFeaturedIdx: index('blogPosts_isFeatured_idx').on(table.isFeatured),
+    sortOrderIdx: index('blogPosts_sortOrder_idx').on(table.sortOrder),
+    publishedAtIdx: index('blogPosts_publishedAt_idx').on(table.publishedAt),
+    scheduledForIdx: index('blogPosts_scheduledFor_idx').on(table.scheduledFor),
+    deletedAtIdx: index('blogPosts_deletedAt_idx').on(table.deletedAt),
+    statusActiveIdx: index('blogPosts_statusActive_idx').on(table.status, table.isActive),
+    categoryStatusIdx: index('blogPosts_categoryStatus_idx').on(table.categoryId, table.status),
+  })
+);
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;
 
 /**
  * Notifications Table - جدول الإشعارات

@@ -120,7 +120,17 @@ function cleanAuditRecord(
 ): ContentRecord | null {
   const entityType = record.entityType;
   const action = record.action;
-  const validEntityTypes = ['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton'];
+  const validEntityTypes = [
+    'text',
+    'image',
+    'color',
+    'seo',
+    'page',
+    'section',
+    'sectionButton',
+    'blogPost',
+    'blogCategory',
+  ];
   const validActions = ['create', 'update', 'delete'];
   if (typeof entityType !== 'string' || !validEntityTypes.includes(entityType)) {
     throw new Error('سجل التدقيق يحتوي نوع كيان غير مدعوم.');

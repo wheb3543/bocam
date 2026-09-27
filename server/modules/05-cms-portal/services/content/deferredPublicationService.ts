@@ -1,5 +1,6 @@
 import { and, eq, isNull, lte } from 'drizzle-orm';
 import {
+  blogPosts,
   contentAuditLog,
   images,
   media,
@@ -19,6 +20,7 @@ import {
 import { invalidateAdminPagesCache } from '../../../../routers/content/pages';
 import { invalidateAdminSectionsCache } from '../../../../routers/content/sections';
 import { invalidateAdminTextContentCache } from '../../../../routers/content/textContent';
+import { invalidateBlogCache } from '../../routers/content/blog';
 import {
   evaluatePublicationQuality,
   type CmsPublishEntityType,
@@ -35,6 +37,7 @@ type DeferredEntityCounters = {
   pages: number;
   sections: number;
   sectionButtons: number;
+  blogPosts: number;
 };
 
 export type DeferredCmsPublishResult = {
@@ -53,6 +56,7 @@ const emptyCounters = (): DeferredEntityCounters => ({
   pages: 0,
   sections: 0,
   sectionButtons: 0,
+  blogPosts: 0,
 });
 
 /**
@@ -67,67 +71,85 @@ export async function publishDueCmsContent(
   const db = await ensureDatabaseAvailable();
 
   const result = await db.transaction(async (tx) => {
-    const [dueTextContent, dueImages, dueMedia, dueSeo, duePages, dueSections, dueSectionButtons] =
-      await Promise.all([
-        tx
-          .select()
-          .from(textContent)
-          .where(
-            and(
-              eq(textContent.status, 'draft'),
-              lte(textContent.publishedAt, now),
-              isNull(textContent.deletedAt)
-            )
-          ),
-        tx
-          .select()
-          .from(images)
-          .where(
-            and(eq(images.status, 'draft'), lte(images.publishedAt, now), isNull(images.deletedAt))
-          ),
-        tx
-          .select()
-          .from(media)
-          .where(
-            and(eq(media.status, 'draft'), lte(media.publishedAt, now), isNull(media.deletedAt))
-          ),
-        tx
-          .select()
-          .from(seoSettings)
-          .where(
-            and(
-              eq(seoSettings.status, 'draft'),
-              lte(seoSettings.publishedAt, now),
-              isNull(seoSettings.deletedAt)
-            )
-          ),
-        tx
-          .select()
-          .from(pages)
-          .where(
-            and(eq(pages.status, 'draft'), lte(pages.publishedAt, now), isNull(pages.deletedAt))
-          ),
-        tx
-          .select()
-          .from(sections)
-          .where(
-            and(
-              eq(sections.status, 'draft'),
-              lte(sections.publishedAt, now),
-              isNull(sections.deletedAt)
-            )
-          ),
-        tx
-          .select()
-          .from(sectionButtons)
-          .where(
-            and(
-              eq(sectionButtons.status, 'draft'),
-              lte(sectionButtons.publishedAt, now),
-              isNull(sectionButtons.deletedAt)
-            )
-          ),
-      ]);
+    const [
+      dueTextContent,
+      dueImages,
+      dueMedia,
+      dueSeo,
+      duePages,
+      dueSections,
+      dueSectionButtons,
+      dueBlogPosts,
+    ] = await Promise.all([
+      tx
+        .select()
+        .from(textContent)
+        .where(
+          and(
+            eq(textContent.status, 'draft'),
+            lte(textContent.publishedAt, now),
+            isNull(textContent.deletedAt)
+          )
+        ),
+      tx
+        .select()
+        .from(images)
+        .where(
+          and(eq(images.status, 'draft'), lte(images.publishedAt, now), isNull(images.deletedAt))
+        ),
+      tx
+        .select()
+        .from(media)
+        .where(
+          and(eq(media.status, 'draft'), lte(media.publishedAt, now), isNull(media.deletedAt))
+        ),
+      tx
+        .select()
+        .from(seoSettings)
+        .where(
+          and(
+            eq(seoSettings.status, 'draft'),
+            lte(seoSettings.publishedAt, now),
+            isNull(seoSettings.deletedAt)
+          )
+        ),
+      tx
+        .select()
+        .from(pages)
+        .where(
+          and(eq(pages.status, 'draft'), lte(pages.publishedAt, now), isNull(pages.deletedAt))
+        ),
+      tx
+        .select()
+        .from(sections)
+        .where(
+          and(
+            eq(sections.status, 'draft'),
+            lte(sections.publishedAt, now),
+            isNull(sections.deletedAt)
+          )
+        ),
+      tx
+        .select()
+        .from(sectionButtons)
+        .where(
+          and(
+            eq(sectionButtons.status, 'draft'),
+            lte(sectionButtons.publishedAt, now),
+            isNull(sectionButtons.deletedAt)
+          )
+        ),
+      tx
+        .select()
+        .from(blogPosts)
+        .where(
+          and(
+            eq(blogPosts.status, 'draft'),
+            lte(blogPosts.publishedAt, now),
+            isNull(blogPosts.deletedAt)
+          )
+        ),
+    ]);
 
     const published = emptyCounters();
     const blocked = emptyCounters();
@@ -140,7 +162,7 @@ export async function publishDueCmsContent(
     }
 
     async function recordBlockedPublication(options: {
-      entityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+      entityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton' | 'blogPost';
       entityId: number;
       scheduledAt: Date | null;
       issues: PublicationQualityIssue[];
@@ -352,6 +374,34 @@ export async function publishDueCmsContent(
       published.sectionButtons += 1;
     }
 
+    for (const item of dueBlogPosts) {
+      const issues = await qualityIssues('blogPost', item);
+      if (issues.length) {
+        await tx.update(blogPosts).set({ publishedAt: null }).where(eq(blogPosts.id, item.id));
+        await recordBlockedPublication({
+          entityType: 'blogPost',
+          entityId: item.id,
+          scheduledAt: item.publishedAt,
+          issues,
+        });
+        blocked.blogPosts += 1;
+        continue;
+      }
+      await tx
+        .update(blogPosts)
+        .set({ status: 'published', isActive: 'yes' })
+        .where(eq(blogPosts.id, item.id));
+      await tx.insert(contentAuditLog).values({
+        entityType: 'blogPost',
+        entityId: item.id,
+        action: 'update',
+        oldValue: JSON.stringify({ status: 'draft', publishedAt: item.publishedAt }),
+        newValue: JSON.stringify({ status: 'published', publishedAt: item.publishedAt }),
+        reason: `نشر مؤجل بواسطة مهمة CMS ${taskUid}`,
+      });
+      published.blogPosts += 1;
+    }
+
     return {
       taskUid,
       executedAt: now.toISOString(),
@@ -362,7 +412,8 @@ export async function publishDueCmsContent(
         dueSeo.length +
         duePages.length +
         dueSections.length +
-        dueSectionButtons.length,
+        dueSectionButtons.length +
+        dueBlogPosts.length,
       published,
       blocked,
     };
@@ -393,6 +444,9 @@ export async function publishDueCmsContent(
     result.blocked.sectionButtons > 0
   ) {
     await invalidateAdminSectionsCache();
+  }
+  if (result.published.blogPosts > 0 || result.blocked.blogPosts > 0) {
+    await invalidateBlogCache();
   }
 
   logger.info('Processed due CMS publications', result);

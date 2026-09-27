@@ -16,7 +16,7 @@ drizzle/
 │   ├── 02-crm-patients.ts          # سجلات المرضى، العلاقات، النتائج، OTP
 │   ├── 03-omni-inbox.ts             # واتساب، القوالب، البث، التعليقات، حسابات التواصل
 │   ├── 04-marketing-publishing.ts   # الحملات، العملاء المحتملين، النشر الآلي
-│   ├── 05-cms-portal.ts             # الصفحات، الأقسام، مقالات التدوين، الوسائط، SEO
+│   ├── 05-cms-portal.ts             # الصفحات، الأقسام، مقالات المدونة، الوسائط، SEO
 │   ├── 06-tasks-projects.ts         # المهام، المشاريع، فرق العمل، مرفقات المهام
 │   ├── 07-users-rbac.ts             # المستخدمين، الأدوار، الصلاحيات، طلبات الوصول
 │   ├── 10-system-settings.ts        # الإعدادات، التراخيص، سجلات التدقيق، التكاملات
@@ -34,7 +34,7 @@ drizzle/
 | **02-crm-patients** | 4 | `patients`, `patientRelationships`, `patientOtps`, `patientResults` |
 | **03-omni-inbox** | 32 | `whatsappConversations`, `whatsappMessages`, `whatsappTemplates`, `socialInboxAccounts`, `comments` |
 | **04-marketing-publishing** | 19 | `campaigns`, `leads`, `socialPublishPosts`, `broadcastRecipients`, `metaLeadForms` |
-| **05-cms-portal** | 13 | `pages`, `sections`, `sectionButtons`, `media`, `seoSettings`, `textContent`, `colorScheme` |
+| **05-cms-portal** | 16 | `pages`, `sections`, `sectionButtons`, `media`, `seoSettings`, `textContent`, `colorScheme`, **`blogPosts`**, **`blogCategories`**, `contentVersions`, `contentAuditLog`, `contentTrash` |
 | **06-tasks-projects** | 9 | `tasks`, `projects`, `teams`, `teamMembers`, `taskComments`, `followUpTasks` |
 | **07-users-rbac** | 4 | `users`, `roleDefinitions`, `userRoleAssignments`, `accessRequests` |
 | **10-system-settings** | 24 | `settings`, `auditLogs`, `notifications`, `integrationConnections`, `trackingEvents` |

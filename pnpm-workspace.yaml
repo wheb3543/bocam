@@ -16,3 +16,4 @@ minimumReleaseAgeExclude:
   - baseline-browser-mapping@2.10.43
   - bullmq@5.80.2
   - postcss@8.5.17
+  - isomorphic-dompurify@4.4.0

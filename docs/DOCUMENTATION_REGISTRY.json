@@ -156,14 +156,14 @@
       "notes": "Generated baseline; domain and ownership require phase review."
     },
     {
-      "path": "AGENTS.md",
-      "title": "AGENTS",
+      "path": "AAGENTS.md",
+      "title": "BOCAM agent engineering guidelines",
       "language": "mixed",
-      "domain": "unclassified",
-      "document_type": "reference",
-      "status": "unclassified",
-      "audience": "unclassified",
-      "owner": "unassigned",
+      "domain": "architecture",
+      "document_type": "guide",
+      "status": "canonical",
+      "audience": "engineering",
+      "owner": "platform",
       "source_code_paths": [],
       "test_paths": [],
       "related_documents": [],
@@ -171,7 +171,7 @@
       "last_reviewed": null,
       "review_due": null,
       "evidence_level": "inventory-only",
-      "notes": "Generated baseline; domain and ownership require phase review."
+      "notes": "Registered via scripts/qa/register-doc.mjs"
     },
     {
       "path": "CHANGELOG.md",
@@ -1314,6 +1314,34 @@
       "notes": "Generated baseline; domain and ownership require phase review."
     },
     {
+      "path": "docs/architecture/DATABASE_MODULAR_SCHEMA.md",
+      "title": "DATABASE MODULAR SCHEMA",
+      "language": "ar",
+      "domain": "database-platform",
+      "document_type": "architecture",
+      "status": "canonical",
+      "audience": "engineers",
+      "owner": "Database & Platform Engineering Team",
+      "source_code_paths": [
+        "drizzle/schema/",
+        "drizzle/schema.ts",
+        "drizzle.config.ts"
+      ],
+      "test_paths": [
+        "server/services/rolePermissionService.workflow.test.ts"
+      ],
+      "related_documents": [
+        "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/SERVER_MODULAR_ARCHITECTURE.md",
+        "README.md"
+      ],
+      "supersedes": null,
+      "last_reviewed": "2026-09-18",
+      "review_due": "2027-03-18",
+      "evidence_level": "tested",
+      "notes": "Canonical architecture blueprint for domain-modular Drizzle database schemas."
+    },
+    {
       "path": "docs/architecture/DATABASE_SCHEMA_RUNTIME_REFERENCE.md",
       "title": "DATABASE SCHEMA RUNTIME REFERENCE",
       "language": "mixed",
@@ -1503,34 +1531,6 @@
       "review_due": "2027-03-18",
       "evidence_level": "tested",
       "notes": "Canonical blueprint for 3-tier modular backend architecture."
-    },
-    {
-      "path": "docs/architecture/DATABASE_MODULAR_SCHEMA.md",
-      "title": "DATABASE MODULAR SCHEMA",
-      "language": "ar",
-      "domain": "database-platform",
-      "document_type": "architecture",
-      "status": "canonical",
-      "audience": "engineers",
-      "owner": "Database & Platform Engineering Team",
-      "source_code_paths": [
-        "drizzle/schema/",
-        "drizzle/schema.ts",
-        "drizzle.config.ts"
-      ],
-      "test_paths": [
-        "server/services/rolePermissionService.workflow.test.ts"
-      ],
-      "related_documents": [
-        "docs/architecture/ARCHITECTURE.md",
-        "docs/architecture/SERVER_MODULAR_ARCHITECTURE.md",
-        "README.md"
-      ],
-      "supersedes": null,
-      "last_reviewed": "2026-09-18",
-      "review_due": "2027-03-18",
-      "evidence_level": "tested",
-      "notes": "Canonical architecture blueprint for domain-modular Drizzle database schemas."
     },
     {
       "path": "docs/archive/content/CONTENT_MANAGEMENT_AUDIT_REPORT.md",
@@ -2359,6 +2359,24 @@
       "review_due": null,
       "evidence_level": "inventory-only",
       "notes": "Generated baseline; domain and ownership require phase review."
+    },
+    {
+      "path": "docs/domains/BLOG_CMS_RUNTIME_REFERENCE.md",
+      "title": "Untitled",
+      "language": "mixed",
+      "domain": "unclassified",
+      "document_type": "reference",
+      "status": "unclassified",
+      "audience": "unclassified",
+      "owner": "unassigned",
+      "source_code_paths": [],
+      "test_paths": [],
+      "related_documents": [],
+      "supersedes": null,
+      "last_reviewed": null,
+      "review_due": null,
+      "evidence_level": "inventory-only",
+      "notes": "Registered via scripts/qa/register-doc.mjs"
     },
     {
       "path": "docs/domains/CAMPAIGNS_LEADS_RUNTIME_REFERENCE.md",

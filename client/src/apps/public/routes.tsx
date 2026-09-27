@@ -43,3 +43,5 @@ export const PrivacyPolicyPage = lazy(
 export const PrivacyPolicyChangelogPage = lazy(
   () => import('./modules/05-content-and-legal/pages/PrivacyPolicyChangelogPage')
 );
+export const BlogListPage = lazy(() => import('./modules/05-content-and-legal/pages/BlogListPage'));
+export const BlogPostPage = lazy(() => import('./modules/05-content-and-legal/pages/BlogPostPage'));

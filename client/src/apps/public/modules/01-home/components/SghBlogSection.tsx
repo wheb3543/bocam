@@ -1,154 +1,164 @@
-import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Calendar } from 'lucide-react';
+/**
+ * SghBlogSection - قسم «أحدث المقالات» في الصفحة الرئيسية
+ *
+ * يجلب المقالات المميزة من إدارة المدونة عبر tRPC بدل المحتوى الثابت،
+ * ويعرض أكثرها تمييزاً مع شريط تنقل تلقائي. التصميم يطابق هوية SGH:
+ * صندوق داخلي #f8f8f8، بطاقة بيضاء، وزر «عرض المزيد» أزرق.
+ */
+import { useEffect, useState } from 'react';
+import { Link } from 'wouter';
+import { trpc } from '@/lib/api/trpc';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ChevronLeft, ChevronRight, Clock, RefreshCw } from 'lucide-react';
+import {
+  clampExcerpt,
+  formatBlogDate,
+  formatReadingTime,
+} from '../../05-content-and-legal/utils/blogPresentation';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  date: string;
-  excerpt: string;
-  image: string;
-}
-
-const BLOG_POSTS: BlogPost[] = [
-  {
-    id: 'blog-1',
-    title: 'الشك في مرض الإيدز',
-    date: 'نيسـان 15, 2026',
-    image: '/sgh/blog/blog-1.jpg',
-    excerpt:
-      'الشك في مرض الإيدز، ماذا تفعل الآن؟ هل الشك في مرض الإيدز يعني الإصابة؟ لا، الشك وحده لا يعني الإصابة. كثير من الناس يمرون بقلق شديد بعد تعرض محتمل، لكن القلق لا يُشخّص أي مرض. الطريقة الوحيدة للتأكد هي إجراء تحليل HIV في الوقت المناسب. الإطمئنان الحقيقي يأتي من التحليل، لا من التخمين.',
-  },
-  {
-    id: 'blog-2',
-    title: 'أعراض الكلاميديا عند النساء',
-    date: 'نيسـان 14, 2026',
-    image: '/sgh/blog/blog-2.jpg',
-    excerpt:
-      'أعراض الكلاميديا عند النساء: 7 علامات تحذيرية لا تتجاهليها + متى تزورين طبيبك في السعودي الألماني. تمت المراجعة الطبية بواسطة فريق أطباء عيادات الأمراض المعدية. لماذا تُسمى الكلاميديا بالعدوى الصامتة؟ تخيّلي أن جسمك يحمل عدوى بكتيرية دون أن تشعري بأي ألم أو أعراض واضحة.',
-  },
-  {
-    id: 'blog-3',
-    title: 'أسباب انقطاع النفس أثناء النوم',
-    date: 'نيسـان 12, 2026',
-    image: '/sgh/blog/blog-3.jpg',
-    excerpt:
-      'أسباب انقطاع النفس أثناء النوم: 7 علامات خطيرة تستدعي فحص Sleep Study فوراً. تستيقظ كل يوم وأنت منهك، رغم أنك نمت ساعات طويلة. شريكك يشكو من شخيرك الشديد، وأحياناً تستيقظ مذعوراً وأنت تشعر أنك توقفت عن التنفس. هذه الأعراض ليست مجرد تعب عادي بل تستوجب مراجعة الطبيب المختص.',
-  },
-  {
-    id: 'blog-4',
-    title: 'تجربتي مع انقطاع النفس أثناء النوم',
-    date: 'نيسـان 12, 2026',
-    image: '/sgh/blog/blog-4.jpg',
-    excerpt:
-      'تجربتي مع انقطاع النفس أثناء النوم: كيف اكتشفت المشكلة وبدأت العلاج. كنت أعتقد أن الشخير شيء طبيعي، لكن لم أكن أعرف أني أتوقف عن التنفس أثناء النوم! لسنوات وأنا أستيقظ كل صباح بنفس الشعور من التعب والصداع حتى راجعت المستشفى وبدأت خطة العلاج الفعالة.',
-  },
-  {
-    id: 'blog-5',
-    title: 'هل الشخير طبيعي',
-    date: 'نيسـان 12, 2026',
-    image: '/sgh/blog/blog-5.jpg',
-    excerpt:
-      'هل الشخير طبيعي أم علامة على مرض خطير؟ ومتى تحتاج زيارة Sleep Lab؟ كثير من الناس يعتقدون أن الشخير أمر طبيعي، لكن الحقيقة قد تكون مختلفة تماماً. تعرف على أسبابه وكيفية تشخيصه وعلاجه بأحدث التقنيات.',
-  },
-];
+const FALLBACK_COVER = '/sgh/blog/blog-1.jpg';
 
 export default function SghBlogSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const {
+    data: posts = [],
+    isLoading,
+    isError,
+    refetch,
+  } = trpc.blog.featured.useQuery({ limit: 5 }, { placeholderData: (previous) => previous });
 
-  // Auto-slide every 8 seconds
+  // تنقل تلقائي كل 8 ثوانٍ، ويتوقف عند وجود مقال واحد فقط.
   useEffect(() => {
+    if (posts.length < 2) {
+      return;
+    }
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % BLOG_POSTS.length);
+      setCurrentIndex((prev) => (prev + 1) % posts.length);
     }, 8000);
     return () => clearInterval(timer);
-  }, []);
+  }, [posts.length]);
 
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + BLOG_POSTS.length) % BLOG_POSTS.length);
-  };
+  useEffect(() => {
+    if (currentIndex > posts.length - 1) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, posts.length]);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % BLOG_POSTS.length);
-  };
-
-  const currentPost = BLOG_POSTS[currentIndex];
+  const currentPost = posts[currentIndex];
+  const currentHref = currentPost ? `/blog/${encodeURIComponent(currentPost.slug)}` : '/blog';
 
   return (
-    <section
-      id="blog"
-      className="section-blog my-6 sm:my-8 bg-white select-none overflow-hidden"
-      dir="rtl"
-    >
-      {/* SGH Hail: .inner-section with authentic #f8f8f8 background card and 3rem padding */}
-      <div className="container max-w-[1380px] mx-auto px-[15px]">
-        <div className="inner-section w-full bg-[#f8f8f8] py-10 sm:py-12 px-4 sm:px-12 rounded-none sm:rounded-2xl">
-          {/* Inner Content Grid: .col-md-10.offset-md-1 (max-w-[1140px] mx-auto) */}
-          <div className="max-w-[1140px] mx-auto">
-            {/* Header with CTA Button */}
-            <div className="section-header with-cta flex items-center justify-between mb-8 sm:mb-10">
-              <h2 className="text-[28px] sm:text-[32px] font-bold text-[#212529] tracking-tight m-0">
+    <section id="blog" className="section-blog my-6 bg-white sm:my-8" dir="rtl">
+      <div className="container mx-auto max-w-[1380px] px-[15px]">
+        <div className="inner-section w-full rounded-none bg-[#f8f8f8] px-4 py-10 sm:rounded-2xl sm:px-12 sm:py-12">
+          <div className="mx-auto w-full max-w-[1140px]">
+            {/* الترويسة */}
+            <header className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+              <h2 className="m-0 text-[28px] font-bold tracking-tight text-[#212529] sm:text-[32px]">
                 أحدث المقالات
               </h2>
-              <a
-                href="/#blog"
-                className="btn btn-primary inline-flex h-[38px] items-center justify-center bg-[#1ca8e5] hover:bg-[#1694cc] text-white text-[15px] sm:text-[16px] font-normal px-[22.4px] py-[6px] rounded-[30px] transition-colors shadow-xs cursor-pointer"
-              >
-                عرض المزيد
-              </a>
-            </div>
+              <Link href="/blog">
+                <span className="inline-block rounded-[30px] bg-[#1ca8e5] px-[22.4px] py-[6px] text-[15px] font-normal text-white shadow-xs transition-colors hover:bg-[#1896cd] sm:text-[16px]">
+                  عرض المزيد
+                </span>
+              </Link>
+            </header>
 
-            {/* Slider Row with authentic SGH card layout */}
-            <div className="slider-row relative bg-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-xs overflow-hidden border border-slate-100/80">
-              <div className="flex flex-col md:flex-row items-center gap-8 lg:gap-12 min-h-[320px]">
-                {/* Image Column (In RTL: on the right) with authentic 80% aspect ratio */}
-                <div className="w-full md:w-[385px] shrink-0">
-                  <a
-                    href="/#blog"
-                    className="block w-full h-[260px] sm:h-[308px] overflow-hidden rounded-xl shadow-xs relative group cursor-pointer"
+            {/* بطاقة المقال */}
+            <div className="relative overflow-hidden rounded-2xl border border-slate-100/80 bg-white p-6 shadow-xs sm:p-8 lg:p-10">
+              {isLoading && (
+                <div className="flex flex-col items-center gap-8 md:flex-row">
+                  <Skeleton className="h-[260px] w-full rounded-xl md:w-[385px] md:shrink-0" />
+                  <div className="w-full space-y-4">
+                    <Skeleton className="h-8 w-3/4" />
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                </div>
+              )}
+
+              {isError && (
+                <div className="py-10 text-center">
+                  <p className="text-sm text-[#565656]">تعذّر تحميل أحدث المقالات حالياً.</p>
+                  <button
+                    type="button"
+                    onClick={() => refetch()}
+                    className="mt-4 inline-flex items-center gap-2 rounded-[30px] border border-[#1ca8e5] px-4 py-2 text-sm font-medium text-[#1ca8e5] transition-colors hover:bg-[#1ca8e5] hover:text-white"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    إعادة المحاولة
+                  </button>
+                </div>
+              )}
+
+              {!isLoading && !isError && !currentPost && (
+                <p className="py-10 text-center text-sm text-[#565656]">
+                  لا توجد مقالات منشورة في المدونة الطبية بعد.
+                </p>
+              )}
+
+              {currentPost && (
+                <div className="flex min-h-[320px] flex-col items-center gap-8 md:flex-row lg:gap-12">
+                  <Link
+                    href={currentHref}
+                    className="group block h-[260px] w-full overflow-hidden rounded-xl shadow-xs sm:h-[308px] md:w-[385px] md:shrink-0"
+                    aria-label={currentPost.title}
                   >
                     <img
                       key={currentPost.id}
-                      src={currentPost.image}
-                      alt={currentPost.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 animate-in fade-in duration-300"
+                      src={currentPost.coverImage?.trim() || FALLBACK_COVER}
+                      alt={currentPost.coverImageAlt?.trim() || currentPost.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                  </a>
-                </div>
+                  </Link>
 
-                {/* Content Column (In RTL: on the left) */}
-                <div className="flex-1 text-right flex flex-col justify-start">
-                  <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-bold leading-[1.25] text-[#212529] mb-2 hover:text-[#1ca8e5] transition-colors cursor-pointer">
-                    <a href="/#blog">{currentPost.title}</a>
-                  </h3>
+                  <div className="flex flex-1 flex-col items-start justify-start text-right">
+                    <h3 className="mb-2 text-[22px] font-bold leading-[1.25] text-[#212529] sm:text-[26px] lg:text-[28px]">
+                      <Link href={currentHref} className="transition-colors hover:text-[#1ca8e5]">
+                        {currentPost.title}
+                      </Link>
+                    </h3>
 
-                  <div className="inline-date flex items-center gap-1.5 text-[13.6px] text-[#8ca4b8] mb-4 sm:mb-6">
-                    <Calendar className="w-3.5 h-3.5 text-[#8ca4b8]" />
-                    <span>{currentPost.date}</span>
+                    <div className="mb-4 flex flex-wrap items-center gap-4 text-[13.6px] text-[#8ca4b8] sm:mb-6">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatReadingTime(currentPost.readingTime)}
+                      </span>
+                      <span>{formatBlogDate(currentPost.publishedAt)}</span>
+                    </div>
+
+                    <p className="line-clamp-4 text-[14.5px] leading-[24px] text-[#333333] sm:text-[15.2px]">
+                      {clampExcerpt(currentPost.excerpt)}
+                    </p>
                   </div>
-
-                  <div className="description text-[14.5px] sm:text-[15.2px] leading-[24px] text-[#333333] font-normal line-clamp-4">
-                    {currentPost.excerpt}
-                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Navigator (Slider Navigation Buttons) */}
-              <div className="navigator flex items-center justify-start gap-2 pt-6">
-                <button
-                  onClick={handlePrev}
-                  className="na-slider-actions prev w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
-                  aria-label="السابق"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="na-slider-actions next w-10 h-10 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-95"
-                  aria-label="التالي"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-              </div>
+              {/* أزرار التنقل بين المقالات */}
+              {posts.length > 1 && (
+                <div className="flex items-center justify-start gap-2 pt-6">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentIndex((prev) => (prev - 1 + posts.length) % posts.length)
+                    }
+                    aria-label="المقال السابق"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 shadow-xs transition-all hover:border-slate-300 hover:bg-slate-100 active:scale-95"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentIndex((prev) => (prev + 1) % posts.length)}
+                    aria-label="المقال التالي"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-700 shadow-xs transition-all hover:border-slate-300 hover:bg-slate-100 active:scale-95"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

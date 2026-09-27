@@ -12,11 +12,27 @@ type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 
 const logger = createLogger('auditLogService');
 
+/** أنواع الكيانات التي يسجّل سجل التدقيق تغييراتها. */
+export type AuditLogEntityType =
+  | 'text'
+  | 'image'
+  | 'color'
+  | 'seo'
+  | 'page'
+  | 'section'
+  | 'sectionButton'
+  | 'blogPost'
+  | 'blogCategory'
+  | 'operation';
+
+/** الإجراءات القابلة للتسجيل في سجل التدقيق. */
+export type AuditLogAction =
+  'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
+
 interface AuditLogFilters {
-  entityType?:
-    'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton' | 'operation';
+  entityType?: AuditLogEntityType;
   entityId?: number;
-  action?: 'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
+  action?: AuditLogAction;
   startDate?: Date;
   endDate?: Date;
   limit?: number;
@@ -34,10 +50,9 @@ export class AuditLogService {
   async logChange(
     db: DbClient,
     params: {
-      entityType:
-        'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton' | 'operation';
+      entityType: AuditLogEntityType;
       entityId: number;
-      action: 'create' | 'update' | 'delete' | 'operation_succeeded' | 'operation_failed';
+      action: AuditLogAction;
       userId?: number;
       oldValue?: string;
       newValue?: string;

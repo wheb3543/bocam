@@ -5,4 +5,6 @@
 export { default as CmsPagesManagerPage } from './pages/CmsPagesManagerPage';
 export { default as MediaLibraryPage } from './media/MediaLibraryPage';
 export { default as MediaPicker } from './media/MediaPicker';
+export { default as BlogManagementPage } from './blog/pages/BlogManagementPage';
+export { default as BlogContentEditor } from './blog/components/BlogContentEditor';
 export { default as SEO } from './components/SEO';

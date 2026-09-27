@@ -99,6 +99,12 @@ const PrivacyPolicyPage = lazy(
 const PrivacyPolicyChangelogPage = lazy(
   () => import('@apps/public/modules/05-content-and-legal/pages/PrivacyPolicyChangelogPage')
 );
+const BlogListPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/BlogListPage')
+);
+const BlogPostPage = lazy(
+  () => import('@apps/public/modules/05-content-and-legal/pages/BlogPostPage')
+);
 const AdminLogin = lazy(() => import('@apps/admin/auth/AdminLoginPage'));
 const FeatureLockedPage = lazy(() => import('@apps/admin/shared/feedback/FeatureLockedPage'));
 const ActivationPage = lazy(
@@ -195,6 +201,8 @@ function Router() {
         <Route path={'/thank-you'} component={ThankYou} />
         <Route path={'/privacy-policy'} component={PrivacyPolicyPage} />
         <Route path={'/privacy-policy-changelog'} component={PrivacyPolicyChangelogPage} />
+        <Route path={'/blog'} component={BlogListPage} />
+        <Route path={'/blog/:slug'} component={BlogPostPage} />
         <Route path={'/unauthorized'} component={Unauthorized} />
         <Route path={'/access-request'} component={AccessRequest} />
         <Route path={'/admin-login'} component={AdminLogin} />

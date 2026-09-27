@@ -9,7 +9,15 @@ import {
 } from '../../../../../drizzle/schema';
 
 export type CmsPublishEntityType =
-  'page' | 'textContent' | 'image' | 'media' | 'section' | 'sectionButton' | 'seo';
+  | 'page'
+  | 'textContent'
+  | 'image'
+  | 'media'
+  | 'section'
+  | 'sectionButton'
+  | 'seo'
+  | 'blogPost'
+  | 'blogCategory';
 
 export type PublicationQualityIssue = {
   code: string;
@@ -242,6 +250,46 @@ export async function evaluatePublicationQuality(
 
   if (entityType === 'seo') {
     issues.push(...seoProfileIssues(await getSeoPageProfile(db, candidate), candidate));
+  }
+
+  if (entityType === 'blogPost') {
+    if (!candidate.title?.trim()) {
+      issues.push({
+        code: 'blog-title-missing',
+        message: 'لا يمكن نشر مقال بلا عنوان.',
+      });
+    }
+    if (!candidate.slug?.trim()) {
+      issues.push({
+        code: 'blog-slug-missing',
+        message: 'لا يمكن نشر مقال بلا رابط ثابت (slug).',
+      });
+    }
+    if (!candidate.content?.trim()) {
+      issues.push({
+        code: 'blog-content-missing',
+        message: 'لا يمكن نشر مقال بجسم فارغ.',
+      });
+    }
+    // صورة الغلاف ونصها البديل مطلوبان للوصولية و SEO لبطاقات المدونة.
+    if (!candidate.url?.trim()) {
+      issues.push({
+        code: 'blog-cover-missing',
+        message: 'لا يمكن نشر مقال بلا صورة غلاف؛ البطاقة تعتمد عليها في صفحة المدونة.',
+      });
+    } else if (!candidate.altAr?.trim() && !candidate.altEn?.trim()) {
+      issues.push({
+        code: 'blog-cover-alt-missing',
+        message: 'لا يمكن نشر مقال بلا نص بديل لصورة الغلاف.',
+      });
+    }
+    const description = candidate.description?.trim() ?? '';
+    if (description.length > 0 && (description.length < 70 || description.length > 160)) {
+      issues.push({
+        code: 'blog-description-length',
+        message: 'وصف المقال المخصص لمحركات البحث يجب أن يتراوح بين 70 و160 حرفاً.',
+      });
+    }
   }
 
   if (entityType === 'page' && candidate.id) {

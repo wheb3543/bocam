@@ -88,7 +88,7 @@ export const ADMIN_NAVIGATION_SECTIONS: AdminNavigationSection[] = [
   {
     id: 'automated-cms',
     label: 'المحتوى والموقع والنشر',
-    items: navigationItems('content', 'publishing'),
+    items: navigationItems('content', 'blog', 'publishing'),
     subsections: [
       {
         id: 'media-and-editing',

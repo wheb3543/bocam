@@ -4,6 +4,8 @@ import { adminProcedure, router } from '../../../../_core/trpc';
 import { contentRestoreProcedure } from './authorization';
 import { ensureDatabaseAvailable } from '../../../../_core/databaseGuard';
 import {
+  blogCategories,
+  blogPosts,
   cmsTrashRetentionPolicies,
   images,
   pages,
@@ -22,6 +24,7 @@ import {
 import { invalidateAdminTextContentCache } from './textContent';
 import { invalidateAdminPagesCache } from './pages';
 import { invalidateAdminSectionsCache } from './sections';
+import { invalidateBlogCache } from './blog';
 import {
   DEFAULT_CMS_TRASH_RETENTION_DAYS,
   getCmsTrashRetentionPolicy,
@@ -34,6 +37,8 @@ const trashEntityTypeSchema = z.enum([
   'page',
   'section',
   'sectionButton',
+  'blogPost',
+  'blogCategory',
 ]);
 type TrashEntityType = z.infer<typeof trashEntityTypeSchema>;
 
@@ -103,6 +108,27 @@ export function toTrashItem(
       title: String(record.titleAr || record.titleEn || record.name || 'قسم بلا عنوان'),
       description: `${record.name ?? ''} · الصفحة #${record.pageId ?? ''}`,
       status: record.status as TrashItem['status'],
+      deletedAt,
+    };
+  }
+
+  if (entityType === 'blogPost') {
+    return {
+      entityType,
+      id: record.id as number,
+      title: String(record.title || record.titleEn || 'مقال بلا عنوان'),
+      description: `${String(record.slug ?? '')} · ${String(record.excerpt ?? '').slice(0, 100)}`,
+      status: record.status as TrashItem['status'],
+      deletedAt,
+    };
+  }
+  if (entityType === 'blogCategory') {
+    return {
+      entityType,
+      id: record.id as number,
+      title: String(record.name || record.nameEn || 'تصنيف بلا اسم'),
+      description: String(record.slug ?? ''),
+      status: (record.status as TrashItem['status']) ?? 'published',
       deletedAt,
     };
   }
@@ -233,6 +259,24 @@ async function getDeletedRecord(db: DbClient, entityType: TrashEntityType, id: n
         .limit(1)
     )[0];
   }
+  if (entityType === 'blogPost') {
+    return (
+      await db
+        .select()
+        .from(blogPosts)
+        .where(and(eq(blogPosts.id, id), isNotNull(blogPosts.deletedAt)))
+        .limit(1)
+    )[0];
+  }
+  if (entityType === 'blogCategory') {
+    return (
+      await db
+        .select()
+        .from(blogCategories)
+        .where(and(eq(blogCategories.id, id), isNotNull(blogCategories.deletedAt)))
+        .limit(1)
+    )[0];
+  }
   return (
     await db
       .select()
@@ -250,6 +294,11 @@ async function restoreDeletedEntity(
   id: number,
   userId: number
 ) {
+  // جدول التصنيفات لا يملك عمود حالة نشر، فله مسار استعادة مستقل.
+  if (entityType === 'blogCategory') {
+    return restoreDeletedBlogCategory(tx, id, userId);
+  }
+
   const restoreConfig = {
     textContent: {
       table: textContent,
@@ -285,6 +334,12 @@ async function restoreDeletedEntity(
       table: sectionButtons,
       versionEntityType: 'sectionButton' as const,
       auditEntityType: 'sectionButton' as const,
+      versionReason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
+    },
+    blogPost: {
+      table: blogPosts,
+      versionEntityType: 'blogPost' as const,
+      auditEntityType: 'blogPost' as const,
       versionReason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
     },
   }[entityType];
@@ -335,6 +390,54 @@ async function restoreDeletedEntity(
   return true;
 }
 
+/**
+ * استعادة تصنيف المدونة: جدول التصنيفات لا يملك عمود حالة نشر، لذا نكتفي
+ * بإلغاء الحذف الناعم مع حفظ نسخة أمان وتسجيل التدقيق كسائر الكيانات.
+ */
+async function restoreDeletedBlogCategory(
+  tx: TransactionClient,
+  id: number,
+  userId: number
+): Promise<boolean> {
+  const [current] = await tx
+    .select()
+    .from(blogCategories)
+    .where(and(eq(blogCategories.id, id), isNotNull(blogCategories.deletedAt)))
+    .limit(1);
+
+  if (!current) {
+    return false;
+  }
+
+  await contentVersionsService.createVersion(
+    tx as unknown as Parameters<typeof contentVersionsService.createVersion>[0],
+    {
+      entityType: 'blogCategory',
+      entityId: id,
+      data: current,
+      userId,
+      reason: 'نسخة أمان قبل الاستعادة من سلة المحذوفات',
+    }
+  );
+
+  const restoredValue = { ...current, deletedAt: null };
+  await tx.update(blogCategories).set({ deletedAt: null }).where(eq(blogCategories.id, id));
+  await auditLogService.logChange(
+    tx as unknown as Parameters<typeof auditLogService.logChange>[0],
+    {
+      entityType: 'blogCategory',
+      entityId: id,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(restoredValue),
+      reason: 'استعادة تصنيف المدونة من سلة المحذوفات',
+    }
+  );
+
+  return true;
+}
+
 async function invalidateRestoredEntityCaches(entityTypes: Set<TrashEntityType>) {
   if (entityTypes.has('textContent')) {
     await invalidateAdminTextContentCache();
@@ -351,6 +454,9 @@ async function invalidateRestoredEntityCaches(entityTypes: Set<TrashEntityType>)
   }
   if (entityTypes.has('section')) {
     await invalidateAdminSectionsCache();
+  }
+  if (entityTypes.has('blogPost') || entityTypes.has('blogCategory')) {
+    await invalidateBlogCache();
   }
 }
 

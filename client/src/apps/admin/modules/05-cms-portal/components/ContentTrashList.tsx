@@ -37,12 +37,22 @@ import {
   RefreshCcw,
   Search,
   Settings2,
+  Newspaper,
+  Tags,
   ShieldCheck,
   Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type TrashEntityType = 'textContent' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+type TrashEntityType =
+  | 'textContent'
+  | 'image'
+  | 'seo'
+  | 'page'
+  | 'section'
+  | 'sectionButton'
+  | 'blogPost'
+  | 'blogCategory';
 type TrashFilter = TrashEntityType | 'all';
 
 const entityOptions: Array<{ value: TrashFilter; label: string }> = [
@@ -53,6 +63,8 @@ const entityOptions: Array<{ value: TrashFilter; label: string }> = [
   { value: 'image', label: 'الصور' },
   { value: 'seo', label: 'إعدادات SEO' },
   { value: 'sectionButton', label: 'أزرار الأقسام' },
+  { value: 'blogPost', label: 'مقالات المدونة' },
+  { value: 'blogCategory', label: 'تصنيفات المدونة' },
 ];
 
 const entityPresentation = {
@@ -69,6 +81,16 @@ const entityPresentation = {
     label: 'زر قسم',
     icon: MousePointerClick,
     className: 'bg-rose-50 text-rose-700 ring-rose-200',
+  },
+  blogPost: {
+    label: 'مقال المدونة',
+    icon: Newspaper,
+    className: 'bg-teal-50 text-teal-700 ring-teal-200',
+  },
+  blogCategory: {
+    label: 'تصنيف المدونة',
+    icon: Tags,
+    className: 'bg-cyan-50 text-cyan-700 ring-cyan-200',
   },
 } as const;
 

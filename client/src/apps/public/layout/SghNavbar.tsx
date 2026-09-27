@@ -41,14 +41,14 @@ export default function SghNavbar() {
   ];
 
   const patientsSubMenu = [
-    { label: 'الرعاية الصحية والتعليم', href: '/#blog' },
+    { label: 'الرعاية الصحية والتعليم', href: '/blog' },
     { label: 'الأكاديمية', href: '/#about' },
     { label: 'برنامج الأطباء الزائرين', href: '/visiting-doctors' },
     { label: 'المخيمات الطبية الخيرية', href: '/camps' },
     { label: 'العروض الطبية', href: '/offers' },
     { label: 'قصص وتجارب المرضى', href: '/#feedback' },
     { label: 'شبكة Mayo Clinic للرعاية', href: '/#about' },
-    { label: 'نصائح الخبراء', href: '/#blog' },
+    { label: 'نصائح الخبراء', href: '/blog' },
     { label: 'عيادات التخصصات الفرعية', href: '/departments' },
     { label: 'خدمات كبار الشخصيات (VIP)', href: '/#services' },
     { label: 'المرضى من خارج الدولة', href: '/#about' },

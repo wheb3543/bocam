@@ -88,7 +88,18 @@ export const auditLogRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
+          .enum([
+            'text',
+            'image',
+            'color',
+            'seo',
+            'page',
+            'section',
+            'sectionButton',
+            'blogPost',
+            'blogCategory',
+            'operation',
+          ])
           .optional(),
         entityId: z.number().optional(),
         action: z
@@ -119,7 +130,18 @@ export const auditLogRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
+          .enum([
+            'text',
+            'image',
+            'color',
+            'seo',
+            'page',
+            'section',
+            'sectionButton',
+            'blogPost',
+            'blogCategory',
+            'operation',
+          ])
           .optional(),
         entityId: z.number().optional(),
         action: z
@@ -146,7 +168,18 @@ export const auditLogRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['text', 'image', 'color', 'seo', 'page', 'section', 'sectionButton', 'operation'])
+          .enum([
+            'text',
+            'image',
+            'color',
+            'seo',
+            'page',
+            'section',
+            'sectionButton',
+            'blogPost',
+            'blogCategory',
+            'operation',
+          ])
           .optional(),
         entityId: z.number().optional(),
         action: z

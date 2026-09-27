@@ -54,7 +54,7 @@ export default function SghTopHeader() {
   const quickNavLinks = [
     { label: 'الصفحة الرئيسية', href: '/' },
     { label: 'بودكاست', href: '/#podcast' },
-    { label: 'المدونة الطبية', href: '/#blog' },
+    { label: 'المدونة الطبية', href: '/blog' },
     { label: 'علاقات المستثمرين', href: 'https://saudigermanhealth.com/ar/investors' },
     {
       label: 'خدمات الرعاية الصحية المنزلية',

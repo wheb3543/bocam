@@ -5,6 +5,7 @@ import {
   FileText,
   BarChart3,
   MessageCircle,
+  Newspaper,
   FileEdit,
   Users,
   Calendar,
@@ -142,6 +143,13 @@ const primaryNavItems: NavItem[] = [
     title: 'المحتوى',
     href: '/admin/content/content',
     icon: FileEdit,
+  },
+  {
+    id: 'blog',
+    title: 'المدونة الطبية',
+    href: '/admin/content/blog',
+    icon: Newspaper,
+    requiredPermission: 'content.view',
   },
   {
     id: 'publishing',
@@ -328,6 +336,13 @@ export const allToolsGroups: NavGroup[] = [
     items: [
       { id: 'management', title: 'الإدارة', href: '/admin/management', icon: SettingsIcon },
       { id: 'content', title: 'المحتوى', href: '/admin/content/content', icon: FileEdit },
+      {
+        id: 'blog',
+        title: 'المدونة الطبية',
+        href: '/admin/content/blog',
+        icon: Newspaper,
+        requiredPermission: 'content.view',
+      },
       {
         id: 'media-library',
         title: 'مكتبة الوسائط',

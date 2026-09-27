@@ -26,6 +26,9 @@ const ContentManagementPage = lazy(
 const MediaLibraryPage = lazy(
   () => import('@apps/admin/modules/05-cms-portal/media/MediaLibraryPage')
 );
+const BlogManagementPage = lazy(
+  () => import('@apps/admin/modules/05-cms-portal/blog/pages/BlogManagementPage')
+);
 const UsersManagementPage = lazy(
   () => import('@apps/admin/modules/07-users-rbac/pages/StaffUsersPage')
 );
@@ -163,6 +166,8 @@ export function renderAdminPage(path: string): ReactNode {
       return <ContentManagementPage />;
     case '/admin/content/media-library':
       return <MediaLibraryPage />;
+    case '/admin/content/blog':
+      return <BlogManagementPage />;
     case '/admin/users/users':
       return <UsersManagementPage />;
     case '/admin/content/publishing':
@@ -346,6 +351,7 @@ export default function AdminContentRoutes() {
       </Route>
       <Route path="/admin/content/content" component={ContentManagementPage} />
       <Route path="/admin/content/media-library" component={MediaLibraryPage} />
+      <Route path="/admin/content/blog" component={BlogManagementPage} />
       <Route path="/admin/users/users" component={UsersManagementPage} />
       <Route path="/admin/content/publishing" component={PublishingPage} />
       <Route path="/admin/whatsapp">

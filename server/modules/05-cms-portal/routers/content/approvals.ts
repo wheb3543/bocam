@@ -9,6 +9,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import {
+  blogPosts,
   contentApprovals,
   contentAuditLog,
   contentVersions,
@@ -49,7 +50,16 @@ const logger = createLogger('approvals');
  * Schema لطلب موافقة جديد
  */
 const createApprovalSchema = z.object({
-  entityType: z.enum(['textContent', 'image', 'media', 'page', 'section', 'sectionButton', 'seo']),
+  entityType: z.enum([
+    'textContent',
+    'image',
+    'media',
+    'page',
+    'section',
+    'sectionButton',
+    'seo',
+    'blogPost',
+  ]),
   entityId: z.number(),
   entityTypeVersion: z.number().default(0),
   changes: z.string(), // JSON string
@@ -185,6 +195,31 @@ const pageChangeSchema = z
     (value) => Object.keys(value).length > 0,
     'لا تحتوي حمولة الموافقة على تغييرات قابلة للتطبيق'
   );
+
+const blogPostChangeSchema = z
+  .object({
+    title: z.string().min(3).max(255).optional(),
+    titleEn: z.string().max(255).nullable().optional(),
+    slug: z.string().min(1).max(255).optional(),
+    excerpt: z.string().max(1000).nullable().optional(),
+    excerptEn: z.string().max(1000).nullable().optional(),
+    content: z.string().min(1).max(400_000).optional(),
+    contentEn: z.string().max(400_000).nullable().optional(),
+    coverImage: z.string().max(500).nullable().optional(),
+    coverImageAlt: z.string().max(255).nullable().optional(),
+    categoryId: z.number().int().positive().nullable().optional(),
+    reviewerName: z.string().max(255).nullable().optional(),
+    tags: z.string().nullable().optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    isActive: z.enum(['yes', 'no']).optional(),
+    isFeatured: z.enum(['yes', 'no']).optional(),
+    sortOrder: z.number().int().min(0).max(9999).optional(),
+    metaTitle: z.string().max(255).nullable().optional(),
+    metaDescription: z.string().max(500).nullable().optional(),
+    keywords: z.string().max(1000).nullable().optional(),
+    ogImage: z.string().max(500).nullable().optional(),
+  })
+  .strict();
 
 const sectionChangeSchema = z
   .object({
@@ -335,7 +370,16 @@ export const approvalsRouter = router({
     .input(
       z.object({
         entityType: z
-          .enum(['textContent', 'image', 'media', 'page', 'section', 'sectionButton', 'seo'])
+          .enum([
+            'textContent',
+            'image',
+            'media',
+            'page',
+            'section',
+            'sectionButton',
+            'seo',
+            'blogPost',
+          ])
           .optional(),
         entityId: z.number().optional(),
         status: z.enum(['pending', 'approved', 'rejected']).optional(),
@@ -496,6 +540,7 @@ export const approvalsRouter = router({
           'section',
           'sectionButton',
           'seo',
+          'blogPost',
         ]),
         entityId: z.number(),
       })
@@ -621,9 +666,10 @@ export const approvalsRouter = router({
 
       let previousEntity: unknown;
       let approvedChanges: unknown;
-      let auditEntityType: 'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton';
+      let auditEntityType:
+        'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton' | 'blogPost';
       let versionEntityType:
-        'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton' | null = null;
+        'text' | 'image' | 'seo' | 'page' | 'section' | 'sectionButton' | 'blogPost' | null = null;
       let applyChanges: () => Promise<unknown>;
 
       if (pendingApproval.entityType === 'textContent') {
@@ -727,6 +773,25 @@ export const approvalsRouter = router({
             .update(sectionButtons)
             .set(changes)
             .where(eq(sectionButtons.id, pendingApproval.entityId));
+      } else if (pendingApproval.entityType === 'blogPost') {
+        const changes = parseEntityChanges(blogPostChangeSchema, pendingApproval.changes);
+        const [existing] = await tx
+          .select()
+          .from(blogPosts)
+          .where(eq(blogPosts.id, pendingApproval.entityId))
+          .limit(1);
+        if (!existing) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'مقال المدونة المطلوب لم يعد موجوداً.',
+          });
+        }
+        previousEntity = existing;
+        approvedChanges = changes;
+        auditEntityType = 'blogPost';
+        versionEntityType = 'blogPost';
+        applyChanges = () =>
+          tx.update(blogPosts).set(changes).where(eq(blogPosts.id, pendingApproval.entityId));
       } else {
         const changes = parseEntityChanges(sectionChangeSchema, pendingApproval.changes);
         const [existing] = await tx

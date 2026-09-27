@@ -11,6 +11,8 @@ import { ensureDatabaseAvailable } from '../../../../_core/databaseGuard';
 import { contentVersionsService } from '../../../../services/content/contentVersionsService';
 import { createLogger } from '../../../../_core/logger';
 import {
+  blogCategories,
+  blogPosts,
   textContent,
   images,
   colorScheme,
@@ -28,6 +30,7 @@ import {
 } from '../../../../routers/public/content';
 import { invalidateAdminSectionsCache } from './sections';
 import { invalidateAdminPagesCache } from './pages';
+import { invalidateBlogCache } from './blog';
 
 const logger = createLogger('contentVersionsRouter');
 
@@ -39,6 +42,8 @@ const entityTypeSchema = z.enum([
   'page',
   'section',
   'sectionButton',
+  'blogPost',
+  'blogCategory',
 ]);
 
 function toDateOrNull(value: unknown): Date | null {
@@ -178,6 +183,121 @@ async function restoreVersionData(
       oldValue: JSON.stringify(current),
       newValue: JSON.stringify(parsed),
       reason: 'استعادة نسخة سابقة',
+    });
+    return;
+  }
+
+  if (entityType === 'blogPost') {
+    const parsed = z
+      .object({
+        title: z.string().min(1).max(255),
+        titleEn: z.string().max(255).nullable().optional(),
+        slug: z.string().min(1).max(255),
+        excerpt: z.string().nullable().optional(),
+        excerptEn: z.string().nullable().optional(),
+        content: z.string().min(1),
+        contentEn: z.string().nullable().optional(),
+        coverImage: z.string().max(500).nullable().optional(),
+        coverImageAlt: z.string().max(255).nullable().optional(),
+        categoryId: z.number().nullable().optional(),
+        reviewerName: z.string().max(255).nullable().optional(),
+        reviewDate: z.unknown().nullable().optional(),
+        tags: z.string().nullable().optional(),
+        readingTime: z.number().int().min(0).optional(),
+        status: z.enum(['draft', 'published', 'archived']),
+        isActive: z.enum(['yes', 'no']),
+        isFeatured: z.enum(['yes', 'no']).optional(),
+        sortOrder: z.number().int().min(0).max(9999).optional(),
+        metaTitle: z.string().max(255).nullable().optional(),
+        metaDescription: z.string().nullable().optional(),
+        keywords: z.string().nullable().optional(),
+        ogImage: z.string().max(500).nullable().optional(),
+        publishedAt: z.unknown().nullable().optional(),
+        scheduledFor: z.unknown().nullable().optional(),
+        deletedAt: z.unknown().nullable().optional(),
+      })
+      .parse(record);
+
+    const [current] = await tx.select().from(blogPosts).where(eq(blogPosts.id, entityId)).limit(1);
+    if (!current) {
+      throw new Error('المقال المراد استعادته غير موجود');
+    }
+
+    await contentVersionsService.createVersion(tx, {
+      entityType,
+      entityId,
+      data: current,
+      userId,
+      reason: 'نسخة أمان تلقائية قبل الاستعادة',
+    });
+
+    await tx
+      .update(blogPosts)
+      .set({
+        ...parsed,
+        reviewDate: toDateOrNull(parsed.reviewDate),
+        publishedAt: toDateOrNull(parsed.publishedAt),
+        scheduledFor: toDateOrNull(parsed.scheduledFor),
+        deletedAt: toDateOrNull(parsed.deletedAt),
+      })
+      .where(eq(blogPosts.id, entityId));
+
+    await auditLogService.logChange(tx, {
+      entityType: 'blogPost',
+      entityId,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(parsed),
+      reason: 'استعادة نسخة سابقة من مقال المدونة',
+    });
+    return;
+  }
+
+  if (entityType === 'blogCategory') {
+    const parsed = z
+      .object({
+        name: z.string().min(1).max(255),
+        nameEn: z.string().max(255).nullable().optional(),
+        description: z.string().nullable().optional(),
+        icon: z.string().max(100).nullable().optional(),
+        color: z.string().max(20).nullable().optional(),
+        sortOrder: z.number().int().min(0).max(9999).optional(),
+        isActive: z.enum(['yes', 'no']),
+        deletedAt: z.unknown().nullable().optional(),
+      })
+      .parse(record);
+
+    const [current] = await tx
+      .select()
+      .from(blogCategories)
+      .where(eq(blogCategories.id, entityId))
+      .limit(1);
+    if (!current) {
+      throw new Error('التصنيف المراد استعادته غير موجود');
+    }
+
+    await contentVersionsService.createVersion(tx, {
+      entityType,
+      entityId,
+      data: current,
+      userId,
+      reason: 'نسخة أمان تلقائية قبل الاستعادة',
+    });
+
+    await tx
+      .update(blogCategories)
+      .set({ ...parsed, deletedAt: toDateOrNull(parsed.deletedAt) })
+      .where(eq(blogCategories.id, entityId));
+
+    await auditLogService.logChange(tx, {
+      entityType: 'blogCategory',
+      entityId,
+      action: 'update',
+      userId,
+      oldValue: JSON.stringify(current),
+      newValue: JSON.stringify(parsed),
+      reason: 'استعادة نسخة سابقة من تصنيف المدونة',
     });
     return;
   }
@@ -576,6 +696,9 @@ export const contentVersionsRouter = router({
       }
       if (version.entityType === 'sectionButton') {
         await invalidateAdminSectionsCache();
+      }
+      if (version.entityType === 'blogPost' || version.entityType === 'blogCategory') {
+        await invalidateBlogCache();
       }
 
       logger.info('Content version restored successfully', { versionId: input.versionId });

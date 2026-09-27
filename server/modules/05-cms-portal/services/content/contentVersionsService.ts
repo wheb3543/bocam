@@ -13,7 +13,15 @@ type DbClient = Awaited<ReturnType<typeof ensureDatabaseAvailable>>;
 const logger = createLogger('contentVersionsService');
 
 export type ContentVersionEntityType =
-  'text' | 'image' | 'color' | 'seo' | 'page' | 'section' | 'sectionButton';
+  | 'text'
+  | 'image'
+  | 'color'
+  | 'seo'
+  | 'page'
+  | 'section'
+  | 'sectionButton'
+  | 'blogPost'
+  | 'blogCategory';
 
 /**
  * ContentVersionsService - خدمة النسخ المحفوظة

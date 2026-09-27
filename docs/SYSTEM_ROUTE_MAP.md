@@ -14,6 +14,7 @@
 | الأطباء | `/doctors`, `/doctors/:slug`, `/visiting-doctors` | `@apps/public/modules/02-doctors` |
 | العروض | `/offers`, `/offers/:slug` | `@apps/public/modules/03-offers` |
 | المخيمات | `/camps`, `/camps/:slug` | `@apps/public/modules/04-camps` |
+| **المدونة الطبية** | `/blog`, `/blog/:slug` | `@apps/public/modules/05-content-and-legal` |
 | الخصوصية والوصول | `/privacy-policy`, `/privacy-policy-changelog`, `/access-request`, `/unauthorized` | `@apps/public/modules/05-privacy`, `@core/pages` |
 | حالات النظام | `/offline`, `/404`, `/feature-locked/:feature` | `@core/pages` |
 
@@ -43,7 +44,7 @@
 | **02-crm-patients** (إدارة المرضى) | `/admin/bookings/customers`, `/admin/bookings/patient-results` | سجلات المرضى الموحدة، نتائج الفحوصات والتقارير الطبية |
 | **03-omni-inbox** (واتساب وصندوق القنوات الموحد) | `/admin/whatsapp`, `/admin/whatsapp/operations`¹, `/admin/whatsapp/automation`¹, `/admin/whatsapp/campaigns`¹, `/admin/whatsapp/governance`¹, `/admin/whatsapp/analytics`¹, `/admin/whatsapp/lab-results` | Live Chat، مركز العمليات، الأتمتة، الحملات، الحوكمة، والتحليلات |
 | **04-marketing-publishing** (التسويق والحملات) | `/admin/campaigns/campaigns`, `/admin/campaigns/projects`, `/admin/campaigns/review-approval`, `/admin/bookings/leads`, `/admin/tracking-settings` | الحملات الإعلانية، المشاريع التسويقية، استقطاب العملاء المحتملين، ومراجعة الاعتماد |
-| **05-cms-portal** (المحتوى والوسائط) | `/admin/content/content`, `/admin/content/media-library`, `/admin/content/publishing` | المقالات الطبية، مكتبة الوسائط، وجدولة النشر |
+| **05-cms-portal** (المحتوى والوسائط) | `/admin/content/content`, `/admin/content/blog`, `/admin/content/media-library`, `/admin/content/publishing` | إدارة صفحات الموقع، **إدارة المدونة الطبية**، مكتبة الوسائط، وجدولة النشر |
 | **06-tasks-projects** (المهام والفرق) | `/admin/bookings/tasks`, `/admin/teams/digital-marketing`, `/admin/teams/media`, `/admin/teams/field-marketing`, `/admin/teams/customer-service` | مهام الموظفين، فرق التسويق الرقمي، الميداني، الإعلام، وخدمة العملاء |
 | **07-users-rbac** (المستخدمون والصلاحيات) | `/admin/users/users`, `/admin/management` | المستخدمون ومصفوفة الصلاحيات وإدارة الوصول |
 | **10-system-settings** (إعدادات النظام والتقارير) | `/admin/settings`, `/admin/advanced-settings`, `/admin/notifications`, `/admin/system/updates`, `/admin/system/status`, `/admin/system/backups`, `/admin/reports/reports`, `/admin/reports/analytics`, `/admin/reports/bi`, `/admin/reports/camp-stats`, `/admin/reports/pwa-stats`, `/admin/offline`, `/admin/profile`, `/admin/support` | إعدادات المنظومة، النسخ الاحتياطي، حالة الخادم، التقارير الشاملة، وذكاء الأعمال |

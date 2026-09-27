@@ -70,7 +70,7 @@ export default function Footer() {
     { label: 'الأخبار', href: '/#news' },
     { label: 'الفعاليات', href: '/#news' },
     { label: 'العروض', href: '/offers' },
-    { label: 'المدونة الطبية', href: '/#blog' },
+    { label: 'المدونة الطبية', href: '/blog' },
   ];
 
   const navCol3 = [

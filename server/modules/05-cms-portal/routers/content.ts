@@ -16,6 +16,7 @@ import { sectionsRouter } from './content/sections';
 import { sectionButtonsRouter } from './content/sectionButtons';
 import { importExportRouter } from './content/importExport';
 import { approvalsRouter } from './content/approvals';
+import { blogRouter } from './content/blog';
 import { publishingRouter } from './content/publishing';
 import { qualityRouter } from './content/quality';
 import { previewRouter } from './content/preview';
@@ -36,6 +37,7 @@ export const contentRouter = router({
   pages: pagesRouter,
   sections: sectionsRouter,
   sectionButtons: sectionButtonsRouter,
+  blog: blogRouter,
   importExport: importExportRouter,
   approvals: approvalsRouter,
   publishing: publishingRouter,
